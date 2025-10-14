@@ -1,0 +1,24 @@
+# Core FastAPI dependencies
+fastapi
+uvicorn
+pydantic
+python-dotenv
+python-multipart
+pillow
+
+# ML/AI dependencies
+transformers
+torch
+scikit-learn
+nltk
+
+# HTTP and utility dependencies
+httpx
+pyyaml
+loguru
+tenacity
+
+# Testing dependencies
+pytest
+pytest-asyncio
+httpx[http2]

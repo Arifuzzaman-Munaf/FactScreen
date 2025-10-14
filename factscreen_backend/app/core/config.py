@@ -1,35 +1,39 @@
-# app/core/config.py
-
 from typing import List, Optional
-from pydantic import AnyHttpUrl
-from pydantic_settings import BaseSettings  # <-- v2-compatible
+from pydantic import AnyHttpUrl, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Settings class for application configuration using Pydantic BaseSettings.
+# Loads settings from .env file (if present), environment variables, or defaults below.
 class Settings(BaseSettings):
-    # Application metadata and CORS
-    app_name: str = "FactScreen API"
-    version: str = "0.1.0"
-    cors_origins: List[str] = ["http://localhost:5173", "http://localhost:3000"]  # Allowed frontend origins
-    request_timeout: int = 15  # Default timeout (seconds) for HTTP requests out
+    model_config = SettingsConfigDict(
+        env_file=".env",               # Load environment variables from .env file
+        env_file_encoding="utf-8",     # Use UTF-8 encoding for .env file
+        env_prefix=""                  # No prefix required for environment variables
+    )
 
-    # Google Fact Check API configuration
-    google_api_key: Optional[str] = None
-    google_factcheck_url: Optional[AnyHttpUrl] = None
-    google_factcheck_endpoint: Optional[str] = None
+    # Application settings
+    app_name: str = "FactScreen API"   # Name of the application
+    version: str = "0.1.0"             # Version of the API
+    cors_origins: List[str] = [        # Allowed CORS origins for frontend
+        "http://localhost:5173",
+        "http://localhost:3000"
+    ]
+    request_timeout: int = 15          # Request timeout in seconds
 
-    # RapidAPI Fact Checker configuration
-    fact_checker_api_key: Optional[str] = None
-    fact_checker_url: Optional[str] = None  # Hostname or full URL
-    fact_checker_endpoint: Optional[str] = None
+    # Google Fact Check API settings
+    google_api_key: Optional[str] = Field(default=None, alias="GOOGLE_API_KEY")                
+    google_factcheck_url: Optional[AnyHttpUrl] = Field(default=None, alias="GOOGLE_FACTCHECK_URL")  
+    google_factcheck_endpoint: Optional[str] = Field(default=None, alias="GOOGLE_FACTCHECK_ENDPOINT")
 
-    # ClaimBuster API configuration
-    claim_buster_api_key: Optional[str] = None
-    claim_buster_url: Optional[AnyHttpUrl] = None
-    claim_buster_endpoint: Optional[str] = None
+    # RapidAPI Fact Checker settings
+    fact_checker_api_key: Optional[str] = Field(default=None, alias="FACT_CHECKER_API_KEY")     
+    fact_checker_url: Optional[str] = Field(default=None, alias="FACT_CHECKER_URL")             
+    fact_checker_endpoint: Optional[str] = Field(default=None, alias="FACT_CHECKER_ENDPOINT")   
 
-    class Config:
-        # Loads variables from .env file in UTF-8 encoding
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    # ClaimBuster API settings
+    claim_buster_api_key: Optional[str] = Field(default=None, alias="CLAIM_BUSTER_API_KEY")     
+    claim_buster_url: Optional[AnyHttpUrl] = Field(default=None, alias="CLAIM_BUSTER_URL")      
+    claim_buster_endpoint: Optional[str] = Field(default=None, alias="CLAIM_BUSTER_ENDPOINT")   
 
-# Global settings instance for import throughout the app
+# Instantiate the settings object to be used throughout the application
 settings = Settings()
