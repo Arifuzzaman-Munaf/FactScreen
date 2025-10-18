@@ -1,10 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from app.core.config import settings
-from app.api import router
+from app.api import router as api_router
 
-app = FastAPI(title=settings.app_name, version=settings.version)
+app = FastAPI(
+    title=settings.app_name,
+    version=settings.version,
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -14,8 +19,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/health", tags=["health"])  # simple readiness probe
-def health() -> dict:
-    return {"status": "ok", "app": settings.app_name, "version": settings.version}
+app.include_router(api_router, prefix="/v1")
 
-app.include_router(router, prefix="/v1")
+@app.get("/", tags=["meta"])
+async def root():
+    return {"name": settings.app_name, "version": settings.version, "health": "/v1/health"}
