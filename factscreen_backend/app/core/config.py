@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import AnyHttpUrl, Field
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Settings class for application configuration using Pydantic BaseSettings.
@@ -21,19 +21,21 @@ class Settings(BaseSettings):
     request_timeout: int = 15          # Request timeout in seconds
 
     # Google Fact Check API settings
-    google_api_key: Optional[str] = Field(default=None, alias="GOOGLE_API_KEY")                
-    google_factcheck_url: Optional[AnyHttpUrl] = Field(default=None, alias="GOOGLE_FACTCHECK_URL")  
-    google_factcheck_endpoint: Optional[str] = Field(default=None, alias="GOOGLE_FACTCHECK_ENDPOINT")
+    google_api_key: str = Field(default="AIzaSyDAjGKxAF5288FSdBX3NIlidJ6G6RYZ784", alias="GOOGLE_API_KEY")                
+    google_factcheck_url: str = Field(default="https://factchecktools.googleapis.com", alias="GOOGLE_FACTCHECK_URL")  
+    google_factcheck_endpoint: str = Field(default="v1alpha1/claims:search", alias="GOOGLE_FACTCHECK_ENDPOINT")
 
     # RapidAPI Fact Checker settings
-    fact_checker_api_key: Optional[str] = Field(default=None, alias="FACT_CHECKER_API_KEY")     
-    fact_checker_url: Optional[str] = Field(default=None, alias="FACT_CHECKER_URL")             
-    fact_checker_endpoint: Optional[str] = Field(default=None, alias="FACT_CHECKER_ENDPOINT")   
+    fact_checker_api_key: str = Field(default="71845686f3msh5f5392bd87453d6p1da3d4jsn3be66bc8c5ae", alias="FACT_CHECKER_API_KEY")     
+    fact_checker_url: str = Field(default="fact-checker.p.rapidapi.com", alias="FACT_CHECKER_URL")             
+    fact_checker_endpoint: str = Field(default="search", alias="FACT_CHECKER_ENDPOINT")   
+    fact_checker_host: str = Field(default="fact-checker.p.rapidapi.com", alias="FACT_CHECKER_HOST")
 
-    # ClaimBuster API settings
-    claim_buster_api_key: Optional[str] = Field(default=None, alias="CLAIM_BUSTER_API_KEY")     
-    claim_buster_url: Optional[AnyHttpUrl] = Field(default=None, alias="CLAIM_BUSTER_URL")      
-    claim_buster_endpoint: Optional[str] = Field(default=None, alias="CLAIM_BUSTER_ENDPOINT")   
+    # ML Model settings
+    similarity_threshold: float = Field(default=0.75, alias="SIMILARITY_THRESHOLD")
+    sentence_transformer_model: str = Field(default="all-MiniLM-L6-v2", alias="SENTENCE_TRANSFORMER_MODEL")
+    classification_model: str = Field(default="facebook/bart-large-mnli", alias="CLASSIFICATION_MODEL")
+
 
 # Instantiate the settings object to be used throughout the application
 settings = Settings()
