@@ -1,2 +1,14 @@
-from .schemas import AnalyzeRequest, AnalyzeResponse, Evidence
-__all__ = ["AnalyzeRequest", "AnalyzeResponse", "Evidence"]
+from .claim_models import (
+    ClaimRequest, 
+    ClaimResponse, 
+    ClaimsListResponse,
+    FilteredClaimsRequest,
+    FilteredClaimsResponse
+)
+__all__ = [
+    "ClaimRequest", 
+    "ClaimResponse", 
+    "ClaimsListResponse",
+    "FilteredClaimsRequest",
+    "FilteredClaimsResponse"
+]
