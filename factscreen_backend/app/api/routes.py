@@ -1,23 +1,30 @@
+# Import FastAPI modules for routing and error handling
 from fastapi import APIRouter, HTTPException
+
+# Import Pydantic models for claim-related API requests and responses
 from app.models.claim_models import (
-    ClaimRequest, 
-    ClaimResponse, 
-    ClaimsListResponse,
-    FilteredClaimsRequest,
-    FilteredClaimsResponse,
-    FilteredClaimResponse
+    ClaimRequest,  # Request model for claim search
+    ClaimResponse,  # Response model for a single claim
+    ClaimsListResponse,  # Response model for list of claims
+    FilteredClaimsRequest,  # Request model for filtered claim search
+    FilteredClaimsResponse,  # Response model for filtered claims
+    FilteredClaimResponse  # Response model for a single filtered claim
 )
+
+# Import services for claim extraction, similarity filtering, and classification
 from app.services.claim_extract import ClaimExtractionService
 from app.services.similarity_filter import SimilarityFilterService
 from app.services.claim_classifier import ClaimClassificationService
 
+# Initialize API router
 router = APIRouter()
 
-# Initialize services
+# Initialize services for API endpoints
 claim_extraction_service = ClaimExtractionService()
 similarity_filter_service = SimilarityFilterService()
 classification_service = ClaimClassificationService()
 
+# Health check endpoint to check if the API is running
 @router.get("/health", tags=["meta"])
 async def health():
     return {"status": "ok"}
@@ -27,65 +34,71 @@ async def search_claims(request: ClaimRequest):
     """
     Search for claims from multiple fact-checking sources
     
-    This endpoint fetches claims from Google Fact Check API and RapidAPI Fact-Checker
-    and returns them in a standardized format.
+    args:
+    - request: ClaimRequest - Request model for claim search 
+    returns:
+    - ClaimsListResponse - Response model for list of claims
+    - HTTPException - Exception if error occurs
     """
     try:
         # Get combined claims from all sources
         combined_claims = claim_extraction_service.get_combined_claims(
-            query=request.query,
-            language_code=request.language_code,
-            page_size=request.page_size
+            query=request.query, # Search query for claims
+            language_code=request.language_code, # Language code for claims
+            page_size=request.page_size # Page size for claims
         )
         
-        # Convert to response format
+        # Convert claims to response format
         claim_responses = [
             ClaimResponse(**claim) for claim in combined_claims
         ]
         
+        # Return response with claims and total count
         return ClaimsListResponse(
             claims=claim_responses,
             total_count=len(claim_responses),
             query=request.query
         )
         
+    # Exception handling for error searching claims
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error searching claims: {str(e)}")
 
 @router.post("/claims/filtered", response_model=FilteredClaimsResponse, tags=["claims"])
 async def get_filtered_claims(request: FilteredClaimsRequest):
     """
-    Search for claims and filter them by similarity and classification
+    Search for claims and filter them by similarity and assign classification labels.
     
-    This endpoint:
-    1. Fetches claims from multiple fact-checking sources
-    2. Filters claims by similarity to the query using sentence transformers
-    3. Classifies claims using a transformer model
-    4. Returns filtered and classified results
+    args:
+    - request: FilteredClaimsRequest - Request model for filtered claim search
+    returns:
+    - FilteredClaimsResponse - Response model for filtered claims
+    - HTTPException - Exception if error occurs
     """
     try:
         # Get combined claims from all sources
         combined_claims = claim_extraction_service.get_combined_claims(
-            query=request.query,
-            language_code=request.language_code,
-            page_size=request.page_size
+            query=request.query, # Search query for claims
+            language_code=request.language_code, # Language code for claims
+            page_size=request.page_size # Page size for claims
         )
         
-        # Filter by similarity
+        # Filter claims by similarity to the query using sentence transformers
         filtered_claims = similarity_filter_service.filter_claims_by_similarity(
             claims=combined_claims,
-            query=request.query,
-            similarity_threshold=request.similarity_threshold
+            query=request.query, # Search query for claims
+            similarity_threshold=request.similarity_threshold # Similarity threshold for claims
         )
         
-        # Classify claims
+        # Classify claims using a transformer model
         classified_claims = classification_service.classify_claims_batch(filtered_claims)
         
-        # Convert to response format
+        # Convert classified claims to response format
         claim_responses = [
             FilteredClaimResponse(**claim) for claim in classified_claims
         ]
         
+        # Return response with filtered and classified claims
         return FilteredClaimsResponse(
             claims=claim_responses,
             total_count=len(claim_responses),

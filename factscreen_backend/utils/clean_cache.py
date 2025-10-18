@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script to clean Python cache files from the FactScreen project.
+Script to clean Python cache files from the FactScreen project, including pytest cache.
 """
 
 import os
@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 def clean_python_cache():
-    """Remove all Python cache files and __pycache__ directories (but NOT .pytest_cache)"""
+    """Remove all Python cache files, pytest cache, and directories"""
     
     # Get the project root directory
     project_root = Path(__file__).parent
@@ -21,6 +21,7 @@ def clean_python_cache():
     pycache_dirs_removed = 0
     pyc_files_removed = 0
     pyo_files_removed = 0
+    pytest_cache_dirs_removed = 0
 
     # Remove __pycache__ directories
     for pycache_dir in project_root.rglob("__pycache__"):
@@ -52,15 +53,24 @@ def clean_python_cache():
             except Exception as e:
                 print(f"  ❌ Error removing {pyo_file}: {e}")
 
-    # .pytest_cache directories are NOT removed
+    # Remove pytest cache directories (.pytest_cache)
+    for pytest_cache_dir in project_root.rglob(".pytest_cache"):
+        if pytest_cache_dir.is_dir():
+            try:
+                shutil.rmtree(pytest_cache_dir)
+                pytest_cache_dirs_removed += 1
+                print(f"  ✅ Removed pytest cache: {pytest_cache_dir.relative_to(project_root)}")
+            except Exception as e:
+                print(f"  ❌ Error removing pytest cache {pytest_cache_dir}: {e}")
 
     # Summary
     print("\n📊 Cleanup Summary:")
     print(f"  🗂️  __pycache__ directories removed: {pycache_dirs_removed}")
+    print(f"  🗑️  .pytest_cache directories removed: {pytest_cache_dirs_removed}")
     print(f"  📄 .pyc files removed: {pyc_files_removed}")
     print(f"  📄 .pyo files removed: {pyo_files_removed}")
     
-    total_removed = pycache_dirs_removed + pyc_files_removed + pyo_files_removed
+    total_removed = pycache_dirs_removed + pyc_files_removed + pyo_files_removed + pytest_cache_dirs_removed
     
     if total_removed > 0:
         print(f"\n✅ Successfully cleaned {total_removed} cache files/directories!")
