@@ -2,6 +2,7 @@
 fastapi
 uvicorn
 pydantic
+pydantic-settings
 python-dotenv
 python-multipart
 pillow
@@ -11,9 +12,13 @@ transformers
 torch
 scikit-learn
 nltk
+sentence-transformers
+numpy
+pandas
 
 # HTTP and utility dependencies
 httpx
+requests
 pyyaml
 loguru
 tenacity
