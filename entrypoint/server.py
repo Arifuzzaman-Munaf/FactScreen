@@ -108,13 +108,31 @@ def main():
     print("-" * 50)
 
     try:
-        subprocess.run([
-            sys.executable, "-m", "uvicorn",
-            "src.app.main:app",
-            "--reload",
-            "--host", "0.0.0.0",
-            "--port", str(port)
-        ])
+        subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "uvicorn",
+                "src.app.main:app",
+                "--reload",
+                "--reload-dir",
+                "src",
+                "--reload-dir",
+                "config",
+                "--reload-dir",
+                "entrypoint",
+                "--reload-dir",
+                "tests",
+                "--reload-exclude",
+                "venv/*",
+                "--reload-exclude",
+                ".venv/*",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                str(port),
+            ]
+        )
     except KeyboardInterrupt:
         print("\nServer stopped.")
     except Exception as e:

@@ -31,3 +31,6 @@ pytest-asyncio>=0.24.0
 # Development dependencies (Python >=3.10 compatible)
 black>=24.8.0
 flake8>=7.1.0
+
+# Gemini API dependency
+google-genai>=0.1.0

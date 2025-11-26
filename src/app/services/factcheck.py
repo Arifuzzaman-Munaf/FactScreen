@@ -7,19 +7,28 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 
 from src.app.models.schemas import AggregatedResult, ProviderName, ProviderResult, Verdict
 from src.app.core.config import settings
+from src.app.services.gemini_service import (
+    classify_with_gemini,
+    check_claim_verdict_alignment,
+    generate_explanation_from_sources,
+)
 
 
-def aggregate_results(claim_text: str, provider_results: List[ProviderResult]) -> AggregatedResult:
+async def aggregate_results(
+    claim_text: str, provider_results: List[ProviderResult], sources: Optional[List[Dict]] = None
+) -> AggregatedResult:
     """Choose a final verdict and compute confidence.
 
     Rule requested: If ANY provider has a proper label (non-UNKNOWN), show that as the
-    final label. Preference order: GOOGLE > RAPID > CLAIMBUSTER. Always include all
-    provider sources in the response. If none provide a label, return UNKNOWN.
+    final label. Preference order: GOOGLE > RAPID. Always include all
+    provider sources in the response. If none provide a label, use Gemini classification.
+
+    If verdicts exist, check alignment with claim. If misaligned, use Gemini fallback.
     """
     votes = Counter(result.verdict for result in provider_results)
 
     # Pick first explicit verdict by preferred provider order
-    preferred_order = [ProviderName.GOOGLE, ProviderName.RAPID, ProviderName.CLAIMBUSTER]
+    preferred_order = [ProviderName.GOOGLE, ProviderName.RAPID]
     explicit_final: Optional[Verdict] = None
     for provider in preferred_order:
         for res in provider_results:
@@ -36,15 +45,104 @@ def aggregate_results(claim_text: str, provider_results: List[ProviderResult]) -
     )
 
     providers = [r.provider for r in provider_results]
-    # Confidence: agreement ratio, boosted if explicit ratings present
-    # If explicit label found from any provider, set high confidence;
-    # otherwise use agreement ratio
-    total = len(provider_results) if provider_results else 1
-    if explicit_final is not None:
-        confidence = 0.9
+    explanation: Optional[str] = None
+
+    # If we have verdicts, check alignment and generate explanation
+    if provider_results and any(r.verdict != Verdict.UNKNOWN for r in provider_results):
+        # Convert provider results to dict format for alignment check
+        verdicts_list = []
+        for res in provider_results:
+            if res.verdict != Verdict.UNKNOWN:
+                verdicts_list.append(
+                    {
+                        "verdict": res.verdict.value,
+                        "rating": res.rating,
+                        "snippet": res.summary or res.title or "",
+                        "source": res.provider.value,
+                        "url": str(res.source_url) if res.source_url else None,
+                    }
+                )
+
+        if verdicts_list and sources:
+            # Check alignment
+            is_aligned, _ = await check_claim_verdict_alignment(claim_text, verdicts_list)
+
+            if is_aligned:
+                # Verdicts align - generate explanation from sources
+                explanation = await generate_explanation_from_sources(claim_text, sources)
+            else:
+                # Verdicts don't align - fallback to Gemini classification
+                gemini_label, gemini_confidence, gemini_explanation = await classify_with_gemini(
+                    claim_text, sources
+                )
+                # Map Gemini label to Verdict enum
+                if gemini_label == "True":
+                    final = Verdict.TRUE
+                elif gemini_label == "False":
+                    final = Verdict.MISLEADING
+                else:
+                    final = Verdict.UNKNOWN
+
+                confidence = gemini_confidence
+                explanation = (
+                    f"Third-party verdicts were about a different claim. "
+                    f"Gemini analysis: {gemini_explanation}"
+                )
+
+                return AggregatedResult(
+                    claim_text=claim_text,
+                    verdict=final,
+                    votes={k: int(v) for k, v in votes.items()},
+                    provider_results=provider_results,
+                    providers_checked=providers,
+                    confidence=confidence,
+                    explanation=explanation,
+                )
+        elif verdicts_list:
+            # Have verdicts but no sources dict - generate explanation from provider results
+            sources_dict = [
+                {
+                    "verdict": res.verdict.value,
+                    "rating": res.rating,
+                    "snippet": res.summary or res.title or "",
+                    "source": res.provider.value,
+                    "url": str(res.source_url) if res.source_url else None,
+                }
+                for res in provider_results
+                if res.verdict != Verdict.UNKNOWN
+            ]
+            if sources_dict:
+                explanation = await generate_explanation_from_sources(claim_text, sources_dict)
+
+    # If no verdicts from third-party, use Gemini classification
+    if final == Verdict.UNKNOWN:
+        gemini_label, gemini_confidence, gemini_explanation = await classify_with_gemini(
+            claim_text, sources
+        )
+        # Map Gemini label to Verdict enum
+        if gemini_label == "True":
+            final = Verdict.TRUE
+        elif gemini_label == "False":
+            final = Verdict.MISLEADING
+        else:
+            final = Verdict.UNKNOWN
+
+        confidence = gemini_confidence
+        explanation = gemini_explanation
     else:
-        agreement = (votes[final] / total) if total else 0.0
-        confidence = max(0.0, min(1.0, agreement))
+        # Confidence: agreement ratio, boosted if explicit ratings present
+        # If explicit label found from any provider, set high confidence;
+        # otherwise use agreement ratio
+        total = len(provider_results) if provider_results else 1
+        if explicit_final is not None:
+            confidence = 0.9
+        else:
+            agreement = (votes[final] / total) if total else 0.0
+            confidence = max(0.0, min(1.0, agreement))
+
+        # If no explanation generated yet, create one from sources
+        if not explanation and sources:
+            explanation = await generate_explanation_from_sources(claim_text, sources)
 
     return AggregatedResult(
         claim_text=claim_text,
@@ -53,6 +151,7 @@ def aggregate_results(claim_text: str, provider_results: List[ProviderResult]) -
         provider_results=provider_results,
         providers_checked=providers,
         confidence=confidence,
+        explanation=explanation,
     )
 
 
@@ -197,51 +296,9 @@ async def _rapid(query: str) -> List[NormalizedHit]:
     return hits
 
 
-@retry(
-    stop=stop_after_attempt(2),
-    wait=wait_exponential(min=0.5, max=2),
-    reraise=True,
-    retry=retry_if_exception_type(_transient),
-)
-async def _claimbuster(query: str) -> List[NormalizedHit]:
-    if not (
-        settings.claim_buster_api_key
-        and settings.claim_buster_url
-        and settings.claim_buster_endpoint
-    ):
-        return []
-    base_url = str(settings.claim_buster_url).rstrip("/")
-    endpoint = str(settings.claim_buster_endpoint).lstrip("/")
-    url = f"{base_url}/{endpoint}"
-    headers = {"X-Api-Key": settings.claim_buster_api_key}
-    params = {"query": query}
-    async with httpx.AsyncClient(timeout=_get_timeout()) as client:
-        r = await client.get(url, headers=headers, params=params)
-        if r.status_code >= 400:
-            return []
-        data = r.json()
-    matches = (
-        data.get("matches") if isinstance(data, dict) else (data if isinstance(data, list) else [])
-    )
-    hits: List[NormalizedHit] = []
-    for m in matches[:5]:
-        raw = m.get("rating") or m.get("verdict") or m.get("truth_rating") or "unclear"
-        hits.append(
-            {
-                "provider": "claimbuster",
-                "rating": raw,
-                "verdict": _normalize_label(raw),
-                "snippet": m.get("title") or m.get("text") or "",
-                "source": m.get("reviewed_by") or "ClaimBuster",
-                "url": m.get("url"),
-            }
-        )
-    return hits
-
-
 async def search_all(claim: str) -> List[NormalizedHit]:
     results = await asyncio.gather(
-        _google(claim), _rapid(claim), _claimbuster(claim), return_exceptions=True
+        _google(claim), _rapid(claim), return_exceptions=True
     )
     merged: List[NormalizedHit] = []
     for res in results:
@@ -251,7 +308,6 @@ async def search_all(claim: str) -> List[NormalizedHit]:
     per: Dict[str, List[NormalizedHit]] = {
         "google_factcheck": [],
         "rapidapi_fact_checker": [],
-        "claimbuster": [],
     }
     for h in merged:
         prov = h.get("provider") or "unknown"
@@ -260,7 +316,7 @@ async def search_all(claim: str) -> List[NormalizedHit]:
         if len(per[prov]) < 5:
             per[prov].append(h)
     out: List[NormalizedHit] = []
-    for k in ["google_factcheck", "rapidapi_fact_checker", "claimbuster"]:
+    for k in ["google_factcheck", "rapidapi_fact_checker"]:
         out.extend(per.get(k, []))
     return out
 

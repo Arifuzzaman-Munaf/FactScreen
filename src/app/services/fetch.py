@@ -68,18 +68,6 @@ async def fetch_rapid_factchecker(query: str) -> Dict[str, Any]:
     return await _http_get(url, params=params, headers=headers)
 
 
-async def fetch_claimbuster(query: str) -> Dict[str, Any]:
-    """Call ClaimBuster example: idir.uta.edu/claimbuster/api/v2/query/fact_matcher/{claim}."""
-    if not settings.claim_buster_api_key or not settings.claim_buster_url:
-        return {}
-    base = str(settings.claim_buster_url).rstrip("/")
-    endpoint = settings.claim_buster_endpoint or "api/v2/query/fact_matcher"
-    # Claim goes in the path according to the example
-    url = f"{base}/{endpoint}/{query}"
-    headers = {"x-api-key": settings.claim_buster_api_key}
-    return await _http_get(url, headers=headers)
-
-
 async def fetch_page_text(url: str) -> str:
     async with httpx.AsyncClient(timeout=settings.request_timeout) as client:
         r = await client.get(url, follow_redirects=True)

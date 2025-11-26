@@ -12,12 +12,11 @@ from src.app.models.schemas import (
 )
 from src.utils import extract_key_claim, extract_claim
 from src.app.services.fetch import (
-    fetch_claimbuster,
     fetch_google_factcheck,
     fetch_rapid_factchecker,
     fetch_page_text,
 )
-from src.app.services.classify import classify_claimbuster, classify_google, classify_rapid
+from src.app.services.classify import classify_google, classify_rapid
 from src.app.services.factcheck import aggregate_results, search_all
 from src.app.services.sentiment import analyze_texts_sentiment, sentiment_to_label
 from src.app.utils.ocr import extract_text_from_base64_image
@@ -25,25 +24,31 @@ from src.app.utils.ocr import extract_text_from_base64_image
 
 async def validate_text(text: str) -> AggregatedResult:
     claim = extract_key_claim(text)
-    google_raw, rapid_raw, cb_raw = await _fetch_all(claim, None)
-    results = _classify_all(google_raw, rapid_raw, cb_raw)
-    return aggregate_results(claim, results)
+    google_raw, rapid_raw = await _fetch_all(claim, None)
+    results = _classify_all(google_raw, rapid_raw)
+    # Get sources for Gemini explanation
+    sources = await search_all(claim)
+    return await aggregate_results(claim, results, sources)
 
 
 async def validate_url(url: str) -> AggregatedResult:
     # Use the URL for Google's pageUrl param to improve hit rate
     claim = extract_key_claim(url)
-    google_raw, rapid_raw, cb_raw = await _fetch_all(claim, url)
-    results = _classify_all(google_raw, rapid_raw, cb_raw)
-    return aggregate_results(claim, results)
+    google_raw, rapid_raw = await _fetch_all(claim, url)
+    results = _classify_all(google_raw, rapid_raw)
+    # Get sources for Gemini explanation
+    sources = await search_all(claim)
+    return await aggregate_results(claim, results, sources)
 
 
 async def validate_image(image_base64: str) -> AggregatedResult:
     extracted = extract_text_from_base64_image(image_base64)
     claim = extract_key_claim(extracted)
-    google_raw, rapid_raw, cb_raw = await _fetch_all(claim, None)
-    results = _classify_all(google_raw, rapid_raw, cb_raw)
-    return aggregate_results(claim, results)
+    google_raw, rapid_raw = await _fetch_all(claim, None)
+    results = _classify_all(google_raw, rapid_raw)
+    # Get sources for Gemini explanation
+    sources = await search_all(claim)
+    return await aggregate_results(claim, results, sources)
 
 
 async def analyze(req) -> ValidateResponse:
@@ -68,11 +73,10 @@ async def _fetch_all(claim: str, page_url: str | None):
     return await gather(
         fetch_google_factcheck(claim, page_url),
         fetch_rapid_factchecker(claim),
-        fetch_claimbuster(claim),
     )
 
 
-def _classify_all(google_raw, rapid_raw, cb_raw) -> List[ProviderResult]:
+def _classify_all(google_raw, rapid_raw) -> List[ProviderResult]:
     results: List[ProviderResult] = []
     g = classify_google(google_raw)
     if g:
@@ -80,9 +84,6 @@ def _classify_all(google_raw, rapid_raw, cb_raw) -> List[ProviderResult]:
     r = classify_rapid(rapid_raw)
     if r:
         results.append(r)
-    c = classify_claimbuster(cb_raw)
-    if c:
-        results.append(c)
     return results
 
 

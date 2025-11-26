@@ -57,6 +57,32 @@ curl -X POST "http://localhost:8000/v1/claims/filtered" \
   -d '{"query": "Climate change is a hoax", "similarity_threshold": 0.75}'
 ```
 
+### Validate Claims (text / url / image)
+```bash
+curl -X POST "http://localhost:8000/v1/validate" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "text": "The Eiffel Tower will be demolished next year"
+      }'
+```
+
+**Response (excerpt)**
+```json
+{
+  "result": {
+    "claim_text": "The Eiffel Tower will be demolished next year",
+    "verdict": "misleading",
+    "confidence": 0.91,
+    "explanation": "Google Fact Check and RapidAPI sources explain that no such demolition is planned. Gemini confirmed the claim is false."
+  }
+}
+```
+
+The validation endpoint automatically combines third-party fact-checking providers and Gemini 2.5 Flash to generate:
+- `verdict` — final label (true/misleading/unknown)
+- `confidence` — confidence score
+- `explanation` — natural-language reasoning citing sources or Gemini fallback
+
 ## 🏗️ Project Structure
 
 ```
@@ -120,9 +146,12 @@ Configuration is managed through `config/local.yaml` and environment variables.
 Key configuration options:
 - `GOOGLE_API_KEY`: Google Fact Check API key
 - `FACT_CHECKER_API_KEY`: RapidAPI Fact-Checker key
+- `GEMINI_API_KEY`: Gemini 2.5 Flash API key used for explanations/classification
 - `SIMILARITY_THRESHOLD`: Default similarity threshold (0.75)
 - `SENTENCE_TRANSFORMER_MODEL`: Model for similarity (all-MiniLM-L6-v2)
 - `CLASSIFICATION_MODEL`: Model for classification (facebook/bart-large-mnli)
+
+Gemini usage and quota warnings are written to `logs/gemini.log`, including token counts and quota/invalid-key errors.
 
 ## 🧪 Testing
 

@@ -2,6 +2,7 @@ from typing import Any, Dict, Optional
 import re
 
 from src.app.models.schemas import ProviderName, ProviderResult, Verdict
+from src.app.models.schemas import ProviderName, ProviderResult, Verdict
 
 
 _TRUE_KEYWORDS = [
@@ -145,48 +146,3 @@ def classify_rapid(payload: Dict[str, Any]) -> Optional[ProviderResult]:
         return None
 
 
-def classify_claimbuster(payload: Dict[str, Any]) -> Optional[ProviderResult]:
-    """Normalize ClaimBuster response.
-
-    Heuristic mapping depending on vendor output. If a probability/score exists,
-    we classify 'high check-worthiness' as UNKNOWN pending human review; otherwise
-    try to map textual verdicts.
-    """
-    if not payload:
-        return None
-    try:
-        # ClaimBuster fact_matcher returns similarity/evidence; prefer entries with truth_rating
-        candidate = None
-        if isinstance(payload, list):
-            for it in payload:
-                if (
-                    it.get("truth_rating")
-                    or it.get("label")
-                    or it.get("verdict")
-                    or it.get("rating")
-                ):
-                    candidate = it
-                    break
-            if candidate is None and payload:
-                candidate = payload[0]
-        else:
-            candidate = payload
-        label = (
-            candidate.get("truth_rating")
-            or candidate.get("label")
-            or candidate.get("verdict")
-            or candidate.get("rating")
-            or ""
-        )
-        verdict = _map_label_from_sentence(str(label))
-        return ProviderResult(
-            provider=ProviderName.CLAIMBUSTER,
-            verdict=verdict,
-            rating=str(label) if label else None,
-            title=candidate.get("title"),
-            summary=candidate.get("summary"),
-            source_url=candidate.get("url") or candidate.get("source"),
-            metadata={"raw": candidate},
-        )
-    except Exception:
-        return None

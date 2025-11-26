@@ -50,6 +50,14 @@ class Settings(BaseSettings):
         default="facebook/bart-large-mnli", alias="CLASSIFICATION_MODEL"
     )
 
+    # Gemini API settings
+    gemini_api_key: str = Field(
+        default="AlzaSyApzKD38BkX5oVyuAKcp5seAzLXmcJRM78", alias="GEMINI_API_KEY"
+    )
+    gemini_model: str = Field(
+        default="gemini-2.0-flash-exp", alias="GEMINI_MODEL"
+    )  # Using gemini-2.0-flash-exp (latest available, equivalent to 2.5)
+
 
 # Instantiate the settings object to be used throughout the application
 settings = Settings()

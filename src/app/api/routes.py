@@ -10,11 +10,13 @@ from src.app.models.claim_models import (
     FilteredClaimsResponse,  # Response model for filtered claims
     FilteredClaimResponse,  # Response model for a single filtered claim
 )
+from src.app.models.schemas import AnalyzeRequest, ValidateResponse
 
 # Import services for claim extraction, similarity filtering, and classification
 from src.app.services.claim_extract import ClaimExtractionService
 from src.pipelines.feature_eng_pipeline import SimilarityFilterService
 from src.pipelines.inference_pipeline import ClaimClassificationService
+from src.pipelines.validation_pipeline import validate_text, validate_url, validate_image
 
 # Initialize API router
 router = APIRouter()
@@ -106,3 +108,31 @@ async def get_filtered_claims(request: FilteredClaimsRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing filtered claims: {str(e)}")
+
+
+@router.post("/validate", response_model=ValidateResponse, tags=["validation"])
+async def validate_claim(request: AnalyzeRequest):
+    """
+    Validate a claim using third-party fact-checkers and Gemini explanations.
+
+    The request can include either `text`, `url`, or `image_base64`.
+    """
+
+    if not (request.text or request.url or request.image_base64):
+        raise HTTPException(
+            status_code=400, detail="Provide at least one of text, url, or image_base64"
+        )
+
+    try:
+        if request.text:
+            result = await validate_text(request.text)
+        elif request.url:
+            result = await validate_url(str(request.url))
+        else:
+            result = await validate_image(request.image_base64)  # type: ignore[arg-type]
+
+        return ValidateResponse(result=result)
+    except HTTPException:
+        raise
+    except Exception as exc:  # pragma: no cover - defensive
+        raise HTTPException(status_code=500, detail=f"Error validating claim: {exc}")

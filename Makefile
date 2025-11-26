@@ -34,9 +34,9 @@ install:
 	@echo "Creating virtual environment..."
 	@python3 -m venv venv
 	@echo "Upgrading pip, setuptools, and wheel..."
-	@./venv/bin/pip install --upgrade pip setuptools wheel
-	@echo "Installing dependencies..."
-	@./venv/bin/pip install -r requirements-dev.txt
+	@PIP_PROGRESS_BAR=on ./venv/bin/pip install --upgrade pip setuptools wheel
+	@echo "Installing dependencies (progress shown below)..."
+	@PIP_PROGRESS_BAR=on ./venv/bin/pip install -r requirements-dev.txt
 	@echo "✅ Virtual environment created and dependencies installed!"
 	@$(MAKE) _clean
 
@@ -51,14 +51,14 @@ run-server:
 	@if [ ! -d "venv" ]; then \
 		echo "Virtual environment not found. Creating it now..."; \
 		python3 -m venv venv; \
-		echo "Installing dependencies..."; \
-		./venv/bin/pip install --upgrade pip setuptools wheel --quiet; \
-		./venv/bin/pip install -r requirements-dev.txt --quiet; \
+		echo "Installing dependencies (progress shown below)..."; \
+		PIP_PROGRESS_BAR=on ./venv/bin/pip install --upgrade pip setuptools wheel; \
+		PIP_PROGRESS_BAR=on ./venv/bin/pip install -r requirements-dev.txt; \
 		echo "✅ Virtual environment created and dependencies installed!"; \
 	elif ! ./venv/bin/python -c "import uvicorn" 2>/dev/null; then \
-		echo "Dependencies not installed. Installing now..."; \
-		./venv/bin/pip install --upgrade pip setuptools wheel --quiet; \
-		./venv/bin/pip install -r requirements-dev.txt --quiet; \
+		echo "Dependencies not installed. Installing now (progress shown below)..."; \
+		PIP_PROGRESS_BAR=on ./venv/bin/pip install --upgrade pip setuptools wheel; \
+		PIP_PROGRESS_BAR=on ./venv/bin/pip install -r requirements-dev.txt; \
 		echo "✅ Dependencies installed!"; \
 	fi
 	@./venv/bin/python entrypoint/server.py
