@@ -144,5 +144,3 @@ def classify_rapid(payload: Dict[str, Any]) -> Optional[ProviderResult]:
         )
     except Exception:
         return None
-
-
