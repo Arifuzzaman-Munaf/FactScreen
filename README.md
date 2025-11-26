@@ -141,7 +141,16 @@ make format           # Format code with black
 
 ## 🔧 Configuration
 
-Configuration is managed through `config/local.yaml` and environment variables.
+Configuration is managed through environment variables loaded from a `.env` file (via `pydantic-settings`). Create a `.env` file in the project root with:
+
+```
+GOOGLE_API_KEY=your-google-factcheck-key
+FACT_CHECKER_API_KEY=your-rapidapi-key
+GEMINI_API_KEY=your-gemini-key
+GEMINI_MODEL=gemini-2.5-flash
+```
+
+These values override any defaults declared in code; `config/local.yaml` simply documents the expected keys.
 
 Key configuration options:
 - `GOOGLE_API_KEY`: Google Fact Check API key
@@ -172,6 +181,21 @@ make test-integration
 # Run with verbose output
 make test-all
 ```
+
+## 🖥️ Streamlit Frontend
+
+A lightweight Streamlit presentation layer lives in `streamlit_app.py`.
+
+### Run locally
+
+```bash
+# activate venv if not already done
+make install
+FACTSCREEN_API_URL=http://localhost:8000 streamlit run streamlit_app.py
+```
+
+Environment variables (loaded from `.env`) must include the API keys noted above.  
+`FACTSCREEN_API_URL` defaults to `http://localhost:8000` but can be overridden when the backend runs elsewhere.
 
 ## 🚀 Running the Application
 

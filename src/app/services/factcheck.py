@@ -46,6 +46,7 @@ async def aggregate_results(
 
     providers = [r.provider for r in provider_results]
     explanation: Optional[str] = None
+    sources_for_explanation: List[Dict[str, Optional[str]]] = list(sources or [])
 
     # If we have verdicts, check alignment and generate explanation
     if provider_results and any(r.verdict != Verdict.UNKNOWN for r in provider_results):
@@ -70,6 +71,7 @@ async def aggregate_results(
             if is_aligned:
                 # Verdicts align - generate explanation from sources
                 explanation = await generate_explanation_from_sources(claim_text, sources)
+                sources_for_explanation = list(sources or [])
             else:
                 # Verdicts don't align - fallback to Gemini classification
                 gemini_label, gemini_confidence, gemini_explanation = await classify_with_gemini(
@@ -88,7 +90,7 @@ async def aggregate_results(
                     f"Third-party verdicts were about a different claim. "
                     f"Gemini analysis: {gemini_explanation}"
                 )
-
+                explanation = _attach_sources_block(explanation, sources or [])
                 return AggregatedResult(
                     claim_text=claim_text,
                     verdict=final,
@@ -113,6 +115,7 @@ async def aggregate_results(
             ]
             if sources_dict:
                 explanation = await generate_explanation_from_sources(claim_text, sources_dict)
+                sources_for_explanation = sources_dict
 
     # If no verdicts from third-party, use Gemini classification
     if final == Verdict.UNKNOWN:
@@ -129,6 +132,7 @@ async def aggregate_results(
 
         confidence = gemini_confidence
         explanation = gemini_explanation
+        sources_for_explanation = list(sources or [])
     else:
         # Confidence: agreement ratio, boosted if explicit ratings present
         # If explicit label found from any provider, set high confidence;
@@ -143,7 +147,9 @@ async def aggregate_results(
         # If no explanation generated yet, create one from sources
         if not explanation and sources:
             explanation = await generate_explanation_from_sources(claim_text, sources)
+            sources_for_explanation = list(sources or [])
 
+    explanation = _attach_sources_block(explanation, sources_for_explanation)
     return AggregatedResult(
         claim_text=claim_text,
         verdict=final,
@@ -153,6 +159,38 @@ async def aggregate_results(
         confidence=confidence,
         explanation=explanation,
     )
+
+
+def _attach_sources_block(
+    explanation: Optional[str], sources: Optional[List[Dict[str, Optional[str]]]]
+) -> Optional[str]:
+    """Append a bullet list of sources to the explanation."""
+    if not explanation:
+        return explanation
+
+    lines: List[str] = []
+    if sources:
+        for src in sources:
+            source_name = (
+                src.get("source") or src.get("provider") or src.get("provider_name") or "Source"
+            )
+            verdict = src.get("verdict") or src.get("rating")
+            url = src.get("url")
+            snippet = src.get("snippet")
+            parts = [source_name]
+            if verdict:
+                parts.append(f"verdict: {verdict}")
+            if snippet:
+                parts.append(f"snippet: {snippet[:120]}{'...' if len(snippet) > 120 else ''}")
+            detail = " | ".join(parts)
+            if url:
+                detail = f"{detail} | {url}"
+            lines.append(detail)
+
+    if not lines:
+        return explanation
+    sources_block = "\n".join(f"- {line}" for line in lines)
+    return f"{explanation}\n\nSources:\n{sources_block}"
 
 
 Label = str  # "True" | "False" | "Unclear"
@@ -297,9 +335,7 @@ async def _rapid(query: str) -> List[NormalizedHit]:
 
 
 async def search_all(claim: str) -> List[NormalizedHit]:
-    results = await asyncio.gather(
-        _google(claim), _rapid(claim), return_exceptions=True
-    )
+    results = await asyncio.gather(_google(claim), _rapid(claim), return_exceptions=True)
     merged: List[NormalizedHit] = []
     for res in results:
         if isinstance(res, list):

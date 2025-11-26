@@ -1,7 +1,34 @@
 # FactScreen API Makefile
 
-.PHONY: help install clean _clean test test-unit test-integration test-all run-server stop-server lint format check-deps dev
+.PHONY: help install clean _clean test test-unit test-integration test-all run-server stop-server lint format check-deps dev run-frontend run-app
 
+FACTSCREEN_API_URL ?= http://localhost:8000
+
+# Frontend commands
+run-frontend:
+	@if [ ! -d "venv" ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "Starting Streamlit frontend..."
+	@echo "Backend URL: $(FACTSCREEN_API_URL)"
+	@FACTSCREEN_API_URL=$(FACTSCREEN_API_URL) ./venv/bin/streamlit run streamlit_app.py
+
+run-app:
+	@if [ ! -d "venv" ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "Starting backend and frontend together..."
+	@FACTSCREEN_API_URL=$(FACTSCREEN_API_URL) ./venv/bin/python entrypoint/server.py &
+	@BACKEND_PID=$$!; \
+		sleep 3; \
+		echo "Backend started with PID $$BACKEND_PID"; \
+		echo "Launching Streamlit frontend..."; \
+		FACTSCREEN_API_URL=$(FACTSCREEN_API_URL) ./venv/bin/streamlit run streamlit_app.py || EXIT_CODE=$$?; \
+		echo "Shutting down backend..."; \
+		kill $$BACKEND_PID >/dev/null 2>&1 || true; \
+		exit $${EXIT_CODE:-0}
 # Default target
 help:
 	@echo "FactScreen API - Available Commands:"

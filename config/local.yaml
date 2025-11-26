@@ -23,7 +23,7 @@ rapidapi:
 
 # ML Model settings
 ml:
-  similarity_threshold: 0.4
+  similarity_threshold: 0.15
   sentence_transformer_model: "all-MiniLM-L6-v2"
   classification_model: "facebook/bart-large-mnli"
 

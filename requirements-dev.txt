@@ -34,3 +34,6 @@ flake8>=7.1.0
 
 # Gemini API dependency
 google-genai>=0.1.0
+
+# Frontend
+streamlit>=1.40.0

@@ -65,7 +65,7 @@ def _handle_gemini_exception(exc: Exception, context: str) -> str:
         )
         return (
             "Gemini API key is invalid. Update the GEMINI_API_KEY environment variable "
-            "or config/local.yaml and restart the server."
+            "or .env file and restart the server."
         )
 
     if "quota" in lower_msg or "exhausted" in lower_msg or "429" in lower_msg:

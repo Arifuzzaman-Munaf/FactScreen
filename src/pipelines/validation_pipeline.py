@@ -1,5 +1,6 @@
-from typing import List
+from typing import List, Optional
 from asyncio import gather
+import asyncio
 
 from src.app.models.schemas import (
     AggregatedResult,
@@ -9,6 +10,8 @@ from src.app.models.schemas import (
     AnalyzeResponseDetailed,
     Evidence,
     ProviderRating,
+    ProviderName,
+    Verdict,
 )
 from src.utils import extract_key_claim, extract_claim
 from src.app.services.fetch import (
@@ -20,35 +23,45 @@ from src.app.services.classify import classify_google, classify_rapid
 from src.app.services.factcheck import aggregate_results, search_all
 from src.app.services.sentiment import analyze_texts_sentiment, sentiment_to_label
 from src.app.utils.ocr import extract_text_from_base64_image
+from src.app.services.claim_extract import ClaimExtractionService
+from src.pipelines.feature_eng_pipeline import SimilarityFilterService
+from src.pipelines.inference_pipeline import ClaimClassificationService
+from src.app.core.config import settings
+_claim_extraction_service = ClaimExtractionService()
+_similarity_filter_service = SimilarityFilterService()
+_classification_service = ClaimClassificationService()
+
 
 
 async def validate_text(text: str) -> AggregatedResult:
-    claim = extract_key_claim(text)
-    google_raw, rapid_raw = await _fetch_all(claim, None)
-    results = _classify_all(google_raw, rapid_raw)
+    claim_for_display = extract_key_claim(text)
+    raw_query = text.strip() or claim_for_display
+    results = await _get_provider_results(raw_query, page_url=None)
+
     # Get sources for Gemini explanation
-    sources = await search_all(claim)
-    return await aggregate_results(claim, results, sources)
+    sources = await search_all(claim_for_display)
+    return await aggregate_results(claim_for_display, results, sources)
 
 
 async def validate_url(url: str) -> AggregatedResult:
     # Use the URL for Google's pageUrl param to improve hit rate
-    claim = extract_key_claim(url)
-    google_raw, rapid_raw = await _fetch_all(claim, url)
-    results = _classify_all(google_raw, rapid_raw)
+    claim_source = await _extract_text_from_url(url)
+    claim_for_display = extract_key_claim(claim_source or url)
+    raw_query = url.strip() or claim_for_display
+    results = await _get_provider_results(raw_query, page_url=url)
+
     # Get sources for Gemini explanation
-    sources = await search_all(claim)
-    return await aggregate_results(claim, results, sources)
+    sources = await search_all(claim_for_display)
+    return await aggregate_results(claim_for_display, results, sources)
 
 
 async def validate_image(image_base64: str) -> AggregatedResult:
     extracted = extract_text_from_base64_image(image_base64)
-    claim = extract_key_claim(extracted)
-    google_raw, rapid_raw = await _fetch_all(claim, None)
-    results = _classify_all(google_raw, rapid_raw)
+    claim_for_display = extract_key_claim(extracted)
+    results = await _get_provider_results(claim_for_display, page_url=None)
     # Get sources for Gemini explanation
-    sources = await search_all(claim)
-    return await aggregate_results(claim, results, sources)
+    sources = await search_all(claim_for_display)
+    return await aggregate_results(claim_for_display, results, sources)
 
 
 async def analyze(req) -> ValidateResponse:
@@ -85,6 +98,72 @@ def _classify_all(google_raw, rapid_raw) -> List[ProviderResult]:
     if r:
         results.append(r)
     return results
+
+
+async def _get_provider_results(query: str, page_url: Optional[str]) -> List[ProviderResult]:
+    filtered_results = await asyncio.to_thread(_filtered_provider_results_sync, query)
+    if filtered_results:
+        return filtered_results
+    google_raw, rapid_raw = await _fetch_all(query, page_url)
+    return _classify_all(google_raw, rapid_raw)
+
+
+def _filtered_provider_results_sync(query: str) -> List[ProviderResult]:
+    try:
+        combined = _claim_extraction_service.get_combined_claims(query=query)
+    except Exception:
+        return []
+    if not combined:
+        return []
+
+    try:
+        filtered = _similarity_filter_service.filter_claims_by_similarity(
+            claims=combined,
+            query=query,
+            similarity_threshold=settings.similarity_threshold,
+        )
+    except Exception:
+        return []
+    if not filtered:
+        return []
+
+    classified = _classification_service.classify_claims_batch(filtered)
+    provider_results: List[ProviderResult] = []
+    for cls in classified:
+        provider_enum = (
+            ProviderName.GOOGLE
+            if cls.get("source_api") == "Google FactCheckTools"
+            else ProviderName.RAPID
+        )
+        verdict = _map_normalized_rating(cls.get("normalized_rating"))
+        provider_results.append(
+            ProviderResult(
+                provider=provider_enum,
+                verdict=verdict,
+                rating=cls.get("normalized_rating"),
+                title=cls.get("claim"),
+                summary=cls.get("claim"),
+                source_url=cls.get("review_link"),
+                metadata={"source_api": cls.get("source_api")},
+            )
+        )
+    return provider_results
+
+
+def _map_normalized_rating(label: Optional[str]) -> Verdict:
+    text = (label or "").lower()
+    if "true" in text and "false" not in text and "misleading" not in text:
+        return Verdict.TRUE
+    if "false" in text or "misleading" in text:
+        return Verdict.MISLEADING
+    return Verdict.UNKNOWN
+
+
+async def _extract_text_from_url(url: str) -> str:
+    try:
+        return await fetch_page_text(url)
+    except Exception:
+        return ""
 
 
 async def analyze_detailed(req: AnalyzeRequest) -> AnalyzeResponseDetailed:

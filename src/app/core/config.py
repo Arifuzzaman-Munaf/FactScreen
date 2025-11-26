@@ -23,9 +23,7 @@ class Settings(BaseSettings):
     request_timeout: int = 15  # Request timeout in seconds
 
     # Google Fact Check API settings
-    google_api_key: str = Field(
-        default="AIzaSyDAjGKxAF5288FSdBX3NIlidJ6G6RYZ784", alias="GOOGLE_API_KEY"
-    )
+    google_api_key: str = Field(default="", alias="GOOGLE_API_KEY")
     google_factcheck_url: str = Field(
         default="https://factchecktools.googleapis.com", alias="GOOGLE_FACTCHECK_URL"
     )
@@ -34,15 +32,13 @@ class Settings(BaseSettings):
     )
 
     # RapidAPI Fact Checker settings
-    fact_checker_api_key: str = Field(
-        default="71845686f3msh5f5392bd87453d6p1da3d4jsn3be66bc8c5ae", alias="FACT_CHECKER_API_KEY"
-    )
+    fact_checker_api_key: str = Field(default="", alias="FACT_CHECKER_API_KEY")
     fact_checker_url: str = Field(default="fact-checker.p.rapidapi.com", alias="FACT_CHECKER_URL")
     fact_checker_endpoint: str = Field(default="search", alias="FACT_CHECKER_ENDPOINT")
     fact_checker_host: str = Field(default="fact-checker.p.rapidapi.com", alias="FACT_CHECKER_HOST")
 
     # ML Model settings
-    similarity_threshold: float = Field(default=0.75, alias="SIMILARITY_THRESHOLD")
+    similarity_threshold: float = Field(default=0.15, alias="SIMILARITY_THRESHOLD")
     sentence_transformer_model: str = Field(
         default="all-MiniLM-L6-v2", alias="SENTENCE_TRANSFORMER_MODEL"
     )
@@ -51,12 +47,8 @@ class Settings(BaseSettings):
     )
 
     # Gemini API settings
-    gemini_api_key: str = Field(
-        default="AlzaSyApzKD38BkX5oVyuAKcp5seAzLXmcJRM78", alias="GEMINI_API_KEY"
-    )
-    gemini_model: str = Field(
-        default="gemini-2.0-flash-exp", alias="GEMINI_MODEL"
-    )  # Using gemini-2.0-flash-exp (latest available, equivalent to 2.5)
+    gemini_api_key: str = Field(default="", alias="GEMINI_API_KEY")
+    gemini_model: str = Field(default="gemini-2.5-flash", alias="GEMINI_MODEL")
 
 
 # Instantiate the settings object to be used throughout the application
