@@ -106,3 +106,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+# ML Model files (too large for git)
+src/app/models/distilbert-sst2/*.safetensors
+src/app/models/distilbert-sst2/*.bin
+*.safetensors
+*.bin

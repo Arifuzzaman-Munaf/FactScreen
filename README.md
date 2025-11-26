@@ -27,13 +27,13 @@ make test
 ### Option 2: Manual Setup
 ```bash
 # 1. Install dependencies
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 
 # 2. Start the server
-python start_server.py
+python entrypoint/server.py
 
 # 3. Test the API
-python run_tests.py
+make test
 ```
 
 ### 4. Access Documentation
@@ -61,23 +61,26 @@ curl -X POST "http://localhost:8000/v1/claims/filtered" \
 
 ```
 FactScreen/
-├── factscreen_backend/          # Backend application
-│   ├── app/                     # Main application code
-│   │   ├── api/                 # API routes
-│   │   ├── core/                # Configuration
-│   │   ├── models/              # Data models
-│   │   └── services/            # Business logic
-│   ├── tests/                   # Test suite
-│   ├── pytest.ini              # Pytest configuration
-│   └── pyproject.toml           # Project configuration
-├── requirements.txt             # Dependencies
-├── setup.py                     # Package setup
-├── Makefile                     # Development commands
-├── start_server.py             # Server startup script
-├── run_tests.py                # Test runner
-├── clean_cache.py              # Cache cleaner
-├── .gitignore                  # Git ignore rules
-├── env.example                 # Environment variables template
+├── config/                      # Configuration files
+│   └── local.yaml              # Local configuration
+├── entrypoint/                 # Application entrypoints
+│   └── server.py              # Server startup script
+├── notebooks/                  # Jupyter notebooks (for future use)
+├── src/                        # Main source code
+│   ├── app/                    # Application code
+│   │   ├── api/               # API routes
+│   │   ├── core/              # Configuration
+│   │   ├── models/            # Data models
+│   │   ├── services/          # Business logic
+│   │   └── utils/             # Utility functions
+│   ├── pipelines/             # ML pipelines
+│   │   ├── feature_eng_pipeline.py    # Feature engineering
+│   │   ├── inference_pipeline.py      # Inference/classification
+│   │   └── validation_pipeline.py     # Validation pipeline
+│   └── utils.py               # Utility functions
+├── tests/                      # Test suite
+├── Makefile                    # Development commands
+├── requirements-dev.txt        # Development dependencies
 └── README.md                   # This file
 ```
 
@@ -85,8 +88,7 @@ FactScreen/
 
 ```bash
 # Setup
-make install          # Install production dependencies
-make dev-install      # Install development dependencies
+make install          # Install dependencies
 make dev              # Setup development environment
 
 # Development
@@ -113,11 +115,7 @@ make format           # Format code with black
 
 ## 🔧 Configuration
 
-Copy `env.example` to `.env` and update the values:
-
-```bash
-cp env.example .env
-```
+Configuration is managed through `config/local.yaml` and environment variables.
 
 Key configuration options:
 - `GOOGLE_API_KEY`: Google Fact Check API key
@@ -146,17 +144,11 @@ make test-integration
 make test-all
 ```
 
-## 🚀 Deployment
+## 🚀 Running the Application
 
 ### Development
 ```bash
 make dev
-make run-server
-```
-
-### Production
-```bash
-make prod
 make run-server
 ```
 

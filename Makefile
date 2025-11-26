@@ -1,6 +1,6 @@
 # FactScreen API Makefile
 
-.PHONY: help install clean test test-unit test-integration test-all run-server stop-server lint format check-deps dev
+.PHONY: help install clean _clean test test-unit test-integration test-all run-server stop-server lint format check-deps dev
 
 # Default target
 help:
@@ -33,60 +33,116 @@ help:
 install:
 	@echo "Creating virtual environment..."
 	@python3 -m venv venv
+	@echo "Upgrading pip, setuptools, and wheel..."
+	@./venv/bin/pip install --upgrade pip setuptools wheel
 	@echo "Installing dependencies..."
-	@./venv/bin/pip install -r requirements.txt
+	@./venv/bin/pip install -r requirements-dev.txt
+	@echo "✅ Virtual environment created and dependencies installed!"
+	@$(MAKE) _clean
 
 check-deps:
 	@echo "Checking dependencies..."
 	@./venv/bin/python -c "import fastapi, uvicorn, transformers, sentence_transformers; print('✅ All dependencies installed')"
+	@$(MAKE) _clean
 
 # Development commands
 run-server:
-	@echo "Starting FactScreen API server..."
-	@echo "Server will be available at: http://localhost:8000"
-	@echo "API documentation: http://localhost:8000/docs"
-	@echo "Press Ctrl+C to stop the server"
-	@cd factscreen_backend && ../venv/bin/python utils/start_server.py
+	@$(MAKE) _clean
+	@if [ ! -d "venv" ]; then \
+		echo "Virtual environment not found. Creating it now..."; \
+		python3 -m venv venv; \
+		echo "Installing dependencies..."; \
+		./venv/bin/pip install --upgrade pip setuptools wheel --quiet; \
+		./venv/bin/pip install -r requirements-dev.txt --quiet; \
+		echo "✅ Virtual environment created and dependencies installed!"; \
+	elif ! ./venv/bin/python -c "import uvicorn" 2>/dev/null; then \
+		echo "Dependencies not installed. Installing now..."; \
+		./venv/bin/pip install --upgrade pip setuptools wheel --quiet; \
+		./venv/bin/pip install -r requirements-dev.txt --quiet; \
+		echo "✅ Dependencies installed!"; \
+	fi
+	@./venv/bin/python entrypoint/server.py
 
 stop-server:
 	@echo "Stopping server..."
-	@pkill -f "uvicorn app.main:app" || echo "No server process found"
+	@pkill -f "uvicorn src.app.main:app" || echo "No server process found"
+	@$(MAKE) _clean
 
+# Internal cleanup function (used by other commands)
+_clean:
+	@find . -type d -name "__pycache__" -not -path "./venv/*" -exec rm -rf {} + 2>/dev/null || true
+	@find . -name "*.pyc" -not -path "./venv/*" -delete 2>/dev/null || true
+	@find . -name "*.pyo" -not -path "./venv/*" -delete 2>/dev/null || true
+	@find . -name ".pytest_cache" -not -path "./venv/*" -exec rm -rf {} + 2>/dev/null || true
+	@find . -name ".mypy_cache" -not -path "./venv/*" -exec rm -rf {} + 2>/dev/null || true
+	@find . -name ".coverage" -not -path "./venv/*" -delete 2>/dev/null || true
+	@find . -name "htmlcov" -not -path "./venv/*" -exec rm -rf {} + 2>/dev/null || true
+
+# Public clean command
 clean:
 	@echo "Cleaning cache files..."
-	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-	@find . -name "*.pyc" -delete 2>/dev/null || true
-	@find . -name "*.pyo" -delete 2>/dev/null || true
+	@$(MAKE) _clean
 	@echo "✅ Cache files cleaned!"
 
 # Testing commands
 test:
+	@if [ ! -d "venv" ] || ! ./venv/bin/python -c "import pytest" 2>/dev/null; then \
+		echo "Virtual environment or pytest not found. Run 'make install' first."; \
+		exit 1; \
+	fi
 	@echo "Running all tests..."
-	@cd factscreen_backend && ../venv/bin/python -m pytest tests/ -v
+	@./venv/bin/python -m pytest tests/ -v
+	@$(MAKE) _clean
 
 test-unit:
+	@if [ ! -d "venv" ] || ! ./venv/bin/python -c "import pytest" 2>/dev/null; then \
+		echo "Virtual environment or pytest not found. Run 'make install' first."; \
+		exit 1; \
+	fi
 	@echo "Running unit tests..."
-	@cd factscreen_backend && ../venv/bin/python -m pytest tests/test_services.py -v
+	@./venv/bin/python -m pytest tests/test_services.py -v
+	@$(MAKE) _clean
 
 test-integration:
+	@if [ ! -d "venv" ] || ! ./venv/bin/python -c "import pytest" 2>/dev/null; then \
+		echo "Virtual environment or pytest not found. Run 'make install' first."; \
+		exit 1; \
+	fi
 	@echo "Running integration tests..."
-	@cd factscreen_backend && ../venv/bin/python -m pytest tests/test_integration.py -v
+	@./venv/bin/python -m pytest tests/test_integration.py -v
+	@$(MAKE) _clean
 
 test-all:
+	@if [ ! -d "venv" ] || ! ./venv/bin/python -c "import pytest" 2>/dev/null; then \
+		echo "Virtual environment or pytest not found. Run 'make install' first."; \
+		exit 1; \
+	fi
 	@echo "Running all tests with verbose output..."
-	@cd factscreen_backend && ../venv/bin/python -m pytest tests/ -v -s
+	@./venv/bin/python -m pytest tests/ -v -s
+	@$(MAKE) _clean
 
 # Code quality commands
 lint:
+	@if [ ! -d "venv" ] || ! ./venv/bin/python -c "import flake8" 2>/dev/null; then \
+		echo "Virtual environment or flake8 not found. Run 'make install' first."; \
+		exit 1; \
+	fi
 	@echo "Running linting checks..."
-	@cd factscreen_backend && ../venv/bin/python -m flake8 app/ tests/ --max-line-length=100 --ignore=E203,W503
+	@./venv/bin/python -m flake8 src/ tests/ --max-line-length=100 --ignore=E203,W503 --exclude=venv
+	@$(MAKE) _clean
 
 format:
+	@if [ ! -d "venv" ] || ! ./venv/bin/python -c "import black" 2>/dev/null; then \
+		echo "Virtual environment or black not found. Run 'make install' first."; \
+		exit 1; \
+	fi
 	@echo "Formatting code with black..."
-	@cd factscreen_backend && ../venv/bin/python -m black app/ tests/ --line-length=100
+	@./venv/bin/python -m black src/ tests/ --line-length=100 --exclude=venv
+	@$(MAKE) _clean
 
 # Quick development workflow
 dev: install
 	@echo "Development environment ready!"
 	@echo "Run 'make run-server' to start the server"
 	@echo "Run 'make test' to run tests"
+	@$(MAKE) _clean
