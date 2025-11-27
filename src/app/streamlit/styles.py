@@ -16,14 +16,291 @@ THEME_CSS = """
     --text-light: #f8fafc;
 }
 
-/* Hide Streamlit menu and settings */
+/* Hide Streamlit menu and settings but keep header space */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
-header {visibility: hidden;}
 .stDeployButton {display: none;}
 div[data-testid="stToolbar"] {visibility: hidden !important;}
 .stDecoration {display: none;}
 #stDecoration {display: none;}
+
+/* Make header area available for custom navbar */
+header[data-testid="stHeader"] {
+    display: none !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Remove default Streamlit padding */
+.stApp > header {
+    display: none !important;
+}
+
+/* Ensure body and html start at top */
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Remove any default Streamlit spacing */
+#root {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Top Navigation Bar - Stunning Glassmorphic Design */
+.top-navbar {
+    background: linear-gradient(135deg, 
+        rgba(15, 23, 42, 0.95) 0%, 
+        rgba(30, 41, 59, 0.95) 50%,
+        rgba(15, 23, 42, 0.95) 100%);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border-bottom: 2px solid transparent;
+    background-image: 
+        linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95)),
+        linear-gradient(90deg, 
+            rgba(99, 102, 241, 0.6), 
+            rgba(139, 92, 246, 0.6), 
+            rgba(236, 72, 153, 0.6),
+            rgba(99, 102, 241, 0.6));
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    padding: 1.5rem 4rem;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(99, 102, 241, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(99, 102, 241, 0.2);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1000;
+    box-sizing: border-box;
+    animation: navbarGlow 4s ease-in-out infinite;
+}
+
+@keyframes navbarGlow {
+    0%, 100% { 
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.5),
+            0 0 0 1px rgba(99, 102, 241, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    50% { 
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(99, 102, 241, 0.4),
+            0 0 0 1px rgba(99, 102, 241, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+}
+
+/* Add padding to main content to account for fixed navbar */
+.main .block-container {
+    padding-top: 6.5rem !important;
+    margin-top: 0 !important;
+    max-width: 1400px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 3rem !important;
+    padding-right: 3rem !important;
+}
+
+/* Ensure app container starts at top */
+.stApp {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    overflow-x: hidden !important;
+}
+
+/* Remove any spacing before navbar */
+.stApp > div:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Ensure navbar is at absolute top */
+.top-navbar {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.nav-brand {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+}
+
+.logo-icon {
+    width: 48px;
+    height: 48px;
+    filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.6));
+    animation: logoFloat 3s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.nav-text-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.nav-logo {
+    font-size: 2.2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: navLogoGradient 4s ease infinite;
+    letter-spacing: -0.03em;
+    filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.5));
+    transition: filter 0.3s ease;
+}
+
+.nav-logo:hover {
+    filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.7));
+}
+
+@keyframes navLogoGradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.nav-tagline {
+    font-size: 0.9rem;
+    color: rgba(248, 250, 252, 0.8);
+    font-weight: 400;
+    letter-spacing: 0.3px;
+}
+
+.nav-buttons-container {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Stunning Navigation Buttons */
+.nav-btn-html {
+    background: rgba(99, 102, 241, 0.15) !important;
+    border: 2px solid rgba(99, 102, 241, 0.4) !important;
+    color: rgba(248, 250, 252, 0.9) !important;
+    border-radius: 12px !important;
+    padding: 0.75rem 1.5rem !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    min-width: 130px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    box-shadow: 
+        0 4px 15px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+}
+
+.nav-icon {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+    transition: transform 0.3s ease;
+}
+
+.nav-btn-html:hover .nav-icon {
+    transform: scale(1.1);
+}
+
+.nav-btn-html.active .nav-icon {
+    transform: scale(1.15);
+}
+
+.nav-btn-html::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.nav-btn-html:hover::before {
+    left: 100%;
+}
+
+.nav-btn-html:hover {
+    background: rgba(99, 102, 241, 0.3) !important;
+    border-color: rgba(99, 102, 241, 0.7) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 
+        0 8px 25px rgba(99, 102, 241, 0.5),
+        0 0 15px rgba(139, 92, 246, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+}
+
+.nav-btn-html.active {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%) !important;
+    border-color: #8b5cf6 !important;
+    color: #ffffff !important;
+    box-shadow: 
+        0 8px 30px rgba(99, 102, 241, 0.6),
+        0 0 20px rgba(139, 92, 246, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-1px) !important;
+    animation: buttonPulse 2s ease-in-out infinite !important;
+}
+
+@keyframes buttonPulse {
+    0%, 100% {
+        box-shadow: 
+            0 8px 30px rgba(99, 102, 241, 0.6),
+            0 0 20px rgba(139, 92, 246, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    50% {
+        box-shadow: 
+            0 8px 35px rgba(99, 102, 241, 0.8),
+            0 0 30px rgba(139, 92, 246, 0.7),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+}
 
 /* Smooth scrolling */
 html {
@@ -51,8 +328,70 @@ html {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
 }
 
+/* Input Card Container - Glassmorphic Design with Better Contrast */
+div[data-testid="stForm"] {
+    background: linear-gradient(135deg, 
+        rgba(30, 41, 59, 0.95) 0%, 
+        rgba(15, 23, 42, 0.9) 50%, 
+        rgba(30, 41, 59, 0.95) 100%) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    border-radius: 24px !important;
+    padding: 2.5rem !important;
+    margin: 1.5rem 0 !important;
+    border: 2px solid rgba(99, 102, 241, 0.5) !important;
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.5),
+        0 4px 16px rgba(99, 102, 241, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+        0 0 0 1px rgba(99, 102, 241, 0.2) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+div[data-testid="stForm"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(99, 102, 241, 0.1), 
+        transparent);
+    transition: left 0.6s ease;
+}
+
+div[data-testid="stForm"]:hover::before {
+    left: 100%;
+}
+
+div[data-testid="stForm"]:hover {
+    border-color: rgba(99, 102, 241, 0.7) !important;
+    box-shadow: 
+        0 16px 64px rgba(0, 0, 0, 0.6),
+        0 8px 24px rgba(99, 102, 241, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+        0 0 60px rgba(99, 102, 241, 0.4) !important;
+    transform: translateY(-3px);
+    background: linear-gradient(135deg, 
+        rgba(30, 41, 59, 1) 0%, 
+        rgba(15, 23, 42, 0.95) 50%, 
+        rgba(30, 41, 59, 1) 100%) !important;
+}
+
+/* Input Labels */
 .css-1d391kg, .css-12oz5g7, .css-1adrfps, .stTextInput label, .stTextArea label {
     color: var(--text-light) !important;
+    font-weight: 700 !important;
+    font-size: 1.15rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 section[data-testid="stSidebar"] {
@@ -62,38 +401,70 @@ section[data-testid="stSidebar"] {
     box-shadow: 2px 0 20px rgba(0, 0, 0, 0.2) !important;
 }
 
+/* Input Fields - Enhanced Styling with Better Contrast */
 .stTextInput>div>div>input, .stTextArea>div>div>textarea {
-    background: rgba(15, 23, 42, 0.7) !important;
+    background: rgba(30, 41, 59, 0.8) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 2px solid rgba(99, 102, 241, 0.4) !important;
+    border-radius: 16px !important;
     color: var(--text-light) !important;
-    border: 2px solid rgba(99, 102, 241, 0.5) !important;
-    border-radius: 12px !important;
-    transition: all 0.3s ease !important;
+    padding: 1rem 1.25rem !important;
+    font-size: 1.05rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.3),
+        0 1px 0 rgba(255, 255, 255, 0.08),
+        0 0 0 1px rgba(99, 102, 241, 0.1) !important;
+}
+
+.stTextInput>div>div>input::placeholder, .stTextArea>div>div>textarea::placeholder {
+    color: rgba(248, 250, 252, 0.4) !important;
+    font-style: italic;
+}
+
+.stTextInput>div>div>input:hover, .stTextArea>div>div>textarea:hover {
+    border-color: rgba(99, 102, 241, 0.6) !important;
+    background: rgba(30, 41, 59, 0.9) !important;
+    box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.3),
+        0 1px 0 rgba(255, 255, 255, 0.1),
+        0 0 25px rgba(99, 102, 241, 0.3) !important;
 }
 
 .stTextInput>div>div>input:focus, .stTextArea>div>div>textarea:focus {
-    border-color: rgba(99, 102, 241, 0.9) !important;
-    box-shadow: 0 0 25px rgba(99, 102, 241, 0.4) !important;
-    background: rgba(15, 23, 42, 0.85) !important;
+    border-color: rgba(99, 102, 241, 1) !important;
+    box-shadow: 
+        0 0 0 4px rgba(99, 102, 241, 0.3),
+        0 0 40px rgba(99, 102, 241, 0.6),
+        inset 0 2px 4px rgba(0, 0, 0, 0.3),
+        0 4px 12px rgba(99, 102, 241, 0.4) !important;
+    outline: none !important;
+    transform: scale(1.01);
+    background: rgba(30, 41, 59, 1) !important;
 }
 
-/* Enhanced button styling */
+/* Enhanced button styling - Primary Button */
 .stButton>button {
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%) !important;
     background-size: 200% 200% !important;
-    animation: buttonGradient 3s ease infinite !important;
+    animation: buttonGradient 4s ease infinite !important;
     color: #ffffff !important;
-    border: none !important;
-    border-radius: 12px !important;
-    padding: 0.85rem 2rem !important;
-    font-weight: 700 !important;
-    font-size: 1.05rem !important;
-    letter-spacing: 0.5px !important;
-    box-shadow: 0 10px 35px rgba(99, 102, 241, 0.5), 
-                0 0 20px rgba(139, 92, 246, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 16px !important;
+    padding: 1rem 2.5rem !important;
+    font-weight: 800 !important;
+    font-size: 1.15rem !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    box-shadow: 
+        0 10px 30px rgba(99, 102, 241, 0.6),
+        0 4px 15px rgba(139, 92, 246, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
     position: relative !important;
     overflow: hidden !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .stButton>button::before {
@@ -118,44 +489,72 @@ section[data-testid="stSidebar"] {
 }
 
 .stButton>button:hover {
-    transform: translateY(-3px) scale(1.03) !important;
-    box-shadow: 0 15px 50px rgba(99, 102, 241, 0.7),
-                0 0 30px rgba(139, 92, 246, 0.5),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    transform: translateY(-4px) scale(1.05) !important;
+    box-shadow: 
+        0 20px 60px rgba(99, 102, 241, 0.8),
+        0 8px 25px rgba(139, 92, 246, 0.6),
+        0 0 40px rgba(236, 72, 153, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
 .stButton>button:active {
-    transform: translateY(-1px) scale(1.01) !important;
-    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 
+        0 8px 25px rgba(99, 102, 241, 0.7),
+        0 4px 15px rgba(139, 92, 246, 0.5),
+        inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Secondary button style for navigation */
+/* Secondary button style (Clear button) */
 button[kind="secondary"] {
-    background: rgba(15, 23, 42, 0.8) !important;
+    background: rgba(15, 23, 42, 0.9) !important;
+    backdrop-filter: blur(10px) !important;
     border: 2px solid rgba(99, 102, 241, 0.4) !important;
     color: var(--text-light) !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+    border-radius: 16px !important;
+    padding: 1rem 2rem !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+    box-shadow: 
+        0 6px 20px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 button[kind="secondary"]:hover {
-    background: rgba(15, 23, 42, 0.95) !important;
+    background: rgba(15, 23, 42, 1) !important;
     border-color: rgba(99, 102, 241, 0.7) !important;
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3) !important;
+    box-shadow: 
+        0 10px 30px rgba(99, 102, 241, 0.4),
+        0 4px 15px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    transform: translateY(-2px) scale(1.02);
+}
+
+button[kind="secondary"]:active {
+    transform: translateY(0) scale(0.98);
 }
 
 .hero-title {
-    font-size: 3.5rem;
+    font-size: clamp(2.5rem, 5vw, 4rem);
     font-weight: 900;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899, #f59e0b);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 25%, #ec4899 50%, #f59e0b 75%, #6366f1 100%);
     background-size: 300% 300%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: titleGradient 5s ease infinite;
+    animation: titleGradient 6s ease infinite;
     text-align: center;
-    margin: 0.5rem 0 1rem 0;
-    line-height: 1.2;
-    text-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
+    margin: 1rem 0 1.5rem 0;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.4));
+    position: relative;
+    padding: 0 1rem;
 }
 
 @keyframes titleGradient {
@@ -165,21 +564,135 @@ button[kind="secondary"]:hover {
 }
 
 .hero-subtitle {
-    font-size: 1.3rem;
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
     text-align: center;
-    color: rgba(248, 250, 252, 0.8);
-    margin-bottom: 1.5rem;
-    font-weight: 300;
+    color: rgba(248, 250, 252, 0.85);
+    margin-bottom: 2.5rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 1.6;
+    padding: 0 2rem;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .content-card {
-    background: rgba(15, 23, 42, 0.7);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 2rem;
-    margin: 1.5rem 0;
+    background: linear-gradient(135deg, 
+        rgba(30, 41, 59, 0.85) 0%, 
+        rgba(15, 23, 42, 0.9) 50%, 
+        rgba(30, 41, 59, 0.85) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 24px;
+    padding: 2.5rem;
+    margin: 2rem 0;
+    border: 2px solid rgba(99, 102, 241, 0.4);
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.4),
+        0 4px 16px rgba(99, 102, 241, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.content-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.content-card:hover::before {
+    left: 100%;
+}
+
+.content-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 
+        0 16px 56px rgba(0, 0, 0, 0.5),
+        0 6px 20px rgba(99, 102, 241, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    border-color: rgba(99, 102, 241, 0.6);
+}
+
+.content-card h2 {
+    color: rgba(248, 250, 252, 0.95);
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+}
+
+.content-card p {
+    color: rgba(248, 250, 252, 0.85);
+    line-height: 1.8;
+    margin-bottom: 1rem;
+    font-size: 1.05rem;
+}
+
+.content-card ul, .content-card ol {
+    color: rgba(248, 250, 252, 0.85);
+    line-height: 1.8;
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.content-card li {
+    margin-bottom: 0.75rem;
+    padding-left: 0.5rem;
+}
+
+.content-card strong {
+    color: rgba(248, 250, 252, 0.95);
+    font-weight: 600;
+}
+
+.content-card code {
+    background: rgba(99, 102, 241, 0.2);
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #a78bfa;
     border: 1px solid rgba(99, 102, 241, 0.3);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.content-card table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.content-card th {
+    background: rgba(99, 102, 241, 0.3);
+    color: rgba(248, 250, 252, 0.95);
+    font-weight: 600;
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 2px solid rgba(99, 102, 241, 0.4);
+}
+
+.content-card td {
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    color: rgba(248, 250, 252, 0.85);
+}
+
+.content-card tr:hover {
+    background: rgba(99, 102, 241, 0.1);
 }
 
 .verdict-section {
@@ -386,6 +899,166 @@ p, span, div, li, td, th {
     color: rgba(248, 250, 252, 0.7);
     text-align: center;
     font-style: italic;
+}
+
+/* Responsive Design - Stunning on All Screens */
+@media (max-width: 1200px) {
+    .main .block-container {
+        max-width: 95% !important;
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+    }
+    
+    .top-navbar {
+        padding: 1.25rem 2.5rem !important;
+    }
+    
+    .nav-btn-html {
+        min-width: 110px !important;
+        padding: 0.65rem 1.5rem !important;
+        font-size: 0.9rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .top-navbar {
+        padding: 1rem 1.5rem !important;
+        flex-direction: column !important;
+        gap: 1rem !important;
+        align-items: flex-start !important;
+    }
+    
+    .nav-brand {
+        width: 100% !important;
+        gap: 0.75rem !important;
+    }
+    
+    .logo-container {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .logo-icon {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .nav-buttons-container {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+        gap: 0.75rem !important;
+    }
+    
+    .nav-btn-html {
+        min-width: 100px !important;
+        padding: 0.6rem 1rem !important;
+        font-size: 0.85rem !important;
+        gap: 0.4rem !important;
+    }
+    
+    .nav-icon {
+        width: 18px !important;
+        height: 18px !important;
+    }
+    
+    .nav-logo {
+        font-size: 1.8rem !important;
+    }
+    
+    .nav-tagline {
+        font-size: 0.8rem !important;
+    }
+    
+    .hero-title {
+        font-size: 2rem !important;
+        margin: 0.75rem 0 1rem 0 !important;
+        padding: 0 0.5rem !important;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem !important;
+        padding: 0 1rem !important;
+        margin-bottom: 2rem !important;
+    }
+    
+    .main .block-container {
+        padding-top: 8rem !important;
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+    }
+    
+    div[data-testid="stForm"] {
+        padding: 1.5rem !important;
+        margin: 1rem 0 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .top-navbar {
+        padding: 0.875rem 1rem !important;
+    }
+    
+    .logo-container {
+        width: 36px !important;
+        height: 36px !important;
+    }
+    
+    .logo-icon {
+        width: 36px !important;
+        height: 36px !important;
+    }
+    
+    .nav-btn-html {
+        min-width: 90px !important;
+        padding: 0.5rem 0.875rem !important;
+        font-size: 0.8rem !important;
+        gap: 0.35rem !important;
+    }
+    
+    .nav-icon {
+        width: 16px !important;
+        height: 16px !important;
+    }
+    
+    .nav-logo {
+        font-size: 1.5rem !important;
+    }
+    
+    .content-card {
+        padding: 1.5rem !important;
+        margin: 1.5rem 0 !important;
+    }
+    
+    .content-card h2 {
+        font-size: 1.5rem !important;
+    }
+    
+    .content-card p, .content-card li {
+        font-size: 1rem !important;
+    }
+    
+    .hero-title {
+        font-size: 1.75rem !important;
+    }
+    
+    .main .block-container {
+        padding-top: 9rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* Ensure proper text rendering */
+body, .stApp {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 </style>
 """

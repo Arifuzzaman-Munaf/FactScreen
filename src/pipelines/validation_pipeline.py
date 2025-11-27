@@ -222,9 +222,9 @@ async def analyze_detailed(req: AnalyzeRequest) -> AnalyzeResponseDetailed:
         seen.add(provider_name)
         providers.append(
             ProviderRating(
-                provider=provider_name,
-                rating=h.get("rating"),
-                label=h.get("verdict"),
+            provider=provider_name,
+            rating=h.get("rating"),
+            label=h.get("verdict"),
             )
         )
 

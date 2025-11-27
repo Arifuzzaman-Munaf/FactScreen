@@ -18,7 +18,7 @@ def render_about_page() -> None:
     st.markdown(
         """
         <div class="hero-title">
-            About FactScreen
+            ℹ️ About FactScreen
         </div>
         """,
         unsafe_allow_html=True,
@@ -27,20 +27,9 @@ def render_about_page() -> None:
     st.markdown(
         """
         <div class="content-card">
-            <h2>Product Information</h2>
-            <p><strong>Product Name:</strong> FactScreen: AI-Powered Fake News and Misinformation Classification System</p>
-            <p><strong>Version:</strong> 1.0 (API Name: FactScreen API)</p>
-            <p><strong>Prepared By:</strong> Md. Arifuzzaman Munaf (Torrens University)</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    
-    st.markdown(
-        """
-        <div class="content-card">
-            <h2>Our Purpose</h2>
-            <p>FactScreen is a standalone, web-based application designed to combat the rapid spread of false or misleading digital information. It automates the detection, verification, and explanation of misinformation circulating online.</p>
+            <h2>Product Name & Purpose</h2>
+            <p><strong>FactScreen: AI-Powered Fake News and Misinformation Classification System.</strong></p>
+            <p>FactScreen is a standalone, web-based application designed to combat the rapid spread of false or misleading digital information. It functions as a core verification engine for classifying and explaining the authenticity of claims extracted from text and URLs.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -50,12 +39,12 @@ def render_about_page() -> None:
         """
         <div class="content-card">
             <h2>Primary Objectives</h2>
-            <p>Our system is built to achieve the following goals:</p>
+            <p>The system's architecture is structured to deliver four core goals:</p>
             <ul>
-                <li><strong>Automate Verification:</strong> Identify and verify online claims in real-time</li>
-                <li><strong>Improve Trust:</strong> Provide transparency through evidence-driven, explainable summary reports</li>
-                <li><strong>Reduce Workload:</strong> Reduce manual fact-checking effort for journalists and moderators</li>
-                <li><strong>Support Literacy:</strong> Provide an accessible tool to support public digital literacy</li>
+                <li><strong>Automate Verification:</strong> Identify and verify online claims in real-time.</li>
+                <li><strong>Improve Trust:</strong> Provide transparency through evidence-driven, explainable summary reports.</li>
+                <li><strong>Accessibility:</strong> Support public digital literacy by providing an accessible, web-based verification tool.</li>
+                <li><strong>Accuracy:</strong> Maintain high precision through multi-source verification and advanced Natural Language Processing (NLP).</li>
             </ul>
         </div>
         """,
@@ -65,13 +54,25 @@ def render_about_page() -> None:
     st.markdown(
         """
         <div class="content-card">
-            <h2>How It Works (Technology)</h2>
-            <p>FactScreen employs a modern, multi-layered architecture that uses the following core technologies for classification and reasoning:</p>
+            <h2>Core Technology Stack</h2>
+            <p>FactScreen utilizes a multi-layered, asynchronous architecture built on FastAPI:</p>
             <ul>
-                <li><strong>Source Integration (Data Layer):</strong> Aggregates data from multiple external authoritative fact-checking repositories, including the <strong>Google Fact Check Tool</strong> and the <strong>RapidAPI Fact-Checker</strong></li>
-                <li><strong>Filtering & Classification (AI/ML):</strong> Uses the <strong><code>all-MiniLM-L6-v2</code></strong> model for semantic similarity filtering, and the <strong><code>facebook/bart-large-mnli</code></strong> model for final claim classification</li>
-                <li><strong>Explainability (LLM):</strong> Employs the <strong>Gemini 2.5 Flash</strong> Large Language Model (LLM) to generate human-readable explanations and reasoning summaries for the final verdict</li>
+                <li><strong>Data Sourcing & Integration:</strong> Aggregates and standardizes data retrieved from multiple authoritative external APIs, including the <strong>Google Fact Check Tool</strong> and the <strong>RapidAPI Fact-Checker</strong>.</li>
+                <li><strong>Semantic Filtering:</strong> The <strong><code>all-MiniLM-L6-v2</code></strong> model calculates the semantic similarity score to retain only the most relevant records against the user query.</li>
+                <li><strong>AI Classification:</strong> The <strong><code>facebook/bart-large-mnli</code></strong> transformer model is applied to predict the final verdict label.</li>
+                <li><strong>Explainability Service:</strong> The <strong>Gemini 2.5 Flash</strong> Large Language Model (LLM) is used exclusively to generate the human-readable reasoning and evidence summaries for the verdict.</li>
             </ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    
+    st.markdown(
+        """
+        <div class="content-card">
+            <h2>Project Details</h2>
+            <p><strong>Version:</strong> 1.0</p>
+            <p><strong>Prepared by:</strong> Md. Arifuzzaman Munaf</p>
         </div>
         """,
         unsafe_allow_html=True,

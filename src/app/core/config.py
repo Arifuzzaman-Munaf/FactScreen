@@ -33,8 +33,8 @@ class Settings(BaseSettings):
 
     # RapidAPI Fact Checker settings
     fact_checker_api_key: str = Field(default="", alias="FACT_CHECKER_API_KEY")
-    fact_checker_url: str = Field(default="fact-checker.p.rapidapi.com", alias="FACT_CHECKER_URL")
-    fact_checker_endpoint: str = Field(default="search", alias="FACT_CHECKER_ENDPOINT")
+    fact_checker_url: str = Field(default="fact-checker.p.rapidapi.com", alias="FACT_CHECKER_URL")             
+    fact_checker_endpoint: str = Field(default="search", alias="FACT_CHECKER_ENDPOINT")   
     fact_checker_host: str = Field(default="fact-checker.p.rapidapi.com", alias="FACT_CHECKER_HOST")
 
     # ML Model settings

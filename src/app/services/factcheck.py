@@ -148,15 +148,15 @@ async def aggregate_results(
         explanation = gemini_explanation
         sources_for_explanation = list(sources or [])
     else:
-        # Confidence: agreement ratio, boosted if explicit ratings present
+    # Confidence: agreement ratio, boosted if explicit ratings present
         # If explicit label found from any provider, set high confidence;
         # otherwise use agreement ratio
-        total = len(provider_results) if provider_results else 1
-        if explicit_final is not None:
-            confidence = 0.9
-        else:
-            agreement = (votes[final] / total) if total else 0.0
-            confidence = max(0.0, min(1.0, agreement))
+    total = len(provider_results) if provider_results else 1
+    if explicit_final is not None:
+        confidence = 0.9
+    else:
+        agreement = (votes[final] / total) if total else 0.0
+        confidence = max(0.0, min(1.0, agreement))
 
         # If no explanation generated yet, create one from sources
         if not explanation and sources:
@@ -217,14 +217,14 @@ def _normalize_label(raw: str) -> Label:
     if any(
         k in r
         for k in [
-            "true",
-            "mostly true",
-            "accurate",
-            "correct",
-            "supported",
-            "verified",
-            "substantiated",
-            "well-supported",
+        "true",
+        "mostly true",
+        "accurate",
+        "correct",
+        "supported",
+        "verified",
+        "substantiated",
+        "well-supported",
         ]
     ):
         return "True"
@@ -232,18 +232,18 @@ def _normalize_label(raw: str) -> Label:
     if any(
         k in r
         for k in [
-            "false",
-            "mostly false",
-            "inaccurate",
-            "incorrect",
-            "fake",
-            "pants",
-            "misleading",
-            "partly false",
-            "unsupported",
-            "no evidence",
-            "not supported",
-            "debunked",
+        "false",
+        "mostly false",
+        "inaccurate",
+        "incorrect",
+        "fake",
+        "pants",
+        "misleading",
+        "partly false",
+        "unsupported",
+        "no evidence",
+        "not supported",
+        "debunked",
         ]
     ):
         return "False"
@@ -295,12 +295,12 @@ async def _google(query: str) -> List[NormalizedHit]:
             )
             hits.append(
                 {
-                    "provider": "google_factcheck",
-                    "rating": verdict_raw,
-                    "verdict": _normalize_label(verdict_raw or ""),
-                    "snippet": rev.get("title") or c.get("text") or "",
-                    "source": (rev.get("publisher") or {}).get("name") or "Google Fact Check",
-                    "url": rev.get("url"),
+                "provider": "google_factcheck",
+                "rating": verdict_raw,
+                "verdict": _normalize_label(verdict_raw or ""),
+                "snippet": rev.get("title") or c.get("text") or "",
+                "source": (rev.get("publisher") or {}).get("name") or "Google Fact Check",
+                "url": rev.get("url"),
                 }
             )
     return hits[:5]
@@ -337,12 +337,12 @@ async def _rapid(query: str) -> List[NormalizedHit]:
         raw = it.get("verdict") or it.get("label") or it.get("rating") or it.get("textualRating")
         hits.append(
             {
-                "provider": "rapidapi_fact_checker",
-                "rating": raw,
-                "verdict": _normalize_label(raw or ""),
-                "snippet": it.get("summary") or it.get("title") or "",
-                "source": it.get("source") or "RapidAPI Fact Checker",
-                "url": it.get("url") or it.get("link"),
+            "provider": "rapidapi_fact_checker",
+            "rating": raw,
+            "verdict": _normalize_label(raw or ""),
+            "snippet": it.get("summary") or it.get("title") or "",
+            "source": it.get("source") or "RapidAPI Fact Checker",
+            "url": it.get("url") or it.get("link"),
             }
         )
     return hits
