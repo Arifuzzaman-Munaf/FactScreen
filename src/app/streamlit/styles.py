@@ -298,152 +298,125 @@ html, body {
     justify-content: flex-end !important;
 }
 
-/* Style Streamlit buttons in navbar to match nav-btn-html */
+/* Style Streamlit buttons in navbar - formal & classic */
 .nav-buttons-wrapper .stButton > button,
-.nav-buttons-container .stButton > button {
-    background: rgba(99, 102, 241, 0.15) !important;
-    border: 2px solid rgba(99, 102, 241, 0.4) !important;
-    color: rgba(248, 250, 252, 0.9) !important;
-    border-radius: 12px !important;
-    padding: 0.75rem 1.5rem !important;
-    font-weight: 700 !important;
-    font-size: 0.95rem !important;
-    letter-spacing: 0.5px !important;
+.nav-buttons-container .stButton > button,
+.top-navbar .stButton > button {
+    background: rgba(13, 18, 32, 0.85) !important;
+    border: 1px solid rgba(226, 232, 240, 0.35) !important;
+    color: #e2e8f0 !important;
+    border-radius: 6px !important;
+    padding: 0.6rem 1.2rem !important;
+    font-family: "Segoe UI", "Helvetica Neue", sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 0.92rem !important;
+    letter-spacing: 0.08em !important;
     text-transform: uppercase !important;
-    min-width: 130px !important;
+    min-width: 120px !important;
     position: relative !important;
     overflow: hidden !important;
-    box-shadow: 
-        0 4px 15px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: none !important;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease !important;
     width: 100% !important;
     height: auto !important;
 }
 
 .nav-buttons-wrapper .stButton > button::before,
-.nav-buttons-container .stButton > button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-}
-
-.nav-buttons-wrapper .stButton > button:hover::before,
-.nav-buttons-container .stButton > button:hover::before {
-    left: 100%;
+.nav-buttons-container .stButton > button::before,
+.top-navbar .stButton > button::before {
+    display: none !important;
 }
 
 .nav-buttons-wrapper .stButton > button:hover,
-.nav-buttons-container .stButton > button:hover {
-    background: rgba(99, 102, 241, 0.3) !important;
-    border-color: rgba(99, 102, 241, 0.7) !important;
-    transform: translateY(-2px) scale(1.02) !important;
-    box-shadow: 
-        0 8px 25px rgba(99, 102, 241, 0.5),
-        0 0 15px rgba(139, 92, 246, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+.nav-buttons-container .stButton > button:hover,
+.top-navbar .stButton > button:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(248, 250, 252, 0.65) !important;
     color: #ffffff !important;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
-/* Active state for navbar buttons */
+/* Active / Focus state */
 .nav-buttons-wrapper .stButton > button.nav-active,
 .nav-buttons-container .stButton > button.nav-active,
-.nav-buttons-wrapper .stButton > button[kind="primary"],
-.nav-buttons-container .stButton > button[kind="primary"],
 .nav-buttons-wrapper .stButton > button:focus,
-.nav-buttons-container .stButton > button:focus {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%) !important;
-    border-color: #8b5cf6 !important;
-    color: #ffffff !important;
-    box-shadow: 
-        0 8px 30px rgba(99, 102, 241, 0.6),
-        0 0 20px rgba(139, 92, 246, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-    transform: translateY(-1px) !important;
-    animation: buttonPulse 2s ease-in-out infinite !important;
+.nav-buttons-container .stButton > button:focus,
+.top-navbar .stButton > button:focus {
+    background: #ffffff !important;
+    border-color: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    transform: none !important;
+    animation: none !important;
+    font-weight: 600 !important;
 }
 
-/* Stunning Navigation Buttons */
+/* Custom HTML buttons (if used) */
 .nav-btn-html {
-    background: rgba(99, 102, 241, 0.15) !important;
-    border: 2px solid rgba(99, 102, 241, 0.4) !important;
-    color: rgba(248, 250, 252, 0.9) !important;
-    border-radius: 12px !important;
-    padding: 0.75rem 1.5rem !important;
-    font-weight: 700 !important;
-    font-size: 0.95rem !important;
-    cursor: pointer !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    letter-spacing: 0.5px !important;
+    background: rgba(13, 18, 32, 0.85) !important;
+    border: 1px solid rgba(226, 232, 240, 0.35) !important;
+    color: #e2e8f0 !important;
+    border-radius: 6px !important;
+    padding: 0.6rem 1.2rem !important;
+    font-family: "Segoe UI", "Helvetica Neue", sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 0.92rem !important;
+    letter-spacing: 0.08em !important;
     text-transform: uppercase !important;
-    min-width: 130px !important;
+    min-width: 120px !important;
+    cursor: pointer !important;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease !important;
     position: relative !important;
     overflow: hidden !important;
-    box-shadow: 
-        0 4px 15px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 0.5rem !important;
-}
-
-.nav-icon {
-    width: 20px;
-    height: 20px;
-    stroke-width: 2;
-    transition: transform 0.3s ease;
-}
-
-.nav-btn-html:hover .nav-icon {
-    transform: scale(1.1);
-}
-
-.nav-btn-html.active .nav-icon {
-    transform: scale(1.15);
-}
-
-.nav-btn-html::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-}
-
-.nav-btn-html:hover::before {
-    left: 100%;
+    gap: 0.6rem !important;
 }
 
 .nav-btn-html:hover {
-    background: rgba(99, 102, 241, 0.3) !important;
-    border-color: rgba(99, 102, 241, 0.7) !important;
-    transform: translateY(-2px) scale(1.02) !important;
-    box-shadow: 
-        0 8px 25px rgba(99, 102, 241, 0.5),
-        0 0 15px rgba(139, 92, 246, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(248, 250, 252, 0.65) !important;
     color: #ffffff !important;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 .nav-btn-html.active {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%) !important;
-    border-color: #8b5cf6 !important;
-    color: #ffffff !important;
-    box-shadow: 
-        0 8px 30px rgba(99, 102, 241, 0.6),
-        0 0 20px rgba(139, 92, 246, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-    transform: translateY(-1px) !important;
-    animation: buttonPulse 2s ease-in-out infinite !important;
+    background: #ffffff !important;
+    border-color: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    transform: none !important;
+    animation: none !important;
+    font-weight: 600 !important;
+}
+
+.nav-btn-html::before {
+    display: none !important;
+}
+
+.nav-icon-svg {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.6rem;
+}
+
+.nav-icon-svg svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
+.nav-label-text {
+    letter-spacing: 0.08em;
 }
 
 @keyframes buttonPulse {

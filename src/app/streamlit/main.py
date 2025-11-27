@@ -80,17 +80,17 @@ with nav_col_buttons:
     btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 1], gap="small")
     
     with btn_col1:
-        if st.button("🏠 HOME", key="nav_home", use_container_width=True):
+        if st.button("HOME", key="nav_home", use_container_width=True):
             st.session_state.page = "home"
             st.rerun()
     
     with btn_col2:
-        if st.button("ℹ️ ABOUT", key="nav_about", use_container_width=True):
+        if st.button("ABOUT", key="nav_about", use_container_width=True):
             st.session_state.page = "about"
             st.rerun()
     
     with btn_col3:
-        if st.button("❓ HELP", key="nav_help", use_container_width=True):
+        if st.button("HELP", key="nav_help", use_container_width=True):
             st.session_state.page = "help"
             st.rerun()
 
@@ -99,6 +99,37 @@ st.markdown(
     """
     <script>
         (function() {
+            const icons = {
+                'HOME': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 4l9 6.5" /><path d="M5.5 9.5V20h13V9.5" /><path d="M9.5 20v-5.25h5V20" /></svg>',
+                'ABOUT': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>',
+                'HELP': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M9.75 9a2.25 2.25 0 1 1 3.5 1.85c-.75.5-1.25 1.1-1.25 2.15v.25" /><path d="M12 17h.01" /></svg>'
+            };
+            
+            function addIconsToButtons() {
+                const buttons = Array.from(document.querySelectorAll('.top-navbar .stButton > button'));
+                buttons.forEach(button => {
+                    if (button.dataset.iconApplied === 'true') return;
+                    const originalText = button.textContent.trim();
+                    const lookupKey = originalText.toUpperCase();
+                    const iconMarkup = icons[lookupKey];
+                    if (!iconMarkup) return;
+                    
+                    const iconSpan = document.createElement('span');
+                    iconSpan.className = 'nav-icon-svg';
+                    iconSpan.innerHTML = iconMarkup;
+                    iconSpan.setAttribute('aria-hidden', 'true');
+                    
+                    const labelSpan = document.createElement('span');
+                    labelSpan.className = 'nav-label-text';
+                    labelSpan.textContent = originalText;
+                    
+                    button.innerHTML = '';
+                    button.appendChild(iconSpan);
+                    button.appendChild(labelSpan);
+                    button.dataset.iconApplied = 'true';
+                });
+            }
+            
             // Wrap the navbar columns in styled container
             function wrapNavbar() {
                 // Find all column containers
@@ -157,6 +188,7 @@ st.markdown(
             function initNavbar() {
                 wrapNavbar();
                 updateActiveButton();
+                addIconsToButtons();
             }
             
             // Run on page load
