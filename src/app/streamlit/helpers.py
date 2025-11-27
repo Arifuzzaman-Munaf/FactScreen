@@ -170,14 +170,16 @@ def render_provider_results(providers: List[Dict[str, Any]]) -> str:
         else:
             source_cell = "N/A"
         rows_html.append(
-            f"""
+            dedent(
+                f"""
                 <tr>
                     <td>{verdict}</td>
                     <td>{rating}</td>
                     <td>{summary}</td>
                     <td>{source_cell}</td>
                 </tr>
-            """
+                """
+            ).strip()
         )
     
     table_html = dedent(
@@ -193,7 +195,7 @@ def render_provider_results(providers: List[Dict[str, Any]]) -> str:
                 </tr>
             </thead>
             <tbody>
-                {rows_html}
+                {''.join(rows_html)}
             </tbody>
         </table>
     </div>

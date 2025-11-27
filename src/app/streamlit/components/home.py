@@ -167,7 +167,7 @@ def render_home_page() -> None:
                             <div class="processing-dot"></div>
                             <div class="processing-dot"></div>
                         </div>
-                        <div class="processing-text">Analyzing Claim</div>
+                        <div class="processing-text">Processing Claim</div>
                         <div class="processing-steps">Cross-referencing fact-checkers • AI classification • Generating explanation</div>
                     </div>
                 </div>

@@ -202,22 +202,20 @@ VERDICT_CSS = dedent(
 
 .stExpander {
     background: linear-gradient(135deg, 
-        rgba(30, 41, 59, 0.85) 0%, 
-        rgba(15, 23, 42, 0.9) 50%, 
-        rgba(30, 41, 59, 0.85) 100%) !important;
-    backdrop-filter: blur(15px) saturate(180%) !important;
-    border-radius: 16px !important;
-    border: 2px solid rgba(99, 102, 241, 0.4) !important;
+        rgba(30, 41, 59, 0.9) 0%, 
+        rgba(15, 23, 42, 0.95) 50%, 
+        rgba(30, 41, 59, 0.9) 100%) !important;
+    backdrop-filter: blur(22px) saturate(180%) !important;
+    border-radius: 24px !important;
+    border: 1px solid rgba(99, 102, 241, 0.45) !important;
     padding: 1rem !important;
-    margin: 1.5rem 0 !important;
-    max-width: 900px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    margin: 1.75rem auto !important;
+    max-width: 1080px !important;
     box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.3),
-        0 2px 8px rgba(99, 102, 241, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        0 18px 50px rgba(0, 0, 0, 0.45),
+        0 10px 30px rgba(76, 81, 191, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .stExpander:hover {
@@ -233,8 +231,10 @@ VERDICT_CSS = dedent(
     color: rgba(248, 250, 252, 0.95) !important;
     font-weight: 700 !important;
     font-size: 1.15rem !important;
-    padding: 0.75rem 1rem !important;
-    border-radius: 12px !important;
+    padding: 0.9rem 1.25rem !important;
+    border-radius: 16px !important;
+    background: rgba(79, 70, 229, 0.08) !important;
+    border: 1px solid rgba(148, 163, 184, 0.25) !important;
     transition: all 0.3s ease !important;
 }
 
@@ -246,6 +246,10 @@ VERDICT_CSS = dedent(
 .section-heading {
     margin: 2.5rem auto 1rem auto;
     max-width: 1080px;
+    padding: 0 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .section-heading h3 {
@@ -258,11 +262,14 @@ VERDICT_CSS = dedent(
 .source-table-wrapper {
     max-width: 1080px;
     margin: 0 auto 2rem auto;
-    background: rgba(15, 23, 42, 0.8);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(17, 24, 39, 0.85));
     border: 1px solid rgba(99, 102, 241, 0.4);
-    border-radius: 16px;
+    border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.35);
+    padding: 1px;
+    box-shadow: 
+        0 25px 60px rgba(12, 17, 40, 0.65),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .source-table {
@@ -276,10 +283,11 @@ VERDICT_CSS = dedent(
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     text-align: left;
     font-size: 0.95rem;
+    background: rgba(15, 23, 42, 0.35);
 }
 
 .source-table th {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.04);
     text-transform: uppercase;
     letter-spacing: 0.2em;
     font-size: 0.8rem;
@@ -302,12 +310,17 @@ VERDICT_CSS = dedent(
 .source-table-placeholder {
     max-width: 1080px;
     margin: 0 auto 2rem auto;
-    border: 1px dashed rgba(148, 163, 184, 0.5);
-    border-radius: 16px;
-    padding: 1.5rem;
+    border-radius: 24px;
+    padding: 2rem;
     text-align: center;
-    color: rgba(248, 250, 252, 0.8);
-    font-size: 0.95rem;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.92), rgba(17, 24, 39, 0.9));
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    box-shadow: 
+        0 20px 55px rgba(12, 17, 40, 0.65),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    color: rgba(248, 250, 252, 0.85);
+    font-size: 1rem;
+    letter-spacing: 0.05em;
 }
 
 .explain-placeholder {
