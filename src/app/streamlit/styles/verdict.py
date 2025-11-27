@@ -262,39 +262,64 @@ VERDICT_CSS = dedent(
 .source-table-wrapper {
     max-width: 1080px;
     margin: 0 auto 2rem auto;
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(17, 24, 39, 0.85));
-    border: 1px solid rgba(99, 102, 241, 0.4);
+    padding: 1.5px;
     border-radius: 24px;
-    overflow: hidden;
-    padding: 1px;
-    box-shadow: 
-        0 25px 60px rgba(12, 17, 40, 0.65),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    background: linear-gradient(135deg, rgba(12, 19, 42, 0.95), rgba(5, 9, 28, 0.85));
+    box-shadow: 0 24px 55px rgba(5, 8, 25, 0.6);
 }
 
 .source-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0 14px;
 }
 
-.source-table th,
-.source-table td {
-    padding: 1rem 1.2rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    text-align: left;
-    font-size: 0.95rem;
-    background: rgba(15, 23, 42, 0.35);
-}
-
-.source-table th {
-    background: rgba(255, 255, 255, 0.04);
+.source-table thead th {
+    padding: 1rem 1.4rem;
     text-transform: uppercase;
-    letter-spacing: 0.2em;
-    font-size: 0.8rem;
+    letter-spacing: 0.22em;
+    font-size: 0.78rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.source-table tbody tr:last-child td {
-    border-bottom: none;
+.source-table thead th:first-child {
+    border-top-left-radius: 18px;
+    border-bottom-left-radius: 18px;
+}
+
+.source-table thead th:last-child {
+    border-right: none;
+    border-top-right-radius: 18px;
+    border-bottom-right-radius: 18px;
+}
+
+.source-table tbody tr {
+    background: linear-gradient(120deg, rgba(18, 25, 58, 0.8), rgba(7, 10, 30, 0.95));
+    border-radius: 24px;
+    box-shadow: 0 15px 40px rgba(4, 6, 20, 0.55);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.source-table tbody tr:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 22px 44px rgba(4, 6, 20, 0.65);
+}
+
+.source-table tbody td {
+    padding: 1.25rem 1.4rem;
+    border: none;
+}
+
+.source-table tbody tr td:first-child {
+    border-top-left-radius: 24px;
+    border-bottom-left-radius: 24px;
+}
+
+.source-table tbody tr td:last-child {
+    border-top-right-radius: 24px;
+    border-bottom-right-radius: 24px;
 }
 
 .source-table a {
@@ -305,6 +330,72 @@ VERDICT_CSS = dedent(
 
 .source-table a:hover {
     text-decoration: underline;
+}
+
+.rating-pill {
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.4rem 1.1rem;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.85rem;
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.rating-pill[data-rating="true"] {
+    background: linear-gradient(120deg, rgba(16, 185, 129, 0.2), rgba(5, 46, 22, 0.55));
+    color: #bbf7d0;
+}
+
+.rating-pill[data-rating="false"],
+.rating-pill[data-rating="false or misleading"],
+.rating-pill[data-rating="misleading"] {
+    background: linear-gradient(120deg, rgba(239, 68, 68, 0.25), rgba(67, 12, 23, 0.6));
+    color: #fecaca;
+}
+
+.rating-pill[data-rating="unclear"],
+.rating-pill[data-rating="unknown"] {
+    background: linear-gradient(120deg, rgba(234, 179, 8, 0.2), rgba(70, 41, 3, 0.45));
+    color: #fde68a;
+}
+
+.summary-cell {
+    color: rgba(248, 250, 252, 0.92);
+    line-height: 1.75;
+    font-size: 1rem;
+}
+
+.source-cell {
+    text-align: right;
+    width: 160px;
+}
+
+.source-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(79, 70, 229, 0.45));
+    color: #ede9fe !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.2s ease;
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25);
+}
+
+.source-link::after {
+    content: '↗';
+    font-size: 0.85rem;
+}
+
+.source-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(79, 70, 229, 0.35);
+    text-decoration: none;
 }
 
 .source-table-placeholder {
@@ -343,9 +434,9 @@ VERDICT_CSS = dedent(
     text-transform: uppercase;
 }
 
-.sources-list ol {
-    list-style: decimal;
-    padding-left: 1.25rem;
+.sources-list ul {
+    list-style: none;
+    padding-left: 0;
     margin: 0;
 }
 
@@ -356,10 +447,6 @@ VERDICT_CSS = dedent(
 
 .sources-list li:last-child {
     border-bottom: none;
-}
-
-.source-title {
-    font-weight: 600;
 }
 
 h1, h2, h3 {

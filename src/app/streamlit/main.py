@@ -99,118 +99,93 @@ st.markdown(
     """
     <script>
         (function() {
+            const currentPage = '""" + st.session_state.page + """';
             const icons = {
                 'HOME': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 4l9 6.5" /><path d="M5.5 9.5V20h13V9.5" /><path d="M9.5 20v-5.25h5V20" /></svg>',
                 'ABOUT': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>',
                 'HELP': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M9.75 9a2.25 2.25 0 1 1 3.5 1.85c-.75.5-1.25 1.1-1.25 2.15v.25" /><path d="M12 17h.01" /></svg>'
             };
-            
+
+            if (window.factScreenNavbarReady) {
+                window.factScreenSetActive && window.factScreenSetActive(currentPage);
+                return;
+            }
+
             function addIconsToButtons() {
                 const buttons = Array.from(document.querySelectorAll('.top-navbar .stButton > button'));
                 buttons.forEach(button => {
                     if (button.dataset.iconApplied === 'true') return;
                     const originalText = button.textContent.trim();
-                    const lookupKey = originalText.toUpperCase();
-                    const iconMarkup = icons[lookupKey];
+                    const iconMarkup = icons[originalText.toUpperCase()];
                     if (!iconMarkup) return;
-                    
+
                     const iconSpan = document.createElement('span');
                     iconSpan.className = 'nav-icon-svg';
                     iconSpan.innerHTML = iconMarkup;
                     iconSpan.setAttribute('aria-hidden', 'true');
-                    
+
                     const labelSpan = document.createElement('span');
                     labelSpan.className = 'nav-label-text';
                     labelSpan.textContent = originalText;
-                    
+
                     button.innerHTML = '';
                     button.appendChild(iconSpan);
                     button.appendChild(labelSpan);
                     button.dataset.iconApplied = 'true';
                 });
             }
-            
-            // Wrap the navbar columns in styled container
+
             function wrapNavbar() {
-                // Find all column containers
                 const allColContainers = Array.from(document.querySelectorAll('[data-testid="column-container"]'));
                 if (allColContainers.length < 2) return false;
-                
-                // Check if already wrapped
-                const existingNavbar = document.querySelector('.top-navbar');
-                if (existingNavbar) return true;
-                
-                // Get the first column container (should contain brand, spacer, buttons)
+
+                if (document.querySelector('.top-navbar')) return true;
+
                 const firstColContainer = allColContainers[0];
                 if (!firstColContainer) return false;
-                
-                // Create navbar wrapper
+
                 const navbar = document.createElement('div');
                 navbar.className = 'top-navbar';
-                
-                // Get parent of column container
                 const parent = firstColContainer.parentElement;
-                
-                // Clone and move the column container into navbar
                 navbar.appendChild(firstColContainer.cloneNode(true));
-                
-                // Insert navbar before the first column container
                 parent.insertBefore(navbar, firstColContainer);
-                
-                // Hide original (keep it for Streamlit functionality)
                 firstColContainer.style.position = 'absolute';
                 firstColContainer.style.opacity = '0';
                 firstColContainer.style.pointerEvents = 'none';
-                
                 return true;
             }
-            
-            // Function to update active button styling
-            function updateActiveButton() {
-                const currentPage = '""" + st.session_state.page + """';
+
+            function setActiveButton(page) {
                 const allButtons = Array.from(document.querySelectorAll('.top-navbar .stButton > button, button[key*="nav_"]'));
-                
                 allButtons.forEach(button => {
                     const buttonText = button.textContent.trim().toUpperCase();
-                    button.classList.remove('nav-active');
-                    
-                    if (currentPage === 'home' && buttonText.includes('HOME')) {
-                        button.classList.add('nav-active');
-                    } else if (currentPage === 'about' && buttonText.includes('ABOUT')) {
-                        button.classList.add('nav-active');
-                    } else if (currentPage === 'help' && buttonText.includes('HELP')) {
-                        button.classList.add('nav-active');
+                    button.classList.toggle('nav-active',
+                        (page === 'home' && buttonText.includes('HOME')) ||
+                        (page === 'about' && buttonText.includes('ABOUT')) ||
+                        (page === 'help' && buttonText.includes('HELP'))
+                    );
+                });
+            }
+
+            window.factScreenSetActive = setActiveButton;
+
+            function initializeNavbar(attempt = 0) {
+                if (window.factScreenNavbarReady) {
+                    setActiveButton(currentPage);
+                    return;
+                }
+                if (!wrapNavbar()) {
+                    if (attempt < 5) {
+                        requestAnimationFrame(() => initializeNavbar(attempt + 1));
                     }
-                });
-            }
-            
-            // Initialize navbar
-            function initNavbar() {
-                wrapNavbar();
-                updateActiveButton();
+                    return;
+                }
                 addIconsToButtons();
+                window.factScreenNavbarReady = true;
+                setActiveButton(currentPage);
             }
-            
-            // Run on page load
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', function() {
-                    initNavbar();
-                    setTimeout(initNavbar, 100);
-                    setTimeout(initNavbar, 500);
-                });
-            } else {
-                initNavbar();
-                setTimeout(initNavbar, 100);
-                setTimeout(initNavbar, 500);
-                setTimeout(initNavbar, 1000);
-            }
-            
-            // Watch for DOM changes
-            const observer = new MutationObserver(function() {
-                initNavbar();
-            });
-            observer.observe(document.body, { childList: true, subtree: true });
-            setTimeout(() => observer.disconnect(), 5000);
+
+            initializeNavbar();
         })();
     </script>
     """,

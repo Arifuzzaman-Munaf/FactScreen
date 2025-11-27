@@ -108,8 +108,8 @@ def render_provider_results(providers: List[Dict[str, Any]]) -> str:
         ).strip()
 
     # Prepare table data with deduplication
-    # Deduplicate based on verdict, rating, and summary (same content = duplicate)
-    seen_verdicts = {}  # key: (verdict, rating, summary_normalized) -> row_data
+    # Deduplicate based on rating and summary (same content = duplicate)
+    seen_entries = {}  # key: (rating, summary_normalized) -> row_data
     
     for pr in providers:
         verdict = pr.get("verdict", "unknown").title()
@@ -120,8 +120,8 @@ def render_provider_results(providers: List[Dict[str, Any]]) -> str:
         # Normalize summary for deduplication (lowercase, strip whitespace)
         summary_normalized = title.lower().strip()
         
-        # Create a key for deduplication based on verdict, rating, and summary
-        dedup_key = (verdict, str(rating), summary_normalized)
+        # Create a key for deduplication based on rating and summary
+        dedup_key = (str(rating), summary_normalized)
         
         # Truncate long titles for table display
         display_title = title[:97] + "..." if len(title) > 100 else title
@@ -132,10 +132,9 @@ def render_provider_results(providers: List[Dict[str, Any]]) -> str:
         else:
             source_value = "N/A"
         
-        if dedup_key not in seen_verdicts:
+        if dedup_key not in seen_entries:
             # First occurrence - store the data
-            seen_verdicts[dedup_key] = {
-                "Verdict": verdict,
+            seen_entries[dedup_key] = {
                 "Rating": str(rating),
                 "Summary": display_title,
                 "Source": source_value
@@ -143,12 +142,12 @@ def render_provider_results(providers: List[Dict[str, Any]]) -> str:
         else:
             # Duplicate found - keep first occurrence (already stored)
             # If this one has a valid URL and the stored one doesn't, update it
-            existing = seen_verdicts[dedup_key]
+            existing = seen_entries[dedup_key]
             if source_value != "N/A" and existing["Source"] == "N/A":
                 existing["Source"] = source_value
     
     # Convert to list for DataFrame
-    table_data = list(seen_verdicts.values())
+    table_data = list(seen_entries.values())
     
     if not table_data:
         return dedent(
@@ -161,22 +160,23 @@ def render_provider_results(providers: List[Dict[str, Any]]) -> str:
     
     rows_html = []
     for row in table_data:
-        verdict = html.escape(row["Verdict"])
         rating = html.escape(row["Rating"])
         summary = html.escape(row["Summary"])
         source = row["Source"]
         if source != "N/A" and source.startswith("http"):
-            source_cell = f'<a href="{html.escape(source)}" target="_blank" rel="noopener">Visit Source</a>'
+            source_cell = (
+                f'<a class="source-link" href="{html.escape(source)}" '
+                f'target="_blank" rel="noopener">Visit Source</a>'
+            )
         else:
             source_cell = "N/A"
         rows_html.append(
             dedent(
                 f"""
                 <tr>
-                    <td>{verdict}</td>
-                    <td>{rating}</td>
-                    <td>{summary}</td>
-                    <td>{source_cell}</td>
+                    <td class="rating-pill" data-rating="{rating.lower()}">{rating}</td>
+                    <td class="summary-cell">{summary}</td>
+                    <td class="source-cell">{source_cell}</td>
                 </tr>
                 """
             ).strip()
@@ -188,7 +188,6 @@ def render_provider_results(providers: List[Dict[str, Any]]) -> str:
         <table class="source-table">
             <thead>
                 <tr>
-                    <th>Verdict</th>
                     <th>Rating</th>
                     <th>Summary</th>
                     <th>Source</th>
@@ -228,37 +227,26 @@ def render_sources_from_explanation(explanation: str) -> str:
         return ""
     
     items = []
-    seen = set()
-    for idx, line in enumerate(lines, start=1):
-        text = line
-        url = ""
+    for line in lines:
         if "|" in line:
             parts = [part.strip() for part in line.split("|")]
             possible_url = parts[-1]
+            label = " | ".join(parts[:-1]) if possible_url.startswith("http") else line
+            label = html.escape(label)
             if possible_url.startswith("http"):
-                url = possible_url
-                text = parts[-2] if len(parts) >= 2 else line
-        text = html.escape(text)
-        key = (text.lower(), url.lower())
-        if key in seen:
-            continue
-        seen.add(key)
-
-        if url:
-            items.append(
-                f'<li><span class="source-title">{text}</span> — '
-                f'<a href="{html.escape(url)}" target="_blank" rel="noopener">Visit Link</a></li>'
-            )
+                items.append(f'<li>{label} — <a href="{html.escape(possible_url)}" target="_blank" rel="noopener">Visit Link</a></li>')
+            else:
+                items.append(f"<li>{html.escape(line)}</li>")
         else:
-            items.append(f"<li>{text}</li>")
+            items.append(f"<li>{html.escape(line)}</li>")
     
     sources_html = dedent(
         f"""
         <div class="sources-list">
             <h4>Sources</h4>
-            <ol>
+            <ul>
                 {''.join(items)}
-            </ol>
+            </ul>
         </div>
         """
     ).strip()
