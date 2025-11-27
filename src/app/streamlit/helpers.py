@@ -8,6 +8,8 @@ including API communication, data formatting, and UI rendering helpers.
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+import html
+from textwrap import dedent
 
 # Ensure project root is in path (in case this module is imported directly)
 _current_file = Path(__file__).resolve()
@@ -15,7 +17,6 @@ _project_root = _current_file.parent.parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-import pandas as pd
 import requests
 import streamlit as st
 
@@ -87,21 +88,24 @@ def call_backend(payload: Dict[str, Any]) -> Dict[str, Any]:
     return response.json()
 
 
-def render_provider_results(providers: List[Dict[str, Any]]) -> None:
+def render_provider_results(providers: List[Dict[str, Any]]) -> str:
     """
-    Render provider results as a deduplicated table.
-    
-    This function displays fact-checking results from multiple providers
-    in a table format, automatically deduplicating entries with the same
-    verdict, rating, and summary.
+    Build an HTML table summarizing supporting evidence.
     
     Args:
-        providers: List of provider result dictionaries containing
-                   verdict, rating, title, summary, and source_url
+        providers: List of provider result dictionaries
+    
+    Returns:
+        HTML string representing the evidence table/placeholder.
     """
     if not providers:
-        st.info("No third-party sources were returned.")
-        return
+        return dedent(
+            """
+            <div class="source-table-placeholder">
+                No third-party sources were returned for this claim.
+            </div>
+            """
+        ).strip()
 
     # Prepare table data with deduplication
     # Deduplicate based on verdict, rating, and summary (same content = duplicate)
@@ -147,68 +151,106 @@ def render_provider_results(providers: List[Dict[str, Any]]) -> None:
     table_data = list(seen_verdicts.values())
     
     if not table_data:
-        st.info("No third-party sources were returned.")
-        return
+        return dedent(
+            """
+            <div class="source-table-placeholder">
+                No third-party sources were returned for this claim.
+            </div>
+            """
+        ).strip()
     
-    # Display as table
-    df = pd.DataFrame(table_data)
-    
-    # Check if we have any valid URLs
-    has_urls = any(row["Source"] != "N/A" and row["Source"].startswith("http") for row in table_data)
-    
-    # Build column config (no Provider column)
-    column_config = {
-        "Verdict": st.column_config.TextColumn("Verdict", width="small"),
-        "Rating": st.column_config.TextColumn("Rating", width="small"),
-        "Summary": st.column_config.TextColumn("Summary", width="large"),
-    }
-    
-    if has_urls:
-        column_config["Source"] = st.column_config.LinkColumn(
-            "Source",
-            width="medium",
-            display_text="🔗 View"
+    rows_html = []
+    for row in table_data:
+        verdict = html.escape(row["Verdict"])
+        rating = html.escape(row["Rating"])
+        summary = html.escape(row["Summary"])
+        source = row["Source"]
+        if source != "N/A" and source.startswith("http"):
+            source_cell = f'<a href="{html.escape(source)}" target="_blank" rel="noopener">Visit Source</a>'
+        else:
+            source_cell = "N/A"
+        rows_html.append(
+            f"""
+                <tr>
+                    <td>{verdict}</td>
+                    <td>{rating}</td>
+                    <td>{summary}</td>
+                    <td>{source_cell}</td>
+                </tr>
+            """
         )
-    else:
-        column_config["Source"] = st.column_config.TextColumn("Source", width="medium")
     
-    # Style the table
-    st.dataframe(
-        df,
-        width='stretch',
-        hide_index=True,
-        column_config=column_config
-    )
-
-
-def render_sources_from_explanation(explanation: str) -> None:
+    table_html = dedent(
+        f"""
+    <div class="source-table-wrapper">
+        <table class="source-table">
+            <thead>
+                <tr>
+                    <th>Verdict</th>
+                    <th>Rating</th>
+                    <th>Summary</th>
+                    <th>Source</th>
+                </tr>
+            </thead>
+            <tbody>
+                {rows_html}
+            </tbody>
+        </table>
+    </div>
     """
-    Parse and render sources from explanation text.
+    ).strip()
+    
+    return table_html
+
+
+def render_sources_from_explanation(explanation: str) -> str:
+    """
+    Parse and render sources from explanation text as HTML.
     
     The backend appends a "Sources:" block with bullet list to the explanation.
-    This function parses that section and renders it as formatted list items
+    This function parses that section and returns formatted list items
     with clickable links when URLs are present.
     
     Args:
         explanation: Full explanation text including sources section
+    
+    Returns:
+        HTML string containing formatted sources.
     """
     if "Sources:" not in explanation:
-        return
+        return ""
+    
     _, sources_block = explanation.split("Sources:", maxsplit=1)
     lines = [line.strip("- ").strip() for line in sources_block.splitlines() if line.strip()]
     if not lines:
-        return
-    st.subheader("Sources")
+        return ""
+    
+    items = []
     for line in lines:
         if "|" in line:
             parts = [part.strip() for part in line.split("|")]
-            source_text = " | ".join(parts[:-1]) if parts[-1].startswith("http") else line
-            if parts[-1].startswith("http"):
-                st.markdown(f"- {source_text} | [Link]({parts[-1]})")
+            possible_url = parts[-1]
+            label = " | ".join(parts[:-1]) if possible_url.startswith("http") else line
+            label = html.escape(label)
+            if possible_url.startswith("http"):
+                items.append(f'<li>{label} — <a href="{html.escape(possible_url)}" target="_blank" rel="noopener">Visit Link</a></li>')
             else:
-                st.markdown(f"- {line}")
+                items.append(f"<li>{html.escape(line)}</li>")
         else:
-            st.markdown(f"- {line}")
+            items.append(f"<li>{html.escape(line)}</li>")
+    
+    sources_html = dedent(
+        f"""
+        <div class="sources-list">
+            <h4>Sources</h4>
+            <ul>
+                {''.join(items)}
+            </ul>
+        </div>
+        """
+    ).strip()
+    
+    return sources_html
 
 
 def scroll_to_element(element_id: str, delay: int = 100) -> None:
