@@ -175,7 +175,7 @@ def render_provider_results(providers: List[Dict[str, Any]]) -> None:
     # Style the table
     st.dataframe(
         df,
-        use_container_width=True,
+        width='stretch',
         hide_index=True,
         column_config=column_config
     )
@@ -226,10 +226,15 @@ def scroll_to_element(element_id: str, delay: int = 100) -> None:
                 function scrollToElement() {{
                     const element = document.getElementById('{element_id}');
                     if (element) {{
-                        element.scrollIntoView({{
-                            behavior: 'smooth',
-                            block: 'center',
-                            inline: 'nearest'
+                        // Calculate scroll position to center the element
+                        const elementRect = element.getBoundingClientRect();
+                        const elementTop = elementRect.top + window.pageYOffset;
+                        const elementHeight = elementRect.height;
+                        const windowHeight = window.innerHeight;
+                        const scrollPosition = elementTop - (windowHeight / 2) + (elementHeight / 2);
+                        window.scrollTo({{
+                            top: scrollPosition,
+                            behavior: 'smooth'
                         }});
                         return true;
                     }}

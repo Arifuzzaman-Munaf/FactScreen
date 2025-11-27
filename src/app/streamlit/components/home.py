@@ -46,16 +46,29 @@ def render_home_page() -> None:
         unsafe_allow_html=True,
     )
     
-    with st.form("claim_form"):
-        claim_text = st.text_area("Claim", placeholder="e.g., The sun rises in the west", height=120)
-        claim_url = st.text_input("URL (optional)", placeholder="https://example.com/article")
-        col_submit, col_reset = st.columns([2, 1])
+    with st.form("claim_form", clear_on_submit=False):
+        claim_text = st.text_area(
+            "Claim", 
+            placeholder="e.g., The sun rises in the west", 
+            height=120,
+            value=st.session_state.get("claim_text", ""),
+            key="claim_text_input"
+        )
+        claim_url = st.text_input(
+            "URL (optional)", 
+            placeholder="https://example.com/article",
+            value=st.session_state.get("claim_url", ""),
+            key="claim_url_input"
+        )
+        col_submit, col_reset = st.columns([2, 1], gap="medium")
         with col_submit:
-            submitted = st.form_submit_button("🔍 Verify Claim", use_container_width=True)
+            submitted = st.form_submit_button("🔍 Verify Claim", use_container_width=True, type="primary")
         with col_reset:
-            cleared = st.form_submit_button("Clear", use_container_width=True)
+            cleared = st.form_submit_button("🗑️ Clear", use_container_width=True, type="secondary")
 
         if cleared:
+            st.session_state.claim_text = ""
+            st.session_state.claim_url = ""
             st.rerun()
 
     if submitted:
@@ -151,11 +164,27 @@ def render_home_page() -> None:
                 # Scroll to verdict after rendering
                 scroll_to_element("verdict-result", delay=200)
 
-                st.markdown("### Supporting Evidence")
+                st.markdown(
+                    """
+                    <div style="margin-top: 2rem;">
+                        <h3 style="color: rgba(248, 250, 252, 0.95); font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">
+                            📚 Supporting Evidence
+                        </h3>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
                 render_provider_results(provider_results)
 
-                with st.expander("📊 Explainability"):
+                with st.expander("📊 Explainability & Detailed Analysis", expanded=False):
                     main_text = explanation.split("Sources:")[0].strip()
-                    st.write(main_text)
+                    st.markdown(
+                        f"""
+                        <div style="color: rgba(248, 250, 252, 0.9); line-height: 1.8; font-size: 1.05rem;">
+                            {main_text}
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
                     render_sources_from_explanation(explanation)
 

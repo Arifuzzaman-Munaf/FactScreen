@@ -87,6 +87,44 @@ html, body {
     animation: navbarGlow 4s ease-in-out infinite;
 }
 
+/* Ensure navbar content is properly structured - everything in parallel */
+.top-navbar {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+}
+
+.top-navbar [data-testid="column-container"] {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    gap: 1rem !important;
+}
+
+.top-navbar [data-testid="column"] {
+    display: flex !important;
+    align-items: center !important;
+    flex: 0 0 auto !important;
+}
+
+.top-navbar .nav-brand {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+}
+
+.top-navbar .nav-buttons-wrapper {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: flex-end;
+}
+
 @keyframes navbarGlow {
     0%, 100% { 
         box-shadow: 
@@ -112,6 +150,13 @@ html, body {
     margin-right: auto !important;
     padding-left: 3rem !important;
     padding-right: 3rem !important;
+}
+
+/* JavaScript injection to restructure navbar */
+.stApp::before {
+    content: '';
+    display: block;
+    height: 0;
 }
 
 /* Ensure app container starts at top */
@@ -202,11 +247,125 @@ html, body {
     letter-spacing: 0.3px;
 }
 
+.nav-buttons-wrapper {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+}
+
 .nav-buttons-container {
     display: flex;
     gap: 1rem;
     align-items: center;
     justify-content: flex-end;
+}
+
+/* Ensure Streamlit columns in navbar are properly styled */
+.nav-buttons-wrapper [data-testid="column"],
+.nav-buttons-container [data-testid="column"] {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 130px !important;
+    max-width: 150px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.nav-buttons-wrapper [data-testid="column"] > div,
+.nav-buttons-container [data-testid="column"] > div {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Ensure the column container itself is a flex container */
+.nav-buttons-wrapper > div[data-testid="column-container"],
+.nav-buttons-container > div[data-testid="column-container"] {
+    display: flex !important;
+    gap: 1rem !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    width: 100% !important;
+}
+
+/* Fix for columns that appear after nav-buttons-wrapper */
+.top-navbar + * [data-testid="column-container"] {
+    display: flex !important;
+    gap: 1rem !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+}
+
+/* Style Streamlit buttons in navbar to match nav-btn-html */
+.nav-buttons-wrapper .stButton > button,
+.nav-buttons-container .stButton > button {
+    background: rgba(99, 102, 241, 0.15) !important;
+    border: 2px solid rgba(99, 102, 241, 0.4) !important;
+    color: rgba(248, 250, 252, 0.9) !important;
+    border-radius: 12px !important;
+    padding: 0.75rem 1.5rem !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    min-width: 130px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    box-shadow: 
+        0 4px 15px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    width: 100% !important;
+    height: auto !important;
+}
+
+.nav-buttons-wrapper .stButton > button::before,
+.nav-buttons-container .stButton > button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.nav-buttons-wrapper .stButton > button:hover::before,
+.nav-buttons-container .stButton > button:hover::before {
+    left: 100%;
+}
+
+.nav-buttons-wrapper .stButton > button:hover,
+.nav-buttons-container .stButton > button:hover {
+    background: rgba(99, 102, 241, 0.3) !important;
+    border-color: rgba(99, 102, 241, 0.7) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 
+        0 8px 25px rgba(99, 102, 241, 0.5),
+        0 0 15px rgba(139, 92, 246, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+}
+
+/* Active state for navbar buttons */
+.nav-buttons-wrapper .stButton > button.nav-active,
+.nav-buttons-container .stButton > button.nav-active,
+.nav-buttons-wrapper .stButton > button[kind="primary"],
+.nav-buttons-container .stButton > button[kind="primary"],
+.nav-buttons-wrapper .stButton > button:focus,
+.nav-buttons-container .stButton > button:focus {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%) !important;
+    border-color: #8b5cf6 !important;
+    color: #ffffff !important;
+    box-shadow: 
+        0 8px 30px rgba(99, 102, 241, 0.6),
+        0 0 20px rgba(139, 92, 246, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-1px) !important;
+    animation: buttonPulse 2s ease-in-out infinite !important;
 }
 
 /* Stunning Navigation Buttons */
@@ -337,7 +496,8 @@ div[data-testid="stForm"] {
     backdrop-filter: blur(20px) saturate(180%) !important;
     border-radius: 24px !important;
     padding: 2.5rem !important;
-    margin: 1.5rem 0 !important;
+    margin: 2rem auto !important;
+    max-width: 900px !important;
     border: 2px solid rgba(99, 102, 241, 0.5) !important;
     box-shadow: 
         0 12px 48px rgba(0, 0, 0, 0.5),
@@ -523,6 +683,23 @@ button[kind="secondary"] {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+button[kind="secondary"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+button[kind="secondary"]:hover::before {
+    left: 100%;
 }
 
 button[kind="secondary"]:hover {
@@ -549,7 +726,7 @@ button[kind="secondary"]:active {
     background-clip: text;
     animation: titleGradient 6s ease infinite;
     text-align: center;
-    margin: 1rem 0 1.5rem 0;
+    margin: 2rem 0 1.5rem 0;
     line-height: 1.15;
     letter-spacing: -0.02em;
     filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.4));
@@ -567,7 +744,7 @@ button[kind="secondary"]:active {
     font-size: clamp(1.1rem, 2vw, 1.4rem);
     text-align: center;
     color: rgba(248, 250, 252, 0.85);
-    margin-bottom: 2.5rem;
+    margin-bottom: 3rem;
     font-weight: 400;
     letter-spacing: 0.02em;
     line-height: 1.6;
@@ -697,8 +874,9 @@ button[kind="secondary"]:active {
 
 .verdict-section {
     width: 100%;
+    max-width: 900px;
+    margin: 2rem auto;
     padding: 2.5rem 2rem;
-    margin: 1.5rem 0;
     border-radius: 16px;
     text-align: center;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
@@ -746,9 +924,46 @@ button[kind="secondary"]:active {
 }
 
 .stExpander {
-    background: rgba(15, 23, 42, 0.5) !important;
-    border-radius: 14px !important;
-    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    background: linear-gradient(135deg, 
+        rgba(30, 41, 59, 0.85) 0%, 
+        rgba(15, 23, 42, 0.9) 50%, 
+        rgba(30, 41, 59, 0.85) 100%) !important;
+    backdrop-filter: blur(15px) saturate(180%) !important;
+    border-radius: 16px !important;
+    border: 2px solid rgba(99, 102, 241, 0.4) !important;
+    padding: 1rem !important;
+    margin: 1.5rem 0 !important;
+    max-width: 900px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 2px 8px rgba(99, 102, 241, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.stExpander:hover {
+    border-color: rgba(99, 102, 241, 0.6) !important;
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.4),
+        0 4px 12px rgba(99, 102, 241, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    transform: translateY(-2px);
+}
+
+.stExpander summary {
+    color: rgba(248, 250, 252, 0.95) !important;
+    font-weight: 700 !important;
+    font-size: 1.15rem !important;
+    padding: 0.75rem 1rem !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease !important;
+}
+
+.stExpander summary:hover {
+    background: rgba(99, 102, 241, 0.1) !important;
+    color: rgba(248, 250, 252, 1) !important;
 }
 
 h1, h2, h3 {
@@ -763,6 +978,18 @@ p, span, div, li, td, th {
 /* Ensure dataframes are dark themed */
 .stDataFrame {
     background: rgba(15, 23, 42, 0.6) !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    margin: 1rem 0 !important;
+    max-width: 900px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Style for data table */
+[data-testid="stDataFrame"] {
+    border-radius: 12px !important;
+    overflow: hidden !important;
 }
 
 /* Dark mode for all Streamlit components */
@@ -776,15 +1003,36 @@ p, span, div, li, td, th {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem 1.5rem;
-    background: rgba(15, 23, 42, 0.8);
-    border-radius: 16px;
-    border: 2px solid rgba(99, 102, 241, 0.4);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-    margin: 1rem 0;
+    padding: 2rem 2rem;
+    background: linear-gradient(135deg, 
+        rgba(30, 41, 59, 0.9) 0%, 
+        rgba(15, 23, 42, 0.95) 50%, 
+        rgba(30, 41, 59, 0.9) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 20px;
+    border: 2px solid rgba(99, 102, 241, 0.5);
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.4),
+        0 4px 16px rgba(99, 102, 241, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    margin: 2rem auto;
     max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
+    animation: processingGlow 3s ease-in-out infinite;
+}
+
+@keyframes processingGlow {
+    0%, 100% {
+        box-shadow: 
+            0 12px 40px rgba(0, 0, 0, 0.4),
+            0 4px 16px rgba(99, 102, 241, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    50% {
+        box-shadow: 
+            0 16px 50px rgba(0, 0, 0, 0.5),
+            0 8px 24px rgba(99, 102, 241, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
 }
 
 .processing-loader {
@@ -918,6 +1166,13 @@ p, span, div, li, td, th {
         padding: 0.65rem 1.5rem !important;
         font-size: 0.9rem !important;
     }
+    
+    .nav-buttons-wrapper .stButton > button,
+    .nav-buttons-container .stButton > button {
+        min-width: 110px !important;
+        padding: 0.65rem 1.5rem !important;
+        font-size: 0.9rem !important;
+    }
 }
 
 @media (max-width: 768px) {
@@ -943,6 +1198,7 @@ p, span, div, li, td, th {
         height: 40px !important;
     }
     
+    .nav-buttons-wrapper,
     .nav-buttons-container {
         width: 100% !important;
         justify-content: flex-start !important;
@@ -955,6 +1211,13 @@ p, span, div, li, td, th {
         padding: 0.6rem 1rem !important;
         font-size: 0.85rem !important;
         gap: 0.4rem !important;
+    }
+    
+    .nav-buttons-wrapper .stButton > button,
+    .nav-buttons-container .stButton > button {
+        min-width: 100px !important;
+        padding: 0.6rem 1rem !important;
+        font-size: 0.85rem !important;
     }
     
     .nav-icon {
@@ -1014,6 +1277,13 @@ p, span, div, li, td, th {
         padding: 0.5rem 0.875rem !important;
         font-size: 0.8rem !important;
         gap: 0.35rem !important;
+    }
+    
+    .nav-buttons-wrapper .stButton > button,
+    .nav-buttons-container .stButton > button {
+        min-width: 90px !important;
+        padding: 0.5rem 0.875rem !important;
+        font-size: 0.8rem !important;
     }
     
     .nav-icon {

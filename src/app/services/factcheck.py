@@ -148,15 +148,15 @@ async def aggregate_results(
         explanation = gemini_explanation
         sources_for_explanation = list(sources or [])
     else:
-    # Confidence: agreement ratio, boosted if explicit ratings present
+        # Confidence: agreement ratio, boosted if explicit ratings present
         # If explicit label found from any provider, set high confidence;
         # otherwise use agreement ratio
-    total = len(provider_results) if provider_results else 1
-    if explicit_final is not None:
-        confidence = 0.9
-    else:
-        agreement = (votes[final] / total) if total else 0.0
-        confidence = max(0.0, min(1.0, agreement))
+        total = len(provider_results) if provider_results else 1
+        if explicit_final is not None:
+            confidence = 0.9
+        else:
+            agreement = (votes[final] / total) if total else 0.0
+            confidence = max(0.0, min(1.0, agreement))
 
         # If no explanation generated yet, create one from sources
         if not explanation and sources:

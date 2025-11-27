@@ -42,10 +42,13 @@ st.set_page_config(
 # Apply custom styles
 st.markdown(THEME_CSS, unsafe_allow_html=True)
 
-# Top Navigation Bar - Stunning Design with Logo
-st.markdown(
-    """
-    <div class="top-navbar">
+# Top Navigation Bar - Everything in one parallel horizontal line
+# Use Streamlit columns to keep brand and buttons in the same row
+nav_col_brand, nav_col_spacer, nav_col_buttons = st.columns([2.5, 0.5, 2], gap="medium")
+
+with nav_col_brand:
+    st.markdown(
+        """
         <div class="nav-brand">
             <div class="logo-container">
                 <svg class="logo-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
@@ -68,67 +71,115 @@ st.markdown(
                 <span class="nav-tagline">AI-Powered Fact Verification</span>
             </div>
         </div>
-        <div class="nav-buttons-container">
-            <button class="nav-btn-html" id="nav-btn-home" onclick="window.location.href='?nav=home'">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <span>HOME</span>
-            </button>
-            <button class="nav-btn-html" id="nav-btn-about" onclick="window.location.href='?nav=about'">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                    <path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <circle cx="12" cy="8" r="1" fill="currentColor"/>
-                </svg>
-                <span>ABOUT</span>
-            </button>
-            <button class="nav-btn-html" id="nav-btn-help" onclick="window.location.href='?nav=help'">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                    <path d="M9.09 9C9.3251 8.33167 9.78915 7.76811 10.4 7.40913C11.0108 7.05016 11.7289 6.91894 12.4272 7.03871C13.1255 7.15849 13.7588 7.52152 14.2151 8.06353C14.6713 8.60553 14.9211 9.29152 14.92 10C14.92 12 11.92 13 11.92 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <circle cx="12" cy="17" r="1" fill="currentColor"/>
-                </svg>
-                <span>HELP</span>
-            </button>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+        """,
+        unsafe_allow_html=True,
+    )
 
-# Handle navigation via query params
-if "nav" in st.query_params:
-    nav_page = st.query_params.get("nav")
-    if nav_page in ["home", "about", "help"]:
-        st.session_state.page = nav_page
-        for key in list(st.query_params.keys()):
-            del st.query_params[key]
-        st.rerun()
+with nav_col_buttons:
+    # Navigation buttons in parallel columns
+    btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 1], gap="small")
+    
+    with btn_col1:
+        if st.button("🏠 HOME", key="nav_home", use_container_width=True):
+            st.session_state.page = "home"
+            st.rerun()
+    
+    with btn_col2:
+        if st.button("ℹ️ ABOUT", key="nav_about", use_container_width=True):
+            st.session_state.page = "about"
+            st.rerun()
+    
+    with btn_col3:
+        if st.button("❓ HELP", key="nav_help", use_container_width=True):
+            st.session_state.page = "help"
+            st.rerun()
 
-# Update active button state
+# Wrap everything in navbar styling and ensure parallel layout
 st.markdown(
-    f"""
+    """
     <script>
-        document.addEventListener('DOMContentLoaded', function() {{
-            const currentPage = '{st.session_state.page}';
-            const buttons = {{
-                'home': document.getElementById('nav-btn-home'),
-                'about': document.getElementById('nav-btn-about'),
-                'help': document.getElementById('nav-btn-help')
-            }};
+        (function() {
+            // Wrap the navbar columns in styled container
+            function wrapNavbar() {
+                // Find all column containers
+                const allColContainers = Array.from(document.querySelectorAll('[data-testid="column-container"]'));
+                if (allColContainers.length < 2) return false;
+                
+                // Check if already wrapped
+                const existingNavbar = document.querySelector('.top-navbar');
+                if (existingNavbar) return true;
+                
+                // Get the first column container (should contain brand, spacer, buttons)
+                const firstColContainer = allColContainers[0];
+                if (!firstColContainer) return false;
+                
+                // Create navbar wrapper
+                const navbar = document.createElement('div');
+                navbar.className = 'top-navbar';
+                
+                // Get parent of column container
+                const parent = firstColContainer.parentElement;
+                
+                // Clone and move the column container into navbar
+                navbar.appendChild(firstColContainer.cloneNode(true));
+                
+                // Insert navbar before the first column container
+                parent.insertBefore(navbar, firstColContainer);
+                
+                // Hide original (keep it for Streamlit functionality)
+                firstColContainer.style.position = 'absolute';
+                firstColContainer.style.opacity = '0';
+                firstColContainer.style.pointerEvents = 'none';
+                
+                return true;
+            }
             
-            Object.keys(buttons).forEach(page => {{
-                if (buttons[page]) {{
-                    if (page === currentPage) {{
-                        buttons[page].classList.add('active');
-                    }} else {{
-                        buttons[page].classList.remove('active');
-                    }}
-                }}
-            }});
-        }});
+            // Function to update active button styling
+            function updateActiveButton() {
+                const currentPage = '""" + st.session_state.page + """';
+                const allButtons = Array.from(document.querySelectorAll('.top-navbar .stButton > button, button[key*="nav_"]'));
+                
+                allButtons.forEach(button => {
+                    const buttonText = button.textContent.trim().toUpperCase();
+                    button.classList.remove('nav-active');
+                    
+                    if (currentPage === 'home' && buttonText.includes('HOME')) {
+                        button.classList.add('nav-active');
+                    } else if (currentPage === 'about' && buttonText.includes('ABOUT')) {
+                        button.classList.add('nav-active');
+                    } else if (currentPage === 'help' && buttonText.includes('HELP')) {
+                        button.classList.add('nav-active');
+                    }
+                });
+            }
+            
+            // Initialize navbar
+            function initNavbar() {
+                wrapNavbar();
+                updateActiveButton();
+            }
+            
+            // Run on page load
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    initNavbar();
+                    setTimeout(initNavbar, 100);
+                    setTimeout(initNavbar, 500);
+                });
+            } else {
+                initNavbar();
+                setTimeout(initNavbar, 100);
+                setTimeout(initNavbar, 500);
+                setTimeout(initNavbar, 1000);
+            }
+            
+            // Watch for DOM changes
+            const observer = new MutationObserver(function() {
+                initNavbar();
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+            setTimeout(() => observer.disconnect(), 5000);
+        })();
     </script>
     """,
     unsafe_allow_html=True,
