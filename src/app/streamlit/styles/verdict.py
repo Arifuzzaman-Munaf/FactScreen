@@ -343,9 +343,9 @@ VERDICT_CSS = dedent(
     text-transform: uppercase;
 }
 
-.sources-list ul {
-    list-style: none;
-    padding-left: 0;
+.sources-list ol {
+    list-style: decimal;
+    padding-left: 1.25rem;
     margin: 0;
 }
 
@@ -356,6 +356,10 @@ VERDICT_CSS = dedent(
 
 .sources-list li:last-child {
     border-bottom: none;
+}
+
+.source-title {
+    font-weight: 600;
 }
 
 h1, h2, h3 {

@@ -228,26 +228,37 @@ def render_sources_from_explanation(explanation: str) -> str:
         return ""
     
     items = []
-    for line in lines:
+    seen = set()
+    for idx, line in enumerate(lines, start=1):
+        text = line
+        url = ""
         if "|" in line:
             parts = [part.strip() for part in line.split("|")]
             possible_url = parts[-1]
-            label = " | ".join(parts[:-1]) if possible_url.startswith("http") else line
-            label = html.escape(label)
             if possible_url.startswith("http"):
-                items.append(f'<li>{label} — <a href="{html.escape(possible_url)}" target="_blank" rel="noopener">Visit Link</a></li>')
-            else:
-                items.append(f"<li>{html.escape(line)}</li>")
+                url = possible_url
+                text = parts[-2] if len(parts) >= 2 else line
+        text = html.escape(text)
+        key = (text.lower(), url.lower())
+        if key in seen:
+            continue
+        seen.add(key)
+
+        if url:
+            items.append(
+                f'<li><span class="source-title">{text}</span> — '
+                f'<a href="{html.escape(url)}" target="_blank" rel="noopener">Visit Link</a></li>'
+            )
         else:
-            items.append(f"<li>{html.escape(line)}</li>")
+            items.append(f"<li>{text}</li>")
     
     sources_html = dedent(
         f"""
         <div class="sources-list">
             <h4>Sources</h4>
-            <ul>
+            <ol>
                 {''.join(items)}
-            </ul>
+            </ol>
         </div>
         """
     ).strip()
