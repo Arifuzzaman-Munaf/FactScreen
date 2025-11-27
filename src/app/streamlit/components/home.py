@@ -70,6 +70,18 @@ def render_home_page() -> None:
         st.session_state["evidence_table_html"] = DEFAULT_EVIDENCE_HTML
     if "explanation_html" not in st.session_state:
         st.session_state["explanation_html"] = DEFAULT_EXPLANATION_HTML
+    if "clear_inputs" not in st.session_state:
+        st.session_state["clear_inputs"] = False
+    st.session_state.setdefault("claim_text_input", "")
+    st.session_state.setdefault("claim_url_input", "")
+
+    if st.session_state["clear_inputs"]:
+        st.session_state["claim_text_input"] = ""
+        st.session_state["claim_url_input"] = ""
+        st.session_state["verdict_card_html"] = DEFAULT_VERDICT_CARD
+        st.session_state["evidence_table_html"] = DEFAULT_EVIDENCE_HTML
+        st.session_state["explanation_html"] = DEFAULT_EXPLANATION_HTML
+        st.session_state["clear_inputs"] = False
 
     st.markdown(
         """
@@ -92,13 +104,11 @@ def render_home_page() -> None:
                 "Claim", 
                 placeholder="e.g., The sun rises in the west", 
                 height=120,
-                value=st.session_state.get("claim_text", ""),
                 key="claim_text_input"
             )
             claim_url = st.text_input(
                 "URL (optional)", 
                 placeholder="https://example.com/article",
-                value=st.session_state.get("claim_url", ""),
                 key="claim_url_input"
             )
             error_placeholder = st.empty()
@@ -109,11 +119,7 @@ def render_home_page() -> None:
                 cleared = st.form_submit_button("Clear", use_container_width=True, type="secondary")
 
             if cleared:
-                st.session_state.claim_text = ""
-                st.session_state.claim_url = ""
-                st.session_state["verdict_card_html"] = DEFAULT_VERDICT_CARD
-                st.session_state["evidence_table_html"] = DEFAULT_EVIDENCE_HTML
-                st.session_state["explanation_html"] = DEFAULT_EXPLANATION_HTML
+                st.session_state["clear_inputs"] = True
                 st.rerun()
 
     with col_result:
