@@ -25,24 +25,8 @@ async def aggregate_results(
 
     If verdicts exist, check alignment with claim. If misaligned, use Gemini fallback.
     """
-    votes = Counter(result.verdict for result in provider_results)
-
-    # Pick first explicit verdict by preferred provider order
-    preferred_order = [ProviderName.GOOGLE, ProviderName.RAPID]
-    explicit_final: Optional[Verdict] = None
-    for provider in preferred_order:
-        for res in provider_results:
-            if res.provider == provider and res.verdict != Verdict.UNKNOWN:
-                explicit_final = res.verdict
-                break
-        if explicit_final is not None:
-            break
-
-    final = (
-        explicit_final
-        if explicit_final is not None
-        else (votes.most_common(1)[0][0] if votes else Verdict.UNKNOWN)
-    )
+    votes = Counter(res.verdict for res in provider_results if res.verdict != Verdict.UNKNOWN)
+    final = votes.most_common(1)[0][0] if votes else Verdict.UNKNOWN
 
     providers = [r.provider for r in provider_results]
     explanation: Optional[str] = None
@@ -71,49 +55,8 @@ async def aggregate_results(
         alignment_sources = sources if sources else verdicts_list
         
         if verdicts_list and alignment_sources:
-            # Check alignment - this will detect if verdicts are about opposite/different claims
-            is_aligned, alignment_reason = await check_claim_verdict_alignment(claim_text, alignment_sources)
-
-            if is_aligned:
-                # Verdicts align - generate explanation from sources
-                explanation = await generate_explanation_from_sources(claim_text, sources)
-                sources_for_explanation = list(sources or [])
-            else:
-                # Verdicts don't align - fallback to Gemini classification
-                # Log the misalignment reason for debugging
-                import logging
-                logger = logging.getLogger("factcheck")
-                logger.warning(
-                    f"Verdicts misaligned with claim '{claim_text}': {alignment_reason}"
-                )
-                
-                gemini_label, gemini_confidence, gemini_explanation = await classify_with_gemini(
-                    claim_text, sources
-                )
-                # Map Gemini label to Verdict enum
-                if gemini_label == "True":
-                    final = Verdict.TRUE
-                elif gemini_label == "False":
-                    final = Verdict.MISLEADING
-                else:
-                    final = Verdict.UNKNOWN
-
-                confidence = gemini_confidence
-                explanation = (
-                    f"Note: Third-party fact-checker verdicts were about a different or opposite claim "
-                    f"than your query. ({alignment_reason if alignment_reason else 'Claim mismatch detected'})\n\n"
-                    f"Gemini analysis of your claim: {gemini_explanation}"
-                )
-                explanation = _attach_sources_block(explanation, sources or [])
-                return AggregatedResult(
-                    claim_text=claim_text,
-                    verdict=final,
-                    votes={k: int(v) for k, v in votes.items()},
-                    provider_results=provider_results,
-                    providers_checked=providers,
-                    confidence=confidence,
-                    explanation=explanation,
-                )
+            explanation = await generate_explanation_from_sources(claim_text, sources)
+            sources_for_explanation = list(sources or [])
         elif verdicts_list:
             # Have verdicts but no sources dict - generate explanation from provider results
             sources_dict = [
@@ -148,15 +91,13 @@ async def aggregate_results(
         explanation = gemini_explanation
         sources_for_explanation = list(sources or [])
     else:
-        # Confidence: agreement ratio, boosted if explicit ratings present
-        # If explicit label found from any provider, set high confidence;
-        # otherwise use agreement ratio
-        total = len(provider_results) if provider_results else 1
-        if explicit_final is not None:
-            confidence = 0.9
-        else:
-            agreement = (votes[final] / total) if total else 0.0
-            confidence = max(0.0, min(1.0, agreement))
+        labeled_total = sum(count for verdict, count in votes.items() if verdict != Verdict.UNKNOWN)
+        confidence = (
+            votes[final] / labeled_total
+            if labeled_total and final in votes
+            else 0.0
+        )
+        confidence = float(max(0.0, min(1.0, confidence)))
 
         # If no explanation generated yet, create one from sources
         if not explanation and sources:
