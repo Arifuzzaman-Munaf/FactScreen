@@ -1,3 +1,0 @@
-"""
-FactScreen Source Package
-"""

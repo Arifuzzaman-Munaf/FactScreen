@@ -87,11 +87,8 @@ The validation endpoint automatically combines third-party fact-checking provide
 
 ```
 FactScreen/
-├── config/                      # Configuration files
-│   └── local.yaml              # Local configuration
 ├── entrypoint/                 # Application entrypoints
 │   └── server.py              # Server startup script
-├── notebooks/                  # Jupyter notebooks (for future use)
 ├── src/                        # Main source code
 │   ├── app/                    # Application code
 │   │   ├── api/               # API routes
@@ -150,7 +147,7 @@ GEMINI_API_KEY=your-gemini-key
 GEMINI_MODEL=gemini-2.5-flash
 ```
 
-These values override any defaults declared in code; `config/local.yaml` simply documents the expected keys.
+These values override any defaults declared in code.
 
 Key configuration options:
 - `GOOGLE_API_KEY`: Google Fact Check API key
@@ -184,14 +181,20 @@ make test-all
 
 ## 🖥️ Streamlit Frontend
 
-A lightweight Streamlit presentation layer lives in `src/app/streamlit_app.py`.
+A lightweight Streamlit presentation layer lives in `src/app/streamlit/`.
 
 ### Run locally
 
 ```bash
 # activate venv if not already done
 make install
-FACTSCREEN_API_URL=http://localhost:8000 streamlit run src/app/streamlit_app.py
+
+# Option 1: Using make command (recommended)
+make run-frontend
+
+# Option 2: Direct streamlit command
+# The code automatically handles Python path, works on any device
+FACTSCREEN_API_URL=http://localhost:8000 streamlit run src/app/streamlit/main.py
 ```
 
 Environment variables (loaded from `.env`) must include the API keys noted above.  

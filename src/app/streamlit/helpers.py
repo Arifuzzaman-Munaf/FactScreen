@@ -1,0 +1,249 @@
+"""
+Helper functions for the Streamlit frontend.
+
+This module contains utility functions used throughout the Streamlit application,
+including API communication, data formatting, and UI rendering helpers.
+"""
+
+import sys
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+# Ensure project root is in path (in case this module is imported directly)
+_current_file = Path(__file__).resolve()
+_project_root = _current_file.parent.parent.parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
+import pandas as pd
+import requests
+import streamlit as st
+
+from src.app.streamlit.config import VALIDATION_ENDPOINT
+
+
+def format_confidence(confidence: Optional[float]) -> str:
+    """
+    Format confidence score as a percentage string.
+    
+    Args:
+        confidence: Confidence score between 0.0 and 1.0, or None
+        
+    Returns:
+        Formatted percentage string (e.g., "85.5%") or "—" if None
+    """
+    if confidence is None:
+        return "—"
+    return f"{confidence * 100:.1f}%"
+
+
+def build_payload(claim_text: str, claim_url: str) -> Dict[str, Any]:
+    """
+    Build API request payload from user input.
+    
+    Args:
+        claim_text: Text claim entered by user
+        claim_url: Optional URL entered by user
+        
+    Returns:
+        Dictionary containing either 'url' or 'text' key for API request
+    """
+    if claim_url:
+        return {"url": claim_url}
+    return {"text": claim_text}
+
+
+def call_backend(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Make API request to the FactScreen backend.
+    
+    Args:
+        payload: Request payload dictionary
+        
+    Returns:
+        JSON response from the backend API
+        
+    Raises:
+        RuntimeError: If the API request fails or returns an error status
+    """
+    try:
+        response = requests.post(
+            VALIDATION_ENDPOINT,
+            json=payload,
+            timeout=120,
+        )
+    except requests.RequestException as exc:
+        raise RuntimeError(
+            "Unable to reach FactScreen backend. Please ensure the API server is running."
+        ) from exc
+
+    if response.status_code >= 400:
+        try:
+            detail = response.json().get("detail")
+        except Exception:  # pragma: no cover - defensive
+            detail = response.text
+        raise RuntimeError(detail or "Backend returned an error.")
+
+    return response.json()
+
+
+def render_provider_results(providers: List[Dict[str, Any]]) -> None:
+    """
+    Render provider results as a deduplicated table.
+    
+    This function displays fact-checking results from multiple providers
+    in a table format, automatically deduplicating entries with the same
+    verdict, rating, and summary.
+    
+    Args:
+        providers: List of provider result dictionaries containing
+                   verdict, rating, title, summary, and source_url
+    """
+    if not providers:
+        st.info("No third-party sources were returned.")
+        return
+
+    # Prepare table data with deduplication
+    # Deduplicate based on verdict, rating, and summary (same content = duplicate)
+    seen_verdicts = {}  # key: (verdict, rating, summary_normalized) -> row_data
+    
+    for pr in providers:
+        verdict = pr.get("verdict", "unknown").title()
+        rating = pr.get("rating", "N/A")
+        title = pr.get("title") or pr.get("summary") or "No title available"
+        source_url = pr.get("source_url") or ""
+        
+        # Normalize summary for deduplication (lowercase, strip whitespace)
+        summary_normalized = title.lower().strip()
+        
+        # Create a key for deduplication based on verdict, rating, and summary
+        dedup_key = (verdict, str(rating), summary_normalized)
+        
+        # Truncate long titles for table display
+        display_title = title[:97] + "..." if len(title) > 100 else title
+        
+        # Format source URL
+        if source_url and source_url.startswith("http"):
+            source_value = source_url
+        else:
+            source_value = "N/A"
+        
+        if dedup_key not in seen_verdicts:
+            # First occurrence - store the data
+            seen_verdicts[dedup_key] = {
+                "Verdict": verdict,
+                "Rating": str(rating),
+                "Summary": display_title,
+                "Source": source_value
+            }
+        else:
+            # Duplicate found - keep first occurrence (already stored)
+            # If this one has a valid URL and the stored one doesn't, update it
+            existing = seen_verdicts[dedup_key]
+            if source_value != "N/A" and existing["Source"] == "N/A":
+                existing["Source"] = source_value
+    
+    # Convert to list for DataFrame
+    table_data = list(seen_verdicts.values())
+    
+    if not table_data:
+        st.info("No third-party sources were returned.")
+        return
+    
+    # Display as table
+    df = pd.DataFrame(table_data)
+    
+    # Check if we have any valid URLs
+    has_urls = any(row["Source"] != "N/A" and row["Source"].startswith("http") for row in table_data)
+    
+    # Build column config (no Provider column)
+    column_config = {
+        "Verdict": st.column_config.TextColumn("Verdict", width="small"),
+        "Rating": st.column_config.TextColumn("Rating", width="small"),
+        "Summary": st.column_config.TextColumn("Summary", width="large"),
+    }
+    
+    if has_urls:
+        column_config["Source"] = st.column_config.LinkColumn(
+            "Source",
+            width="medium",
+            display_text="🔗 View"
+        )
+    else:
+        column_config["Source"] = st.column_config.TextColumn("Source", width="medium")
+    
+    # Style the table
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=True,
+        column_config=column_config
+    )
+
+
+def render_sources_from_explanation(explanation: str) -> None:
+    """
+    Parse and render sources from explanation text.
+    
+    The backend appends a "Sources:" block with bullet list to the explanation.
+    This function parses that section and renders it as formatted list items
+    with clickable links when URLs are present.
+    
+    Args:
+        explanation: Full explanation text including sources section
+    """
+    if "Sources:" not in explanation:
+        return
+    _, sources_block = explanation.split("Sources:", maxsplit=1)
+    lines = [line.strip("- ").strip() for line in sources_block.splitlines() if line.strip()]
+    if not lines:
+        return
+    st.subheader("Sources")
+    for line in lines:
+        if "|" in line:
+            parts = [part.strip() for part in line.split("|")]
+            source_text = " | ".join(parts[:-1]) if parts[-1].startswith("http") else line
+            if parts[-1].startswith("http"):
+                st.markdown(f"- {source_text} | [Link]({parts[-1]})")
+            else:
+                st.markdown(f"- {line}")
+        else:
+            st.markdown(f"- {line}")
+
+
+def scroll_to_element(element_id: str, delay: int = 100) -> None:
+    """
+    Inject JavaScript to scroll to a specific element on the page.
+    
+    Args:
+        element_id: HTML ID of the element to scroll to
+        delay: Delay in milliseconds before attempting scroll
+    """
+    st.markdown(
+        f"""
+        <script>
+            (function() {{
+                function scrollToElement() {{
+                    const element = document.getElementById('{element_id}');
+                    if (element) {{
+                        element.scrollIntoView({{
+                            behavior: 'smooth',
+                            block: 'center',
+                            inline: 'nearest'
+                        }});
+                        return true;
+                    }}
+                    return false;
+                }}
+                
+                // Try immediately
+                if (!scrollToElement()) {{
+                    // If element not found, try after a short delay
+                    setTimeout(scrollToElement, {delay});
+                }}
+            }})();
+        </script>
+        """,
+        unsafe_allow_html=True,
+    )
+

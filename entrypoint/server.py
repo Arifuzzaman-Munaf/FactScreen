@@ -118,8 +118,6 @@ def main():
                 "--reload-dir",
                 "src",
                 "--reload-dir",
-                "config",
-                "--reload-dir",
                 "entrypoint",
                 "--reload-dir",
                 "tests",

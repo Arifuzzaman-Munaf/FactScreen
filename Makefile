@@ -12,7 +12,7 @@ run-frontend:
 	fi
 	@echo "Starting Streamlit frontend..."
 	@echo "Backend URL: $(FACTSCREEN_API_URL)"
-	@FACTSCREEN_API_URL=$(FACTSCREEN_API_URL) ./venv/bin/streamlit run src/app/streamlit_app.py
+	@PYTHONPATH=. FACTSCREEN_API_URL=$(FACTSCREEN_API_URL) ./venv/bin/streamlit run src/app/streamlit/main.py
 
 run-app:
 	@if [ ! -d "venv" ]; then \
@@ -20,12 +20,29 @@ run-app:
 		exit 1; \
 	fi
 	@echo "Starting backend and frontend together..."
-	@FACTSCREEN_API_URL=$(FACTSCREEN_API_URL) ./venv/bin/python entrypoint/server.py &
+	@FACTSCREEN_API_URL=$(FACTSCREEN_API_URL) ./venv/bin/python entrypoint/server.py > /tmp/factscreen-backend.log 2>&1 &
 	@BACKEND_PID=$$!; \
-		sleep 3; \
-		echo "Backend started with PID $$BACKEND_PID"; \
+		echo "Backend starting with PID $$BACKEND_PID"; \
+		echo "Waiting for backend to be ready..."; \
+		for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30; do \
+			if curl -s http://localhost:8000/health >/dev/null 2>&1; then \
+				echo "Backend is ready!"; \
+				break; \
+			fi; \
+			if [ $$i -eq 30 ]; then \
+				echo ""; \
+				echo "Error: Backend did not start within 30 seconds"; \
+				echo "Backend log:"; \
+				tail -20 /tmp/factscreen-backend.log || true; \
+				kill $$BACKEND_PID >/dev/null 2>&1 || true; \
+				exit 1; \
+			fi; \
+			sleep 1; \
+			printf "."; \
+		done; \
+		echo ""; \
 		echo "Launching Streamlit frontend..."; \
-		FACTSCREEN_API_URL=$(FACTSCREEN_API_URL) ./venv/bin/streamlit run src/app/streamlit_app.py || EXIT_CODE=$$?; \
+		PYTHONPATH=. FACTSCREEN_API_URL=$(FACTSCREEN_API_URL) ./venv/bin/streamlit run src/app/streamlit/main.py || EXIT_CODE=$$?; \
 		echo "Shutting down backend..."; \
 		kill $$BACKEND_PID >/dev/null 2>&1 || true; \
 		exit $${EXIT_CODE:-0}
