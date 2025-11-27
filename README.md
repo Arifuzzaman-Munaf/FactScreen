@@ -184,14 +184,14 @@ make test-all
 
 ## 🖥️ Streamlit Frontend
 
-A lightweight Streamlit presentation layer lives in `streamlit_app.py`.
+A lightweight Streamlit presentation layer lives in `src/app/streamlit_app.py`.
 
 ### Run locally
 
 ```bash
 # activate venv if not already done
 make install
-FACTSCREEN_API_URL=http://localhost:8000 streamlit run streamlit_app.py
+FACTSCREEN_API_URL=http://localhost:8000 streamlit run src/app/streamlit_app.py
 ```
 
 Environment variables (loaded from `.env`) must include the API keys noted above.  

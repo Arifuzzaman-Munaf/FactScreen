@@ -51,6 +51,7 @@ async def aggregate_results(
     # If we have verdicts, check alignment and generate explanation
     if provider_results and any(r.verdict != Verdict.UNKNOWN for r in provider_results):
         # Convert provider results to dict format for alignment check
+        # Include title as it often contains the actual claim being fact-checked
         verdicts_list = []
         for res in provider_results:
             if res.verdict != Verdict.UNKNOWN:
@@ -58,15 +59,20 @@ async def aggregate_results(
                     {
                         "verdict": res.verdict.value,
                         "rating": res.rating,
+                        "title": res.title or "",
                         "snippet": res.summary or res.title or "",
                         "source": res.provider.value,
                         "url": str(res.source_url) if res.source_url else None,
                     }
                 )
 
-        if verdicts_list and sources:
-            # Check alignment
-            is_aligned, _ = await check_claim_verdict_alignment(claim_text, verdicts_list)
+        # Use sources for alignment check if available (they have more context)
+        # Otherwise use verdicts_list
+        alignment_sources = sources if sources else verdicts_list
+        
+        if verdicts_list and alignment_sources:
+            # Check alignment - this will detect if verdicts are about opposite/different claims
+            is_aligned, alignment_reason = await check_claim_verdict_alignment(claim_text, alignment_sources)
 
             if is_aligned:
                 # Verdicts align - generate explanation from sources
@@ -74,6 +80,13 @@ async def aggregate_results(
                 sources_for_explanation = list(sources or [])
             else:
                 # Verdicts don't align - fallback to Gemini classification
+                # Log the misalignment reason for debugging
+                import logging
+                logger = logging.getLogger("factcheck")
+                logger.warning(
+                    f"Verdicts misaligned with claim '{claim_text}': {alignment_reason}"
+                )
+                
                 gemini_label, gemini_confidence, gemini_explanation = await classify_with_gemini(
                     claim_text, sources
                 )
@@ -87,8 +100,9 @@ async def aggregate_results(
 
                 confidence = gemini_confidence
                 explanation = (
-                    f"Third-party verdicts were about a different claim. "
-                    f"Gemini analysis: {gemini_explanation}"
+                    f"Note: Third-party fact-checker verdicts were about a different or opposite claim "
+                    f"than your query. ({alignment_reason if alignment_reason else 'Claim mismatch detected'})\n\n"
+                    f"Gemini analysis of your claim: {gemini_explanation}"
                 )
                 explanation = _attach_sources_block(explanation, sources or [])
                 return AggregatedResult(

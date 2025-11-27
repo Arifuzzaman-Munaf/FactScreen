@@ -12,7 +12,7 @@ run-frontend:
 	fi
 	@echo "Starting Streamlit frontend..."
 	@echo "Backend URL: $(FACTSCREEN_API_URL)"
-	@FACTSCREEN_API_URL=$(FACTSCREEN_API_URL) ./venv/bin/streamlit run streamlit_app.py
+	@FACTSCREEN_API_URL=$(FACTSCREEN_API_URL) ./venv/bin/streamlit run src/app/streamlit_app.py
 
 run-app:
 	@if [ ! -d "venv" ]; then \
@@ -25,7 +25,7 @@ run-app:
 		sleep 3; \
 		echo "Backend started with PID $$BACKEND_PID"; \
 		echo "Launching Streamlit frontend..."; \
-		FACTSCREEN_API_URL=$(FACTSCREEN_API_URL) ./venv/bin/streamlit run streamlit_app.py || EXIT_CODE=$$?; \
+		FACTSCREEN_API_URL=$(FACTSCREEN_API_URL) ./venv/bin/streamlit run src/app/streamlit_app.py || EXIT_CODE=$$?; \
 		echo "Shutting down backend..."; \
 		kill $$BACKEND_PID >/dev/null 2>&1 || true; \
 		exit $${EXIT_CODE:-0}

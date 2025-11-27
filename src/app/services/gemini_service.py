@@ -157,15 +157,23 @@ async def check_claim_verdict_alignment(
         _log_event(logging.WARNING, "Gemini API key missing", remaining_limit="unknown")
         return True, ""  # If no API key, assume aligned
 
-    # Build context from verdicts
+    # Build context from verdicts - include more details
     verdict_context = []
     for v in verdicts[:5]:  # Use top 5 verdicts
         snippet = v.get("snippet", "") or ""
+        title = v.get("title", "") or ""
         verdict = v.get("verdict", "") or v.get("rating", "") or ""
         source = v.get("source", "") or ""
-        if snippet or verdict:
+        # The title often contains the actual claim being fact-checked
+        # Use title first, then snippet as fallback
+        claim_being_checked = title.strip() if title else (snippet[:200] if snippet else "")
+        
+        if snippet or verdict or title:
             verdict_context.append(
-                f"Source: {source}\nVerdict: {verdict}\nContext: {snippet[:200]}"
+                f"Source: {source}\n"
+                f"Title/Claim Being Fact-Checked: {claim_being_checked}\n"
+                f"Verdict/Rating: {verdict}\n"
+                f"Full Context: {snippet[:300] if snippet else 'No additional context'}"
             )
 
     if not verdict_context:
@@ -173,22 +181,37 @@ async def check_claim_verdict_alignment(
 
     context_text = "\n\n".join(verdict_context)
 
-    prompt = f"""You are a fact-checking assistant. Analyze if the verdicts from fact-checking sources are actually about the same claim as the user's query.
+    prompt = f"""You are a fact-checking assistant. Analyze if the verdicts from fact-checking sources are actually about the SAME claim as the user's query.
+
+CRITICAL: Pay special attention to:
+1. OPPOSITE claims (e.g., user says "X causes Y" but verdict is about "X doesn't cause Y")
+2. NEGATED claims (e.g., user says "A is true" but verdict is about "A is false")
+3. DIFFERENT claims (e.g., user asks about "smoking causes cancer" but verdict is about "smoking doesn't cause cancer")
 
 User's Claim Query: "{claim}"
 
 Fact-Checking Results:
 {context_text}
 
-Task: Determine if these fact-checking results are about the SAME claim as the user's query, or if they are about a DIFFERENT but related claim.
+Task: Determine if these fact-checking results are about the EXACT SAME claim as the user's query.
+
+Return aligned: false if:
+- The verdicts are about the OPPOSITE of the user's claim (e.g., user says "X causes Y" but verdict says "X doesn't cause Y")
+- The verdicts are about a NEGATED version of the claim
+- The verdicts are about a significantly different claim (different topic, different person, different event, different time period)
+- The verdicts contain negations that contradict the user's claim
+
+Return aligned: true ONLY if:
+- The verdicts are clearly about the SAME claim as the user's query
+- The verdicts address the exact same statement, even if they disagree on the verdict
 
 Respond ONLY with a JSON object in this exact format:
 {{
     "aligned": true or false,
-    "reason": "brief explanation of why aligned or not aligned"
+    "reason": "brief explanation of why aligned or not aligned. If not aligned, explain what the mismatch is (e.g., 'verdict is about opposite claim', 'verdict is about different topic', etc.)"
 }}
 
-Be strict: If the verdicts are about a significantly different claim (different topic, different person, different event), return aligned: false."""
+Be VERY strict: When in doubt, return aligned: false."""
 
     try:
         response_text, usage = _invoke_gemini(prompt, context="alignment-check")
