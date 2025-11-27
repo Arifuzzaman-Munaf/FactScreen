@@ -37,3 +37,4 @@ google-genai>=0.1.0
 
 # Frontend
 streamlit>=1.40.0
+watchdog>=6.0.0

@@ -79,12 +79,40 @@ def render_home_page() -> None:
                     <div class="processing-text">Analyzing Claim</div>
                     <div class="processing-steps">Cross-referencing fact-checkers • AI classification • Generating explanation</div>
                 </div>
+                <script>
+                    // Scroll to processing card when it becomes visible
+                    function scrollToProcessingCard() {
+                        const card = document.getElementById('processing-indicator');
+                        if (card) {
+                            card.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'center',
+                                inline: 'nearest'
+                            });
+                            return true;
+                        }
+                        return false;
+                    }
+                    
+                    // Try immediately
+                    if (!scrollToProcessingCard()) {
+                        // Retry when element appears
+                        const observer = new MutationObserver(() => {
+                            if (scrollToProcessingCard()) {
+                                observer.disconnect();
+                            }
+                        });
+                        observer.observe(document.body, { childList: true, subtree: true });
+                        
+                        // Also try with timeouts
+                        setTimeout(scrollToProcessingCard, 100);
+                        setTimeout(scrollToProcessingCard, 300);
+                        setTimeout(() => observer.disconnect(), 2000);
+                    }
+                </script>
                 """,
                 unsafe_allow_html=True,
             )
-            
-            # Scroll to processing indicator immediately
-            scroll_to_element("processing-indicator", delay=50)
             
             try:
                 # Make the API call
