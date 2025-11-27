@@ -160,15 +160,15 @@ def render_home_page() -> None:
             processing_placeholder.markdown(
                 """
                 <div class="processing-overlay">
-                    <div id="processing-indicator" class="processing-container">
-                        <div class="processing-loader"></div>
-                        <div class="processing-dots">
-                            <div class="processing-dot"></div>
-                            <div class="processing-dot"></div>
-                            <div class="processing-dot"></div>
-                        </div>
+                <div id="processing-indicator" class="processing-container">
+                    <div class="processing-loader"></div>
+                    <div class="processing-dots">
+                        <div class="processing-dot"></div>
+                        <div class="processing-dot"></div>
+                        <div class="processing-dot"></div>
+                    </div>
                         <div class="processing-text">Processing Claim</div>
-                        <div class="processing-steps">Cross-referencing fact-checkers • AI classification • Generating explanation</div>
+                    <div class="processing-steps">Cross-referencing fact-checkers • AI classification • Generating explanation</div>
                     </div>
                 </div>
                 """,

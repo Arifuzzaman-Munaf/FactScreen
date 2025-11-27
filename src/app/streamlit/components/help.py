@@ -18,7 +18,7 @@ def render_help_page() -> None:
     st.markdown(
         """
         <div class="hero-title">
-            ❓ Help & Documentation
+            Help & Documentation
         </div>
         """,
         unsafe_allow_html=True,
@@ -26,18 +26,57 @@ def render_help_page() -> None:
     
     st.markdown(
         """
+        <div class="hero-subtitle" style="max-width:900px;margin:0 auto 2rem auto;">
+            Quick walkthroughs, verdict definitions, and safety nets—everything you need to feel confident while using FactScreen.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        """
         <div class="content-card">
             <h2>How to Verify a Claim</h2>
             <ol>
-                <li><strong>Enter Claim:</strong> Type or paste the claim text or URL you wish to verify into the input field on the Home page.</li>
-                <li><strong>Start Verification:</strong> Click the <strong>"Verify Claim"</strong> button.</li>
-                <li><strong>Wait for Processing:</strong> The <strong>"Processing..."</strong> indicator will display. The FastAPI backend is designed to return a classified verdict within <strong>5 seconds</strong> under normal conditions.</li>
-                <li><strong>View Results:</strong> The <strong>Results Panel</strong> will update with the final verdict, confidence score, and supporting evidence.</li>
+                <li><strong>Paste or type a claim:</strong> Anything from a viral headline to a rumor you heard.</li>
+                <li><strong>Select “Verify Claim”:</strong> FactScreen queues up fact-checker APIs and AI analysis.</li>
+                <li><strong>Watch the processing overlay:</strong> The animation confirms every stage is running.</li>
+                <li><strong>Read the verdict card:</strong> Confidence, reasoning, and supporting evidence appear simultaneously.</li>
             </ol>
         </div>
         """,
         unsafe_allow_html=True,
     )
+
+    col1, col2 = st.columns(2, gap="large")
+    with col1:
+        st.markdown(
+            """
+            <div class="content-card">
+                <h2>When to Use FactScreen</h2>
+                <ul>
+                    <li>Before sharing a breaking-news claim.</li>
+                    <li>While preparing editorial content or reports.</li>
+                    <li>During classroom or newsroom fact-checking drills.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col2:
+        st.markdown(
+            """
+            <div class="content-card">
+                <h2>Need Assistance?</h2>
+                <ul>
+                    <li>Use the “Clear” button to start a fresh verification.</li>
+                    <li>Contact <strong><i>arifuzzamanmunaf@gmail.com</i></strong> for workflow guidance.</li>
+                    <li>Report suspicious results via the GitHub issues template.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
     
     st.markdown(
         """
@@ -88,8 +127,8 @@ def render_help_page() -> None:
             <ul>
                 <li><strong>API Timeouts:</strong> All external fact-checking API requests are subject to a maximum <strong>15-second timeout</strong>. If exceeded, the system immediately displays a <strong>System Error</strong> screen.</li>
                 <li><strong>System Error Recovery:</strong> If the server encounters an unhandled exception or network failure, the <strong>System Error UI</strong> provides a plain-language diagnosis and a constructive solution (the <strong>"Try Again"</strong> button).</li>
-                <li><strong>External API Fallback:</strong> If both external fact-checking APIs are unavailable, the backend automatically executes the <strong>Gemini 2.5 Flash LLM</strong> to determine a classification and explanation <strong>without external evidence</strong> (Alternate Flow 1 in UC-04).</li>
-                <li><strong>AI Disclaimer:</strong> All AI-generated outputs include a disclaimer clarifying that the results are probabilistic and are <strong>not legally binding</strong> (Business Rule BR-3).</li>
+                <li><strong>External API Fallback:</strong> If both external fact-checking APIs are unavailable, the backend automatically executes the <strong>Gemini 2.5 Flash LLM</strong> to determine a classification and explanation <strong>without external evidence</strong> .</li>
+                <li><strong>AI Disclaimer:</strong> All AI-generated outputs include a disclaimer clarifying that the results are probabilistic and are <strong>not legally binding</strong> .</li>
                 <li><strong>Input Validation:</strong> The UI actively prevents form submission if the input field is empty, displaying an error message like <strong>"Input cannot be empty"</strong> to prevent a client-side crash.</li>
             </ul>
         </div>

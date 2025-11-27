@@ -18,7 +18,7 @@ def render_about_page() -> None:
     st.markdown(
         """
         <div class="hero-title">
-            ℹ️ About FactScreen
+            About FactScreen
         </div>
         """,
         unsafe_allow_html=True,
@@ -26,10 +26,49 @@ def render_about_page() -> None:
     
     st.markdown(
         """
+        <div class="hero-subtitle" style="max-width:900px;margin:0 auto 2rem auto;">
+            FactScreen is a human-friendly AI companion that keeps misinformation in check with
+            rapid verification, transparent evidence, and beautiful storytelling.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        """
         <div class="content-card">
-            <h2>Product Name & Purpose</h2>
-            <p><strong>FactScreen: AI-Powered Fake News and Misinformation Classification System.</strong></p>
-            <p>FactScreen is a standalone, web-based application designed to combat the rapid spread of false or misleading digital information. It functions as a core verification engine for classifying and explaining the authenticity of claims extracted from text and URLs.</p>
+            <h2>Why FactScreen Exists</h2>
+            <p><strong>FactScreen</strong> combines trusted fact-checker feeds with modern AI classification to help anyone validate a claim in seconds. Paste a statement or URL, and the platform orchestrates evidence gathering, verdict generation, and narrative explanations—no research rabbit holes required.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    col1, col2 = st.columns(2, gap="large")
+    with col1:
+        st.markdown(
+            """
+            <div class="content-card">
+                <h2>Real-time Defense</h2>
+                <ul>
+                    <li>Multisource fact-checking pipelines with relevance filtering.</li>
+                    <li>Instant verdict card with animated confidence dial.</li>
+                    <li>Session memory so teams can compare multiple claims quickly.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col2:
+        st.markdown(
+            """
+            <div class="content-card">
+                <h2>Explainable AI</h2>
+                <ul>
+                    <li>Gemini 2.5 Flash summarizes why the verdict landed where it did.</li>
+                    <li>Source tables highlight the third-party citations powering each label.</li>
+                    <li>Design language mirrors the verdict colors to reinforce trust.</li>
+                </ul>
         </div>
         """,
         unsafe_allow_html=True,
@@ -39,12 +78,12 @@ def render_about_page() -> None:
         """
         <div class="content-card">
             <h2>Primary Objectives</h2>
-            <p>The system's architecture is structured to deliver four core goals:</p>
+            <p>Everything inside FactScreen is optimized for four outcomes:</p>
             <ul>
-                <li><strong>Automate Verification:</strong> Identify and verify online claims in real-time.</li>
-                <li><strong>Improve Trust:</strong> Provide transparency through evidence-driven, explainable summary reports.</li>
-                <li><strong>Accessibility:</strong> Support public digital literacy by providing an accessible, web-based verification tool.</li>
-                <li><strong>Accuracy:</strong> Maintain high precision through multi-source verification and advanced Natural Language Processing (NLP).</li>
+                <li><strong>Automate Verification:</strong> Identify and classify claims in real time.</li>
+                <li><strong>Improve Trust:</strong> Share evidence-backed stories instead of raw predictions.</li>
+                <li><strong>Accessibility:</strong> A single-page interface that works on desktop or tablet.</li>
+                <li><strong>Accuracy:</strong> Multi-source validation plus semantic filtering for relevance.</li>
             </ul>
         </div>
         """,
@@ -67,14 +106,5 @@ def render_about_page() -> None:
         unsafe_allow_html=True,
     )
     
-    st.markdown(
-        """
-        <div class="content-card">
-            <h2>Project Details</h2>
-            <p><strong>Version:</strong> 1.0</p>
-            <p><strong>Prepared by:</strong> Md. Arifuzzaman Munaf</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    # Project details card intentionally removed per latest design request.
 
