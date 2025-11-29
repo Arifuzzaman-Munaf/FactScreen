@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Tuple
 import asyncio
 
 import httpx
@@ -11,6 +11,92 @@ from src.app.services.gemini_service import (
     classify_with_gemini,
     generate_explanation_from_sources,
 )
+
+
+def _check_claim_verdict_alignment(
+    claim_text: str, provider_results: List[ProviderResult]
+) -> Tuple[bool, float]:
+    """
+    Check if provider verdicts are aligned with the actual claim.
+    
+    This function checks if the fact-checking results are about the same claim
+    or a related/opposite claim. Returns alignment status and confidence.
+    
+    Args:
+        claim_text: The original claim being verified
+        provider_results: List of provider results with verdicts
+        
+    Returns:
+        Tuple of (is_aligned: bool, alignment_confidence: float)
+    """
+    if not provider_results or not claim_text:
+        return True, 1.0  # If no results, consider aligned (will use Gemini)
+    
+    # Extract key terms from the claim (simple approach)
+    claim_lower = claim_text.lower()
+    claim_words = set(word for word in claim_lower.split() if len(word) > 3)
+    
+    # Check each provider result's title/summary for alignment
+    aligned_count = 0
+    total_checked = 0
+    
+    for res in provider_results:
+        if res.verdict == Verdict.UNKNOWN:
+            continue
+            
+        total_checked += 1
+        # Get the text being fact-checked (title or summary)
+        fact_checked_text = (res.title or res.summary or "").lower()
+        
+        if not fact_checked_text:
+            # If no text, assume misaligned to be safe
+            continue
+        
+        # Check for direct match or high overlap
+        fact_words = set(word for word in fact_checked_text.split() if len(word) > 3)
+        
+        # Calculate word overlap
+        if claim_words and fact_words:
+            overlap = len(claim_words.intersection(fact_words))
+            overlap_ratio = overlap / max(len(claim_words), len(fact_words))
+            
+            # Check for opposite claims (e.g., "east" vs "west", "true" vs "false")
+            opposite_indicators = [
+                ("east", "west"), ("west", "east"),
+                ("north", "south"), ("south", "north"),
+                ("true", "false"), ("false", "true"),
+                ("yes", "no"), ("no", "yes"),
+                ("rise", "set"), ("set", "rise"),
+                ("up", "down"), ("down", "up"),
+                ("increase", "decrease"), ("decrease", "increase"),
+                ("more", "less"), ("less", "more"),
+            ]
+            
+            is_opposite = False
+            for term1, term2 in opposite_indicators:
+                # Check if one term is in claim and the opposite is in fact-checked text
+                if (term1 in claim_lower and term2 in fact_checked_text) or \
+                   (term2 in claim_lower and term1 in fact_checked_text):
+                    is_opposite = True
+                    break
+            
+            # If it's an opposite claim, consider it misaligned
+            if is_opposite:
+                continue
+            
+            # Consider aligned if overlap ratio is reasonable (>= 0.3) or exact match
+            if overlap_ratio >= 0.3 or claim_lower in fact_checked_text or fact_checked_text in claim_lower:
+                aligned_count += 1
+    
+    # If we checked results, calculate alignment ratio
+    if total_checked > 0:
+        alignment_ratio = aligned_count / total_checked
+        # Consider aligned if at least 50% of results are aligned
+        is_aligned = alignment_ratio >= 0.5
+        return is_aligned, alignment_ratio
+    
+    # If no results to check, consider aligned
+    return True, 1.0
 
 
 async def aggregate_results(
@@ -35,6 +121,9 @@ async def aggregate_results(
     Returns:
         An AggregatedResult object containing the final verdict, confidence, and explanation.
     """
+    # Check if provider verdicts are aligned with the actual claim
+    is_aligned, alignment_confidence = _check_claim_verdict_alignment(claim_text, provider_results)
+    
     # Count the number of providers supporting each verdict
     votes = Counter(res.verdict for res in provider_results if res.verdict != Verdict.UNKNOWN)
     # Get the most common verdict
@@ -46,10 +135,29 @@ async def aggregate_results(
     # Initialize the sources for the explanation to the sources provided
     sources_for_explanation: List[Dict[str, Optional[str]]] = list(sources or [])
 
-    # If we have verdicts, generate explanation from available sources
-    # Note: Alignment checking was removed - system trusts fact-checking providers
-    # return relevant results for the user's claim
-    if provider_results and any(r.verdict != Verdict.UNKNOWN for r in provider_results):
+    # If verdicts are not aligned with the claim, fallback to Gemini
+    # This handles cases where fact-checkers return results for opposite/related claims
+    if not is_aligned and final != Verdict.UNKNOWN:
+        # Verdicts exist but don't align with the claim - use Gemini instead
+        # Pass sources to Gemini so it can mention if they're about opposite/related claims
+        gemini_label, gemini_confidence, gemini_explanation = await classify_with_gemini(
+            claim_text, sources
+        )
+        # Map Gemini label to Verdict enum
+        if gemini_label == "True":
+            final = Verdict.TRUE
+        elif gemini_label == "False":
+            final = Verdict.MISLEADING
+        else:
+            final = Verdict.UNKNOWN
+
+        confidence = gemini_confidence
+        explanation = gemini_explanation
+        # Keep sources but note they may be about opposite/related claims
+        # Gemini will handle this in its explanation
+        sources_for_explanation = list(sources or [])
+    # If we have aligned verdicts, generate explanation from available sources
+    elif provider_results and any(r.verdict != Verdict.UNKNOWN for r in provider_results) and is_aligned:
         # Convert provider results to dict format for explanation generation
         # Include title as it often contains the actual claim being fact-checked
         verdicts_list = []

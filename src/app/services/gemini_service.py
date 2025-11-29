@@ -234,26 +234,34 @@ Claim to verify: "{claim}"
 Fact-Checking Sources:
 {sources_text}
 
+IMPORTANT: The sources above may be about related or opposite claims (e.g., if the claim is "The sun rises in the east", sources might be about "The sun rises in the west"). 
+- If sources are about an OPPOSITE claim, use your knowledge to evaluate the ORIGINAL claim
+- If sources are about a RELATED claim, use them as context but focus on the ORIGINAL claim
+- If sources don't match the claim at all, rely on your knowledge to classify the claim
+
 Task:
-1. Analyze the claim against the provided fact-checking sources
+1. Analyze the claim against the provided fact-checking sources (if relevant) AND your knowledge
 2. Classify the claim as "True", "False", or "Unclear"
 3. Provide a confidence score between 0.0 and 1.0
-4. Generate a clear, concise explanation based on the sources
+4. Generate a clear, concise explanation:
+   - If sources are relevant and match the claim, cite them
+   - If sources are about opposite/related claims, mention this and use your knowledge
+   - If sources don't match, rely on your knowledge and mention authoritative sources if possible
+   - Always provide a clear explanation even if sources don't directly match
 
 Respond ONLY with a JSON object in this exact format:
 {{
     "label": "True" or "False" or "Unclear",
     "confidence": 0.0 to 1.0,
-    "explanation": "detailed explanation based on the sources provided,
-cite specific sources when possible"
+    "explanation": "detailed explanation. If sources match, cite them. If sources are about opposite/related claims, mention this and use your knowledge. Always provide a clear explanation."
 }}
 
 Guidelines:
-- "True": Claim is accurate and supported by sources
-- "False": Claim is inaccurate or misleading, contradicted by sources
-- "Unclear": Insufficient information or conflicting evidence
-- Confidence should reflect how certain you are based on source quality and agreement
-- Explanation should reference specific sources and their verdicts"""
+- "True": Claim is accurate and supported by evidence or knowledge
+- "False": Claim is inaccurate or misleading, contradicted by evidence or knowledge
+- "Unclear": Insufficient information to determine
+- Confidence should reflect your certainty level
+- Explanation should be informative and cite sources when relevant, or use your knowledge when sources don't match"""
     else:
         prompt = f"""You are a fact-checking assistant. Classify the following claim.
 

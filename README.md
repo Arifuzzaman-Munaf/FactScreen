@@ -12,34 +12,93 @@ A comprehensive fact-checking API that combines multiple sources and uses AI for
 
 ## Quick Start
 
-### Option 1: Using Make (Recommended)
+### Option 1: Run Full Application (Frontend + Backend) - Recommended
+```bash
+# Setup development environment (first time only)
+make install
+
+# Start both backend and frontend together
+make run-app
+```
+
+This will:
+- Start the backend API server on http://localhost:8000
+- Start the Streamlit frontend on http://localhost:8501
+- Automatically handle port conflicts
+- Wait for backend to be ready before starting frontend
+
+**Access the application:**
+- **Frontend**: http://localhost:8501
+- **Backend API**: http://localhost:8000
+- **Swagger API Docs**: http://localhost:8000/docs (Interactive API documentation)
+- **ReDoc**: http://localhost:8000/redoc (Alternative API documentation)
+- **OpenAPI Schema**: http://localhost:8000/openapi.json (Raw OpenAPI specification)
+
+### Option 2: Run Backend Only
 ```bash
 # Setup development environment
 make dev
 
-# Start the server
+# Start the backend server only
 make run-server
 
-# Run tests
-make test
+# Access API documentation
+# Swagger UI: http://localhost:8000/docs
+# ReDoc: http://localhost:8000/redoc
 ```
 
-### Option 2: Manual Setup
+### Option 3: Run Frontend Only (requires backend running)
+```bash
+# Start the frontend (backend must be running separately)
+make run-frontend
+
+# Frontend will be available at: http://localhost:8501
+```
+
+### Option 4: Manual Setup
 ```bash
 # 1. Install dependencies
 pip install -r requirements-dev.txt
 
-# 2. Start the server
+# 2. Start the backend server
 python entrypoint/server.py
 
-# 3. Test the API
+# 3. In another terminal, start the frontend
+streamlit run src/app/streamlit/main.py
+
+# 4. Test the API
 make test
 ```
 
-### 4. Access Documentation
-- **Interactive docs**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **OpenAPI schema**: http://localhost:8000/openapi.json
+## API Documentation
+
+FactScreen provides comprehensive API documentation through Swagger UI and ReDoc:
+
+### Swagger UI (Interactive)
+- **URL**: http://localhost:8000/docs
+- **Features**: 
+  - Interactive API testing interface
+  - Try out endpoints directly from the browser
+  - View request/response schemas
+  - See example requests and responses
+  - Test authentication (if configured)
+
+### ReDoc (Alternative Documentation)
+- **URL**: http://localhost:8000/redoc
+- **Features**:
+  - Clean, readable documentation format
+  - Better for printing and sharing
+  - Three-column layout with navigation
+
+### OpenAPI Schema (Raw JSON)
+- **URL**: http://localhost:8000/openapi.json
+- **Use cases**:
+  - Import into API clients (Postman, Insomnia, etc.)
+  - Generate client SDKs
+  - API contract validation
+  - Integration with API gateways
+
+**Note**: All documentation is automatically generated from your API code and updates in real-time as you develop.
 
 ## API Endpoints
 
@@ -145,8 +204,10 @@ FactScreen/
 make install          # Install dependencies
 make dev              # Setup development environment
 
-# Development
-make run-server       # Start development server
+# Running the Application
+make run-app          # Start both backend and frontend together (recommended)
+make run-server       # Start backend server only
+make run-frontend     # Start frontend only (requires backend running)
 make stop-server      # Stop development server
 make clean            # Clean cache files
 
@@ -233,31 +294,65 @@ See [tests/README_TEST.md](tests/README_TEST.md) for detailed testing documentat
 
 ## Streamlit Frontend
 
-A lightweight Streamlit presentation layer lives in `src/app/streamlit/`.
+A lightweight Streamlit presentation layer lives in `src/app/streamlit/` that provides a user-friendly interface for fact-checking.
 
-### Run locally
+### Running the Frontend
+
+**Recommended**: Use `make run-app` to start both backend and frontend together.
+
+**Alternative**: Run frontend separately (requires backend to be running):
 
 ```bash
-# activate venv if not already done
-make install
-
-# Option 1: Using make command (recommended)
+# Option 1: Using make command
 make run-frontend
 
 # Option 2: Direct streamlit command
-# The code automatically handles Python path, works on any device
 FACTSCREEN_API_URL=http://localhost:8000 streamlit run src/app/streamlit/main.py
 ```
 
-Environment variables (loaded from `.env`) must include the API keys noted above.  
+**Frontend URL**: http://localhost:8501 (or alternative port if 8501 is in use)
+
+### Frontend Features
+
+- Interactive claim validation interface
+- URL and text input support
+- Real-time fact-checking results
+- PDF report generation
+- Visual verdict display with confidence scores
+- Source citations and explanations
+
+**Note**: Environment variables (loaded from `.env`) must include the API keys.  
 `FACTSCREEN_API_URL` defaults to `http://localhost:8000` but can be overridden when the backend runs elsewhere.
 
 ## Running the Application
 
-### Development
+### Full Stack (Frontend + Backend)
+```bash
+# Start both frontend and backend together
+make run-app
+```
+
+This is the recommended way to run the application. It will:
+1. Check and free ports 8000 (backend) and 8501 (frontend)
+2. Start the backend API server
+3. Wait for backend to be fully ready (health check)
+4. Start the Streamlit frontend
+5. Display all access URLs
+
+**Access Points:**
+- Frontend: http://localhost:8501
+- Backend API: http://localhost:8000
+- Swagger Docs: http://localhost:8000/docs
+
+### Backend Only
 ```bash
 make dev
 make run-server
+```
+
+### Frontend Only (requires backend running)
+```bash
+make run-frontend
 ```
 
 ## Installation
