@@ -1,7 +1,7 @@
 # FactScreen API Makefile
 # OS-agnostic Makefile for cross-platform compatibility
 
-.PHONY: help install clean _clean test test-api test-services test-pipelines test-integration test-coverage test-all test-report test-report-serve run-server stop-server lint format check-deps dev run-frontend run-app
+.PHONY: help install clean _clean test test-api test-services test-pipelines test-integration test-coverage test-all test-report test-report-allure run-server stop-server lint format check-deps dev run-frontend run-app
 
 FACTSCREEN_API_URL ?= http://localhost:8000
 
@@ -355,7 +355,7 @@ test-report:
 		allure generate allure-results -o allure-report --clean; \
 		echo ""; \
 		echo "✔ Allure report generated in: allure-report/index.html"; \
-		echo "Run 'make test-report-serve' to view it in browser"; \
+		echo "Run 'make test-report-allure' to view it in browser"; \
 	else \
 		echo ""; \
 		echo "⚠️  Allure CLI not available. Test results saved to: allure-results/"; \
@@ -367,7 +367,7 @@ test-report:
 	$(MAKE) _clean; \
 	exit $$EXIT_CODE
 
-test-report-serve:
+test-report-allure:
 	@if [ ! -d "allure-results" ] && [ ! -d "allure-report" ]; then \
 		echo "Allure results not found. Run 'make test-report' first."; \
 		exit 1; \
@@ -480,7 +480,7 @@ help:
 	@echo "  test-coverage  Run tests with coverage report"
 	@echo "  test-all       Run all tests with verbose output"
 	@echo "  test-report    Generate Allure test report"
-	@echo "  test-report-serve Serve Allure report in browser"
+	@echo "  test-report-allure Serve Allure report in browser"
 	@echo ""
 	@echo "Code Quality:"
 	@echo "  lint           Run linting checks"
