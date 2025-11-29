@@ -1,15 +1,14 @@
 from collections import Counter
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict
 import asyncio
 
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
-from src.app.models.schemas import AggregatedResult, ProviderName, ProviderResult, Verdict
+from src.app.models.schemas import AggregatedResult, ProviderResult, Verdict
 from src.app.core.config import settings
 from src.app.services.gemini_service import (
     classify_with_gemini,
-    check_claim_verdict_alignment,
     generate_explanation_from_sources,
 )
 
@@ -17,19 +16,32 @@ from src.app.services.gemini_service import (
 async def aggregate_results(
     claim_text: str, provider_results: List[ProviderResult], sources: Optional[List[Dict]] = None
 ) -> AggregatedResult:
-    """Choose a final verdict and compute confidence.
+    """Choose a final verdict and compute confidence using majority vote
 
-    Rule requested: If ANY provider has a proper label (non-UNKNOWN), show that as the
-    final label. Preference order: GOOGLE > RAPID. Always include all
-    provider sources in the response. If none provide a label, use Gemini classification.
+    Rules:
+    - Final verdict is determined by majority vote among non-UNKNOWN provider verdicts.
+    - Confidence is calculated as: count_of_providers_supporting_final / count_of_all_non_unknown_verdicts.
+    - Always include all provider sources in the response.
+    - If no providers return a non-UNKNOWN verdict, fall back to Gemini classification.
+    - Explanation is generated from available sources using Gemini.
 
-    If verdicts exist, check alignment with claim. If misaligned, use Gemini fallback.
+    Args:
+        claim_text: The text of the claim to fact-check.
+        provider_results: The provider results to aggregate.
+        sources: Optional sources to use for the explanation.
+
+    Returns:
+        An AggregatedResult object containing the final verdict, confidence, and explanation.
     """
+    # Count the number of providers supporting each verdict
     votes = Counter(res.verdict for res in provider_results if res.verdict != Verdict.UNKNOWN)
+    # Get the most common verdict
     final = votes.most_common(1)[0][0] if votes else Verdict.UNKNOWN
-
+    # Get the providers that supported the final verdict
     providers = [r.provider for r in provider_results]
+    # Initialize the explanation to None
     explanation: Optional[str] = None
+    # Initialize the sources for the explanation to the sources provided
     sources_for_explanation: List[Dict[str, Optional[str]]] = list(sources or [])
 
     # If we have verdicts, check alignment and generate explanation
@@ -37,7 +49,9 @@ async def aggregate_results(
         # Convert provider results to dict format for alignment check
         # Include title as it often contains the actual claim being fact-checked
         verdicts_list = []
+        # Iterate over the provider results
         for res in provider_results:
+            # If the provider result is not UNKNOWN, add it to the verdicts list
             if res.verdict != Verdict.UNKNOWN:
                 verdicts_list.append(
                     {
@@ -50,13 +64,13 @@ async def aggregate_results(
                     }
                 )
 
-        # Use sources for alignment check if available (they have more context)
-        # Otherwise use verdicts_list
-        alignment_sources = sources if sources else verdicts_list
-
-        if verdicts_list and alignment_sources:
+        # If there are verdicts and sources, generate an explanation from the sources
+        if verdicts_list and sources:
+            # Generate an explanation from the sources
             explanation = await generate_explanation_from_sources(claim_text, sources)
+            # Set the sources for the explanation to the sources provided
             sources_for_explanation = list(sources or [])
+        # If there are verdicts but no sources, generate an explanation from the provider results
         elif verdicts_list:
             # Have verdicts but no sources dict - generate explanation from provider results
             sources_dict = [
@@ -70,6 +84,7 @@ async def aggregate_results(
                 for res in provider_results
                 if res.verdict != Verdict.UNKNOWN
             ]
+            # If there are sources, generate an explanation from the sources
             if sources_dict:
                 explanation = await generate_explanation_from_sources(claim_text, sources_dict)
                 sources_for_explanation = sources_dict
@@ -80,6 +95,7 @@ async def aggregate_results(
             claim_text, sources
         )
         # Map Gemini label to Verdict enum
+        # If the Gemini label is TRUE, set the final verdict to TRUE
         if gemini_label == "True":
             final = Verdict.TRUE
         elif gemini_label == "False":
@@ -91,6 +107,7 @@ async def aggregate_results(
         explanation = gemini_explanation
         sources_for_explanation = list(sources or [])
     else:
+        # If there are verdicts, calculate the confidence
         labeled_total = sum(count for verdict, count in votes.items() if verdict != Verdict.UNKNOWN)
         confidence = votes[final] / labeled_total if labeled_total and final in votes else 0.0
         confidence = float(max(0.0, min(1.0, confidence)))
@@ -99,8 +116,9 @@ async def aggregate_results(
         if not explanation and sources:
             explanation = await generate_explanation_from_sources(claim_text, sources)
             sources_for_explanation = list(sources or [])
-
+    # Attach the sources to the explanation
     explanation = _attach_sources_block(explanation, sources_for_explanation)
+    # Return the aggregated result
     return AggregatedResult(
         claim_text=claim_text,
         verdict=final,
@@ -115,11 +133,19 @@ async def aggregate_results(
 def _attach_sources_block(
     explanation: Optional[str], sources: Optional[List[Dict[str, Optional[str]]]]
 ) -> Optional[str]:
-    """Append a bullet list of sources to the explanation."""
+    """Append a bullet list of sources to the explanation.
+    Args:
+        explanation: The explanation to append the sources to
+        sources: The sources to append to the explanation
+    Returns:
+        The explanation with the sources appended
+    """
+    # If the explanation is not provided, return the explanation
     if not explanation:
         return explanation
 
     lines: List[str] = []
+    # If the sources are provided, iterate over the sources
     if sources:
         for src in sources:
             source_name = (
@@ -136,68 +162,44 @@ def _attach_sources_block(
             detail = " | ".join(parts)
             if url:
                 detail = f"{detail} | {url}"
+            # Add the detail to the lines
             lines.append(detail)
 
+    # If there are no lines, return the explanation
     if not lines:
         return explanation
     sources_block = "\n".join(f"- {line}" for line in lines)
     return f"{explanation}\n\nSources:\n{sources_block}"
 
 
-Label = str  # "True" | "False" | "Unclear"
-NormalizedHit = Dict[str, Optional[str]]  # {verdict, snippet, source, url}
+def _normalize_label(raw: str) -> str:
+    """Normalize a raw rating string to a standardized label using keywords from config.
 
-
-def _normalize_label(raw: str) -> Label:
+    Args:
+        raw: Raw rating text from fact-checking provider.
+    Returns:
+        A normalized label: "True", "False", or "Unclear".
+    """
+    # Normalize the raw rating text to lowercase
     r = (raw or "").lower()
-    # Positive cues
-    if any(
-        k in r
-        for k in [
-            "true",
-            "mostly true",
-            "accurate",
-            "correct",
-            "supported",
-            "verified",
-            "substantiated",
-            "well-supported",
-        ]
-    ):
+    # Get keywords from settings (loaded from config/local.yaml)
+    true_keywords = settings.classification_true_keywords or []
+    false_keywords = settings.classification_false_keywords or []
+
+    # Check for positive cues
+    if any(k in r for k in true_keywords):
         return "True"
-    # Negative cues (map to False; we'll expose rating separately as "Misleading")
-    if any(
-        k in r
-        for k in [
-            "false",
-            "mostly false",
-            "inaccurate",
-            "incorrect",
-            "fake",
-            "pants",
-            "misleading",
-            "partly false",
-            "unsupported",
-            "no evidence",
-            "not supported",
-            "debunked",
-        ]
-    ):
+    # Check for negative cues (map to False)
+    if any(k in r for k in false_keywords):
         return "False"
     return "Unclear"
 
-
-def _score(label: Label) -> float:
-    return {"True": 0.8, "False": 0.8, "Unclear": 0.5}.get(label, 0.5)
-
-
+# Transient exceptions
 _transient = (httpx.ConnectTimeout, httpx.ReadTimeout, httpx.RemoteProtocolError)
-
 
 def _get_timeout() -> int:
     """Get request timeout value."""
     return int(settings.request_timeout or 15)
-
 
 @retry(
     stop=stop_after_attempt(2),
@@ -205,24 +207,36 @@ def _get_timeout() -> int:
     reraise=True,
     retry=retry_if_exception_type(_transient),
 )
-async def _google(query: str) -> List[NormalizedHit]:
+async def _google(query: str) -> List[Dict[str, Optional[str]]]:
+    """Search Google Fact Check for the claim.
+    Args:
+        query: The claim to search for
+    Returns:
+        A list of normalized hits
+    """
+
     if not (
         settings.google_api_key
         and settings.google_factcheck_url
         and settings.google_factcheck_endpoint
     ):
         return []
+    # Get the base URL and endpoint
     base = str(settings.google_factcheck_url).rstrip("/")
     endpoint = str(settings.google_factcheck_endpoint).lstrip("/")
+    # Construct the URL
     url = f"{base}/{endpoint}"
+    # Construct the parameters
     params = {"query": query, "key": settings.google_api_key}
+    # Make the request
     async with httpx.AsyncClient(timeout=_get_timeout()) as client:
         r = await client.get(url, params=params)
+        # If the status code is greater than or equal to 400, return an empty list
         if r.status_code >= 400:
             return []
         data = r.json()
     claims = data.get("claims", []) if isinstance(data, dict) else []
-    hits: List[NormalizedHit] = []
+    hits: List[Dict[str, Optional[str]]] = []
     for c in claims:
         for rev in c.get("claimReview", []) or []:
             verdict_raw = (
@@ -230,6 +244,7 @@ async def _google(query: str) -> List[NormalizedHit]:
                 or rev.get("reviewRating", {}).get("alternateName")
                 or rev.get("textualRating")
             )
+            # Add the hit to the list
             hits.append(
                 {
                     "provider": "google_factcheck",
@@ -249,14 +264,22 @@ async def _google(query: str) -> List[NormalizedHit]:
     reraise=True,
     retry=retry_if_exception_type(_transient),
 )
-async def _rapid(query: str) -> List[NormalizedHit]:
+async def _rapid(query: str) -> List[Dict[str, Optional[str]]]:
+    """Search RapidAPI Fact Check for the claim.
+    Args:
+        query: The claim to search for
+    Returns:
+        A list of normalized hits
+    """
     if not (
         settings.fact_checker_api_key
         and settings.fact_checker_url
         and settings.fact_checker_endpoint
     ):
         return []
+    # Get the host and URL
     host = str(settings.fact_checker_url).strip("/")
+    # Construct the URL
     url = f"https://{host}/{str(settings.fact_checker_endpoint).lstrip('/')}"
     headers = {
         "X-RapidAPI-Key": settings.fact_checker_api_key,
@@ -268,8 +291,10 @@ async def _rapid(query: str) -> List[NormalizedHit]:
         if r.status_code >= 400:
             return []
         data = r.json()
+    # Get the items
     items = data if isinstance(data, list) else data.get("results", [])
-    hits: List[NormalizedHit] = []
+    hits: List[Dict[str, Optional[str]]] = []
+    # Iterate over the items
     for it in items[:5]:
         raw = it.get("verdict") or it.get("label") or it.get("rating") or it.get("textualRating")
         hits.append(
@@ -285,36 +310,38 @@ async def _rapid(query: str) -> List[NormalizedHit]:
     return hits
 
 
-async def search_all(claim: str) -> List[NormalizedHit]:
+async def search_all(claim: str) -> List[Dict[str, Optional[str]]]:
+    """Search all fact checkers for the claim.
+    Args:
+        claim: The claim to search for
+    Returns:
+        A list of normalized hits
+    """
+    # Search all fact checkers
     results = await asyncio.gather(_google(claim), _rapid(claim), return_exceptions=True)
-    merged: List[NormalizedHit] = []
+    # Merge the results
+    merged: List[Dict[str, Optional[str]]] = []
     for res in results:
         if isinstance(res, list):
             merged.extend(res)
     # keep only top-5 per provider
-    per: Dict[str, List[NormalizedHit]] = {
+    per: Dict[str, List[Dict[str, Optional[str]]]] = {
         "google_factcheck": [],
         "rapidapi_fact_checker": [],
     }
+    # Iterate over the merged results
     for h in merged:
+        # Get the provider
         prov = h.get("provider") or "unknown"
+        # If the provider is not in the dictionary, add it
         if prov not in per:
+            # Add the provider to the dictionary
             per[prov] = []
         if len(per[prov]) < 5:
             per[prov].append(h)
-    out: List[NormalizedHit] = []
+    out: List[Dict[str, Optional[str]]] = []
+    # Iterate over the providers
     for k in ["google_factcheck", "rapidapi_fact_checker"]:
+        # Add the provider to the list
         out.extend(per.get(k, []))
     return out
-
-
-def aggregate(hits: List[NormalizedHit]) -> Tuple[Label, float]:
-    if not hits:
-        return "Unclear", 0.5
-    score = {"True": 0.0, "False": 0.0, "Unclear": 0.0}
-    for h in hits:
-        score[h.get("verdict") or "Unclear"] += _score(h.get("verdict") or "Unclear")
-    label = max(score, key=score.get)
-    total = sum(score.values()) or 1.0
-    confidence = min(0.95, max(0.55, score[label] / total))
-    return label, float(confidence)
