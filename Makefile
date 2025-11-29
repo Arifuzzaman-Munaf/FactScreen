@@ -122,7 +122,7 @@ test-api:
 		exit 1; \
 	fi
 	@echo "Running API route tests..."
-	@$(PYTHON) -m pytest tests/test_api_routes.py -v; EXIT_CODE=$$?; \
+	@$(PYTHON) -m pytest tests/integration/test_api_routes.py -v; EXIT_CODE=$$?; \
 	$(MAKE) _clean; \
 	exit $$EXIT_CODE
 
@@ -134,7 +134,7 @@ test-services:
 		exit 1; \
 	fi
 	@echo "Running core services tests..."
-	@$(PYTHON) -m pytest tests/test_core_services.py -v; EXIT_CODE=$$?; \
+	@$(PYTHON) -m pytest tests/unit/services/ -v; EXIT_CODE=$$?; \
 	$(MAKE) _clean; \
 	exit $$EXIT_CODE
 
@@ -146,7 +146,7 @@ test-pipelines:
 		exit 1; \
 	fi
 	@echo "Running data pipeline tests..."
-	@$(PYTHON) -m pytest tests/test_data_pipelines.py -v; EXIT_CODE=$$?; \
+	@$(PYTHON) -m pytest tests/unit/pipelines/ -v; EXIT_CODE=$$?; \
 	$(MAKE) _clean; \
 	exit $$EXIT_CODE
 
@@ -158,7 +158,7 @@ test-integration:
 		exit 1; \
 	fi
 	@echo "Running integration workflow tests..."
-	@$(PYTHON) -m pytest tests/test_integration_workflows.py -v; EXIT_CODE=$$?; \
+	@$(PYTHON) -m pytest tests/integration/ -v; EXIT_CODE=$$?; \
 	$(MAKE) _clean; \
 	exit $$EXIT_CODE
 

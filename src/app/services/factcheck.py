@@ -46,9 +46,11 @@ async def aggregate_results(
     # Initialize the sources for the explanation to the sources provided
     sources_for_explanation: List[Dict[str, Optional[str]]] = list(sources or [])
 
-    # If we have verdicts, check alignment and generate explanation
+    # If we have verdicts, generate explanation from available sources
+    # Note: Alignment checking was removed - system trusts fact-checking providers
+    # return relevant results for the user's claim
     if provider_results and any(r.verdict != Verdict.UNKNOWN for r in provider_results):
-        # Convert provider results to dict format for alignment check
+        # Convert provider results to dict format for explanation generation
         # Include title as it often contains the actual claim being fact-checked
         verdicts_list = []
         # Iterate over the provider results

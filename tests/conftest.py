@@ -11,6 +11,15 @@ project_root = os.path.dirname(os.path.dirname(__file__))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
+import requests  
+
+from src.app.models.schemas import ( 
+    AggregatedResult,
+    ProviderResult,
+    Verdict,
+    ProviderName,
+)
+
 
 @pytest.fixture
 def mock_google_api_response():
@@ -92,7 +101,6 @@ def api_base_url():
 @pytest.fixture(scope="session")
 def server_required():
     """Fixture to check if server is required for tests"""
-    import requests
 
     try:
         response = requests.get("http://localhost:8000/v1/health", timeout=5)
@@ -106,3 +114,77 @@ def skip_if_no_server(server_required):
     """Skip test if server is not running"""
     if not server_required:
         pytest.skip("Server not running - skipping integration test")
+
+
+@pytest.fixture
+def mock_aggregated_result():
+    """Create a mock AggregatedResult for testing."""
+    # Return a mock AggregatedResult for testing
+    return AggregatedResult(
+        claim_text="Test claim",
+        verdict=Verdict.TRUE,
+        votes={Verdict.TRUE: 2, Verdict.MISLEADING: 1},
+        provider_results=[
+            ProviderResult(
+                provider=ProviderName.GOOGLE,
+                verdict=Verdict.TRUE,
+                rating="True",
+                title="Test Title",
+                summary="Test Summary",
+            ),
+            ProviderResult(
+                provider=ProviderName.RAPID,
+                verdict=Verdict.TRUE,
+                rating="True",
+                title="Test Title 2",
+                summary="Test Summary 2",
+            ),
+        ],
+        providers_checked=[ProviderName.GOOGLE, ProviderName.RAPID],
+        confidence=0.85,
+        explanation="Test explanation",
+    )
+
+
+@pytest.fixture
+def mock_provider_results():
+    """Create mock provider results for testing."""
+    return [
+        ProviderResult(
+            provider=ProviderName.GOOGLE,
+            verdict=Verdict.TRUE,
+            rating="True",
+            title="Google Title",
+            summary="Google summary",
+            source_url="https://google-test.com",
+        ),
+        ProviderResult(
+            provider=ProviderName.RAPID,
+            verdict=Verdict.MISLEADING,
+            rating="False",
+            title="Rapid Title",
+            summary="Rapid summary",
+            source_url="https://rapid-test.com",
+        ),
+    ]
+
+
+@pytest.fixture
+def mock_sources():
+    """Create mock sources for testing."""
+    return [
+        {
+            "snippet": "Test snippet 1",
+            "verdict": "True",
+            "rating": "True",
+            "source": "Test Source 1",
+            "url": "https://example.com/1",
+        },
+        {
+            "snippet": "Test snippet 2",
+            "verdict": "False",
+            "rating": "False",
+            "source": "Test Source 2",
+            "url": "https://example.com/2",
+        },
+    ]
