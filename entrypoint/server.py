@@ -10,6 +10,11 @@ import platform
 import signal
 import time
 
+# get the project root directory
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
 from src.app.core.config import settings
 
 def is_port_in_use(port, host="127.0.0.1"):
