@@ -18,7 +18,7 @@ from src.app.services.claim_extract import ClaimExtractionService
 from src.app.services.report import generate_pdf_report
 from src.pipelines.feature_eng_pipeline import SimilarityFilterService
 from src.pipelines.inference_pipeline import ClaimClassificationService
-from src.pipelines.validation_pipeline import validate_text, validate_url, validate_image
+from src.pipelines.validation_pipeline import validate_text, validate_url
 
 # Initialize API router
 router = APIRouter()

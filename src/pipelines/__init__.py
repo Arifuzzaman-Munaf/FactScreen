@@ -7,7 +7,6 @@ from .inference_pipeline import ClaimClassificationService
 from .validation_pipeline import (
     validate_text,
     validate_url,
-    validate_image,
     analyze,
     analyze_detailed,
 )
@@ -17,7 +16,6 @@ __all__ = [
     "ClaimClassificationService",
     "validate_text",
     "validate_url",
-    "validate_image",
     "analyze",
     "analyze_detailed",
 ]

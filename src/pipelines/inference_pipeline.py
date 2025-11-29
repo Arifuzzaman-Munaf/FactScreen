@@ -9,7 +9,7 @@ class ClaimClassificationService:
     def __init__(self):
         self.model_name = settings.classification_model
         self.classifier = None
-        self.candidate_labels = ["True", "False or Misleading", "Not enough information found"]
+        self.candidate_labels = settings.classification_candidate_labels
         self._load_model()
         self._setup_keywords()
 
@@ -22,49 +22,10 @@ class ClaimClassificationService:
             raise
 
     def _setup_keywords(self):
-        """Setup keyword lists for fast classification"""
-        self.true_keywords = [
-            "true",
-            "correct",
-            "accurate",
-            "valid",
-            "factual",
-            "verified",
-            "confirmed",
-            "legitimate",
-            "proven",
-        ]
-        self.false_misleading_keywords = [
-            "false",
-            "misleading",
-            "lie",
-            "incorrect",
-            "debunked",
-            "refuted",
-            "inaccurate",
-            "fabricated",
-            "untrue",
-            "wrong",
-            "fake",
-            "hoax",
-            "myth",
-            "busted",
-            "disproven",
-        ]
-        self.no_info_keywords = [
-            "not enough",
-            "no evidence",
-            "unproven",
-            "no proof",
-            "inconclusive",
-            "unclear",
-            "insufficient",
-            "unknown",
-            "partly true",
-            "partially true",
-            "mixed",
-            "unverified",
-        ]
+        """Setup keyword lists for fast classification from configuration"""
+        self.true_keywords = settings.classification_true_keywords
+        self.false_misleading_keywords = settings.classification_false_keywords
+        self.no_info_keywords = settings.classification_no_info_keywords
 
     def fast_keyword_classification(self, text: str) -> str:
         """Fast classification based on keywords"""

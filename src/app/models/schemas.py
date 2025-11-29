@@ -48,10 +48,6 @@ class TextValidateRequest(BaseModel):
 class UrlValidateRequest(BaseModel):
     url: AnyHttpUrl
 
-# Image validate request model
-class ImageValidateRequest(BaseModel):
-    image_base64: str = Field(description="Base64-encoded image content")
-
 # Validate response model
 class ValidateResponse(BaseModel):
     result: AggregatedResult
@@ -61,7 +57,6 @@ class ValidateResponse(BaseModel):
 class AnalyzeRequest(BaseModel):
     text: Optional[str] = None
     url: Optional[AnyHttpUrl] = None
-    image_base64: Optional[str] = None
 
 # Analyze response model
 class AnalyzeResponse(BaseModel):

@@ -22,7 +22,14 @@ class SimilarityFilterService:
             raise
 
     def cosine_similarity(self, a: np.ndarray, b: np.ndarray) -> float:
-        """Calculate cosine similarity between two vectors"""
+        """Calculate cosine similarity between two vectors
+        Args:
+            a: First vector
+            b: Second vector
+
+        Returns:
+            Cosine similarity score
+        """
         return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-9))
 
     def filter_claims_by_similarity(
@@ -39,9 +46,11 @@ class SimilarityFilterService:
         Returns:
             List of filtered claims with similarity scores
         """
+        # If similarity threshold is not provided, use the default from settings
         if similarity_threshold is None:
             similarity_threshold = settings.similarity_threshold
 
+        # If no claims are provided, return an empty list
         if not claims:
             return []
 
@@ -53,7 +62,7 @@ class SimilarityFilterService:
                 claim_text = str(claim_text) if claim_text is not None else ""
             claim_texts.append(claim_text)
 
-        # Generate embeddings
+        # Generate embeddings using the sentence transformer model
         try:
             query_embedding = self.model.encode([query])[0]
             claim_embeddings = self.model.encode(claim_texts)

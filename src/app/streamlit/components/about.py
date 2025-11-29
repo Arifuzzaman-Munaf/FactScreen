@@ -1,8 +1,13 @@
 """
-About page component for the Streamlit frontend.
+About Page Component for the Streamlit Frontend
 
-This module contains the About page rendering logic, displaying
-system overview, technology stack, and product information.
+This module defines the rendering logic for the About page in the FactScreen Streamlit application.
+It presents a formal overview of the FactScreen system, including its purpose, objectives, and core technology stack.
+
+Component Responsibilities:
+    - Display product mission and value proposition.
+    - Summarize primary objectives and outcomes.
+    - Outline the technical architecture and integrated AI models and services.
 """
 
 import streamlit as st
@@ -10,11 +15,23 @@ import streamlit as st
 
 def render_about_page() -> None:
     """
-    Render the About page with system overview and technology information.
+    Renders the About page with formal documentation of system overview, product objectives,
+    and technology stack.
 
-    This function displays product information, purpose, objectives,
-    and technical architecture details.
+    The function orchestrates the layout and content of the About page by utilizing Streamlit's
+    markdown rendering capability, providing a structured description of FactScreen's mission,
+    functionality, and core technologies.
+
+    Content Sections:
+        1. Page Title
+        2. Product Introduction
+        3. Purpose Rationale
+        4. Feature Highlights (two-column)
+        5. Primary Objectives
+        6. Technology Stack
     """
+
+    # Section 1: Page Title (Styled as hero)
     st.markdown(
         """
         <div class="hero-title">
@@ -24,86 +41,131 @@ def render_about_page() -> None:
         unsafe_allow_html=True,
     )
 
+    # Section 2: Product Introduction (Formal summary)
     st.markdown(
         """
         <div class="hero-subtitle" style="max-width:900px;margin:0 auto 2rem auto;">
-            FactScreen is a human-friendly AI companion that keeps misinformation in check with
-            rapid verification, transparent evidence, and beautiful storytelling.
+            FactScreen is an advanced artificial intelligence (AI) companion designed to proactively
+            address misinformation through rapid fact verification, transparent evidence citation,
+            and concise narrative explanations.
         </div>
         """,
         unsafe_allow_html=True,
     )
 
+    # Section 3: Purpose Rationale (Overview of system purpose)
     st.markdown(
         """
         <div class="content-card">
-            <h2>Why FactScreen Exists</h2>
-            <p><strong>FactScreen</strong> combines trusted fact-checker feeds with modern AI classification to help anyone validate a claim in seconds. Paste a statement or URL, and the platform orchestrates evidence gathering, verdict generation, and narrative explanations—no research rabbit holes required.</p>
+            <h2>Purpose and System Overview</h2>
+            <p>
+                <strong>FactScreen</strong> integrates authoritative third-party fact-checker feeds
+                and state-of-the-art AI classification models to empower users to verify claims efficiently.
+                Users may submit a statement or URL, after which the platform coordinates automated
+                evidence retrieval, verdict computation, and explanatory narrative generation—eliminating
+                the need for manual research.
+            </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
+    # Section 4: Feature Highlights - Split into two columns
     col1, col2 = st.columns(2, gap="large")
+
     with col1:
+        # Real-time fact-checking feature highlights
         st.markdown(
             """
             <div class="content-card">
-                <h2>Real-time Defense</h2>
+                <h2>Real-Time Fact-Checking</h2>
                 <ul>
-                    <li>Multisource fact-checking pipelines with relevance filtering.</li>
-                    <li>Instant verdict card with animated confidence dial.</li>
-                    <li>Session memory so teams can compare multiple claims quickly.</li>
+                    <li>Multi-source fact-checking pipelines augmented with semantic relevance filtering.</li>
+                    <li>Immediate verdict presentation, including dynamic confidence visualization.</li>
+                    <li>Persistent session memory enables users or teams to compare and analyze multiple claims in quick succession.</li>
                 </ul>
             </div>
             """,
             unsafe_allow_html=True,
         )
+
     with col2:
+        # Explainable AI features
         st.markdown(
             """
             <div class="content-card">
-                <h2>Explainable AI</h2>
+                <h2>Transparent and Explainable AI</h2>
                 <ul>
-                    <li>Gemini 2.5 Flash summarizes why the verdict landed where it did.</li>
-                    <li>Source tables highlight the third-party citations powering each label.</li>
-                    <li>Design language mirrors the verdict colors to reinforce trust.</li>
+                    <li>Employs Gemini 2.5 Flash to concisely articulate the reasoning behind each verdict.</li>
+                    <li>Displays comprehensive source tables, referencing third-party evidence underpinning verdicts.</li>
+                    <li>Consistent and intuitive design language reinforces verdict interpretation and user trust.</li>
                 </ul>
-        </div>
-        """,
+            </div>
+            """,
             unsafe_allow_html=True,
         )
 
+    # Section 5: Primary Objectives (Formal enumeration of goals)
     st.markdown(
         """
         <div class="content-card">
             <h2>Primary Objectives</h2>
-            <p>Everything inside FactScreen is optimized for four outcomes:</p>
+            <p>FactScreen is engineered to achieve the following outcomes:</p>
             <ul>
-                <li><strong>Automate Verification:</strong> Identify and classify claims in real time.</li>
-                <li><strong>Improve Trust:</strong> Share evidence-backed stories instead of raw predictions.</li>
-                <li><strong>Accessibility:</strong> A single-page interface that works on desktop or tablet.</li>
-                <li><strong>Accuracy:</strong> Multi-source validation plus semantic filtering for relevance.</li>
+                <li>
+                    <strong>Automated Verification:</strong>
+                    Enable instant identification and classification of factual claims.
+                </li>
+                <li>
+                    <strong>Trust Enhancement:</strong>
+                    Facilitate evidence-backed, narrative explanations instead of opaque predictions.
+                </li>
+                <li>
+                    <strong>Accessibility:</strong>
+                    Deliver a seamless, intuitive single-page interface for both desktop and tablet devices.
+                </li>
+                <li>
+                    <strong>Accuracy:</strong>
+                    Leverage multi-source data validation and semantic filtering to maximize relevance and correctness.
+                </li>
             </ul>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
+    # Section 6: Technology Stack (Formal, detailed technical components)
     st.markdown(
         """
         <div class="content-card">
             <h2>Core Technology Stack</h2>
-            <p>FactScreen utilizes a multi-layered, asynchronous architecture built on FastAPI:</p>
+            <p>
+                FactScreen operates atop a modular, asynchronous architecture implemented in FastAPI and leverages
+                cutting-edge machine learning and LLMs. The key components are:
+            </p>
             <ul>
-                <li><strong>Data Sourcing & Integration:</strong> Aggregates and standardizes data retrieved from multiple authoritative external APIs, including the <strong>Google Fact Check Tool</strong> and the <strong>RapidAPI Fact-Checker</strong>.</li>
-                <li><strong>Semantic Filtering:</strong> The <strong><code>all-MiniLM-L6-v2</code></strong> model calculates the semantic similarity score to retain only the most relevant records against the user query.</li>
-                <li><strong>AI Classification:</strong> The <strong><code>facebook/bart-large-mnli</code></strong> transformer model is applied to predict the final verdict label.</li>
-                <li><strong>Explainability Service:</strong> The <strong>Gemini 2.5 Flash</strong> Large Language Model (LLM) is used exclusively to generate the human-readable reasoning and evidence summaries for the verdict.</li>
+                <li>
+                    <strong>Data Sourcing & Integration:</strong>
+                    Aggregates and standardizes fact-check records collected from multiple authoritative external APIs,
+                    including the <strong>Google Fact Check Tool</strong> and the <strong>RapidAPI Fact-Checker</strong>.
+                </li>
+                <li>
+                    <strong>Semantic Filtering:</strong>
+                    Utilizes the <strong><code>all-MiniLM-L6-v2</code></strong> Transformer model to compute semantic similarity
+                    scores, filtering records for high relevance to the user's query.
+                </li>
+                <li>
+                    <strong>AI Classification:</strong>
+                    Applies the <strong><code>facebook/bart-large-mnli</code></strong> Transformer model to infer and assign
+                    final verdict labels for each claim.
+                </li>
+                <li>
+                    <strong>Explainability Service:</strong>
+                    Implements <strong>Gemini 2.5 Flash</strong> LLM exclusively for generating transparent, human-readable
+                    explanations and evidence-based summaries supporting each verdict.
+                </li>
             </ul>
         </div>
         """,
         unsafe_allow_html=True,
     )
-
-    # Project details card intentionally removed per latest design request.
