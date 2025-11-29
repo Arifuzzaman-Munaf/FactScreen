@@ -1,26 +1,28 @@
 """
 PDF Report Generation Service
 
-This module provides services for generating professional PDF reports summarizing fact-checking results.
-It uses ReportLab to style and lay out tables, paragraphs, and logo banners with verdicts, confidence scores, 
+This module provides services for generating professional PDF reports
+summarizing fact-checking results. It uses ReportLab to style and lay out
+tables, paragraphs, and logo banners with verdicts, confidence scores,
 explanations, votes, and sources relating to a given claim.
 
 Main Components:
 
-- Utility functions for formatting (dates, stripping HTML, verdict color, etc.).
+- Utility functions for formatting (dates, stripping HTML, verdict color).
 - Parsing of explanations to extract sources.
 - Custom styled ReportLab objects for presenting information in the PDF.
-- The main `generate_pdf_report()` function, which accepts `AggregatedResult` and returns a BytesIO PDF.
+- The main `generate_pdf_report()` function, which accepts `AggregatedResult`
+  and returns a BytesIO PDF.
 """
 
 import re
 from datetime import datetime
 from html import unescape
 from io import BytesIO
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import (
@@ -29,10 +31,9 @@ from reportlab.platypus import (
     Spacer,
     Table,
     TableStyle,
-    PageBreak,
 )
 
-from src.app.models.schemas import AggregatedResult, ProviderResult, Verdict
+from src.app.models.schemas import AggregatedResult, Verdict
 
 
 def _create_logo_table(styles) -> Table:
@@ -49,10 +50,13 @@ def _create_logo_table(styles) -> Table:
                     fontSize=32,
                     textColor=colors.HexColor("#6366f1"),
                     alignment=1,  # Center icon
-                )
+                ),
             ),
             Paragraph(
-                "<b>FactScreen</b><br/><font size='9' color='#64748b'>Fact-Checking Platform</font>",
+                (
+                    "<b>FactScreen</b><br/>"
+                    "<font size='9' color='#64748b'>Fact-Checking Platform</font>"
+                ),
                 ParagraphStyle(
                     "LogoText",
                     parent=styles["Normal"],
@@ -60,11 +64,11 @@ def _create_logo_table(styles) -> Table:
                     textColor=colors.HexColor("#1e293b"),
                     alignment=0,  # Left-aligned text
                     leading=22,
-                )
+                ),
             ),
         ]
     ]
-    
+
     logo_table = Table(logo_data, colWidths=[1 * inch, 5 * inch])
     logo_table.setStyle(
         TableStyle(
@@ -87,9 +91,9 @@ def _get_verdict_color(verdict: Verdict) -> colors.Color:
     Get a visual color highlight for the given fact-check verdict.
     """
     color_map = {
-        Verdict.TRUE: colors.HexColor("#22c55e"),        # Green
+        Verdict.TRUE: colors.HexColor("#22c55e"),  # Green
         Verdict.MISLEADING: colors.HexColor("#ef4444"),  # Red
-        Verdict.UNKNOWN: colors.HexColor("#eab308"),     # Yellow
+        Verdict.UNKNOWN: colors.HexColor("#eab308"),  # Yellow
     }
     return color_map.get(verdict, colors.HexColor("#6b7280"))  # Default gray
 
@@ -112,8 +116,8 @@ def _strip_html_tags(text: str) -> str:
     """
     Remove HTML tags and decode HTML entities for safe PDF rendering.
     """
-    text = re.sub(r'<[^>]+>', '', text)  # Strip HTML
-    text = unescape(text)                # Decode HTML entities
+    text = re.sub(r"<[^>]+>", "", text)  # Strip HTML
+    text = unescape(text)  # Decode HTML entities
     return text.strip()
 
 
@@ -122,7 +126,7 @@ def _parse_sources_from_explanation(explanation: str) -> Tuple[str, List[Tuple[s
     Parse 'Sources:' section from the explanation string.
 
     Extracts a list of (title, URL) tuples from lines found after the 'Sources:' block if present.
-    Lines are assumed to be in the format: 
+    Lines are assumed to be in the format:
         - SourceName | verdict: X | snippet: Title | URL
 
     Returns:
@@ -130,16 +134,16 @@ def _parse_sources_from_explanation(explanation: str) -> Tuple[str, List[Tuple[s
     """
     sources = []
     main_text = explanation
-    
+
     if "Sources:" in explanation:
         parts = explanation.split("Sources:", maxsplit=1)
         main_text = parts[0].strip()
         sources_block = parts[1].strip() if len(parts) > 1 else ""
-        
-        # Split sources into lines and parse each line 
+
+        # Split sources into lines and parse each line
         lines = [line.strip() for line in sources_block.splitlines() if line.strip()]
         seen = set()
-        
+
         for line in lines:
             line = line.lstrip("- ").strip()  # Remove leading dash
             if not line:
@@ -160,7 +164,9 @@ def _parse_sources_from_explanation(explanation: str) -> Tuple[str, List[Tuple[s
                 # More fallback title logic (find first non-metadata part)
                 if not title:
                     for part in parts:
-                        if not part.startswith(("verdict:", "snippet:")) and not part.startswith("http"):
+                        if not part.startswith(("verdict:", "snippet:")) and not part.startswith(
+                            "http"
+                        ):
                             title = part
                             break
                 if not title:
@@ -195,19 +201,16 @@ def generate_pdf_report(result: AggregatedResult) -> BytesIO:
     """
     # Output PDF will be built into this in-memory buffer for streaming/download
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5 * inch, bottomMargin=0.5 * inch)
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        topMargin=0.5 * inch,
+        bottomMargin=0.5 * inch,
+    )
     story = []
     styles = getSampleStyleSheet()
 
     # ParagraphStyles setup for various heading and body elements
-    title_style = ParagraphStyle(
-        "CustomTitle",
-        parent=styles["Heading1"],
-        fontSize=24,
-        textColor=colors.HexColor("#1e293b"),
-        spaceAfter=12,
-        alignment=1,  # Center
-    )
     heading_style = ParagraphStyle(
         "CustomHeading",
         parent=styles["Heading2"],
@@ -235,14 +238,19 @@ def generate_pdf_report(result: AggregatedResult) -> BytesIO:
     logo_table = _create_logo_table(styles)
     story.append(logo_table)
     story.append(Spacer(1, 0.15 * inch))
-    story.append(Paragraph("Fact-Checking Report", ParagraphStyle(
-        "ReportTitle",
-        parent=styles["Heading2"],
-        fontSize=18,
-        textColor=colors.HexColor("#1e293b"),
-        spaceAfter=8,
-        alignment=1,
-    )))
+    story.append(
+        Paragraph(
+            "Fact-Checking Report",
+            ParagraphStyle(
+                "ReportTitle",
+                parent=styles["Heading2"],
+                fontSize=18,
+                textColor=colors.HexColor("#1e293b"),
+                spaceAfter=8,
+                alignment=1,
+            ),
+        )
+    )
     story.append(Spacer(1, 0.2 * inch))
 
     # Metadata section: report generated time and claim text
@@ -282,7 +290,13 @@ def generate_pdf_report(result: AggregatedResult) -> BytesIO:
     )
 
     verdict_data = [
-        ["Final Verdict:", Paragraph(verdict_text, ParagraphStyle("VerdictBold", parent=bold_style, textColor=colors.white))],
+        [
+            "Final Verdict:",
+            Paragraph(
+                verdict_text,
+                ParagraphStyle("VerdictBold", parent=bold_style, textColor=colors.white),
+            ),
+        ],
         ["Confidence Score:", Paragraph(confidence_text, bold_style)],
     ]
     verdict_table = Table(verdict_data, colWidths=[2 * inch, 4.5 * inch])
@@ -327,7 +341,12 @@ def generate_pdf_report(result: AggregatedResult) -> BytesIO:
                     ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
                     ("TOPPADDING", (0, 0), (-1, -1), 8),
                     ("GRID", (0, 0), (-1, -1), 1, colors.HexColor("#cbd5e1")),
-                    ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
+                    (
+                        "ROWBACKGROUNDS",
+                        (0, 1),
+                        (-1, -1),
+                        [colors.white, colors.HexColor("#f8fafc")],
+                    ),
                 ]
             )
         )
@@ -352,7 +371,9 @@ def generate_pdf_report(result: AggregatedResult) -> BytesIO:
                 title_clean = _strip_html_tags(title)
                 if len(title_clean) > 60:
                     title_clean = title_clean[:57] + "..."
-                url_display = url if url and len(url) <= 50 else (url[:47] + "..." if url else "N/A")
+                url_display = (
+                    url if url and len(url) <= 50 else (url[:47] + "..." if url else "N/A")
+                )
                 sources_data.append([str(idx), title_clean, url_display])
             sources_table = Table(sources_data, colWidths=[0.4 * inch, 3.5 * inch, 2.6 * inch])
             sources_table.setStyle(
@@ -369,7 +390,12 @@ def generate_pdf_report(result: AggregatedResult) -> BytesIO:
                         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
                         ("TOPPADDING", (0, 0), (-1, -1), 6),
                         ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
-                        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
+                        (
+                            "ROWBACKGROUNDS",
+                            (0, 1),
+                            (-1, -1),
+                            [colors.white, colors.HexColor("#f8fafc")],
+                        ),
                         ("VALIGN", (0, 0), (-1, -1), "TOP"),
                     ]
                 )
@@ -390,8 +416,7 @@ def generate_pdf_report(result: AggregatedResult) -> BytesIO:
                 source = str(source)[:37] + "..."
             provider_data.append([provider_name, verdict, rating, str(source)])
         provider_table = Table(
-            provider_data,
-            colWidths=[1.5 * inch, 1.2 * inch, 1.5 * inch, 2.3 * inch]
+            provider_data, colWidths=[1.5 * inch, 1.2 * inch, 1.5 * inch, 2.3 * inch]
         )
         provider_table.setStyle(
             TableStyle(
@@ -405,7 +430,12 @@ def generate_pdf_report(result: AggregatedResult) -> BytesIO:
                     ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
                     ("TOPPADDING", (0, 0), (-1, -1), 6),
                     ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
-                    ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
+                    (
+                        "ROWBACKGROUNDS",
+                        (0, 1),
+                        (-1, -1),
+                        [colors.white, colors.HexColor("#f8fafc")],
+                    ),
                     ("VALIGN", (0, 0), (-1, -1), "TOP"),
                 ]
             )
@@ -423,7 +453,9 @@ def generate_pdf_report(result: AggregatedResult) -> BytesIO:
     story.append(
         Paragraph(
             footer_text,
-            ParagraphStyle("Footer", parent=body_style, fontSize=8, textColor=colors.HexColor("#64748b"))
+            ParagraphStyle(
+                "Footer", parent=body_style, fontSize=8, textColor=colors.HexColor("#64748b")
+            ),
         )
     )
 

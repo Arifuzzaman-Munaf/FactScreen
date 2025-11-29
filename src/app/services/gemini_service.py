@@ -8,6 +8,7 @@ from pathlib import Path
 # Try to import the Gemini client from google-genai, and set a flag indicating availability
 try:
     from google import genai
+
     GEMINI_AVAILABLE = True
 except ImportError:
     GEMINI_AVAILABLE = False
@@ -226,13 +227,18 @@ async def check_claim_verdict_alignment(
 
     context_text = "\n\n".join(verdict_context)
 
-    # Build the prompt with detailed instructions to force strict claim alignment checking
-    prompt = f"""You are a fact-checking assistant. Analyze if the verdicts from fact-checking sources are actually about the SAME claim as the user's query.
+    # Build the prompt with detailed instructions to force strict
+    # claim alignment checking
+    prompt = f"""You are a fact-checking assistant. Analyze if the verdicts
+from fact-checking sources are actually about the SAME claim as the user's query.
 
 CRITICAL: Pay special attention to:
-1. OPPOSITE claims (e.g., user says "X causes Y" but verdict is about "X doesn't cause Y")
-2. NEGATED claims (e.g., user says "A is true" but verdict is about "A is false")
-3. DIFFERENT claims (e.g., user asks about "smoking causes cancer" but verdict is about "smoking doesn't cause cancer")
+1. OPPOSITE claims (e.g., user says "X causes Y" but verdict is about
+   "X doesn't cause Y")
+2. NEGATED claims (e.g., user says "A is true" but verdict is about
+   "A is false")
+3. DIFFERENT claims (e.g., user asks about "smoking causes cancer" but
+   verdict is about "smoking doesn't cause cancer")
 
 User's Claim Query: "{claim}"
 
@@ -242,9 +248,11 @@ Fact-Checking Results:
 Task: Determine if these fact-checking results are about the EXACT SAME claim as the user's query.
 
 Return aligned: false if:
-- The verdicts are about the OPPOSITE of the user's claim (e.g., user says "X causes Y" but verdict says "X doesn't cause Y")
+- The verdicts are about the OPPOSITE of the user's claim (e.g., user says
+  "X causes Y" but verdict says "X doesn't cause Y")
 - The verdicts are about a NEGATED version of the claim
-- The verdicts are about a significantly different claim (different topic, different person, different event, different time period)
+- The verdicts are about a significantly different claim (different topic,
+  different person, different event, different time period)
 - The verdicts contain negations that contradict the user's claim
 
 Return aligned: true ONLY if:
@@ -254,7 +262,9 @@ Return aligned: true ONLY if:
 Respond ONLY with a JSON object in this exact format:
 {{
     "aligned": true or false,
-    "reason": "brief explanation of why aligned or not aligned. If not aligned, explain what the mismatch is (e.g., 'verdict is about opposite claim', 'verdict is about different topic', etc.)"
+    "reason": "brief explanation of why aligned or not aligned. If not
+aligned, explain what the mismatch is (e.g., 'verdict is about opposite
+claim', 'verdict is about different topic', etc.)"
 }}
 
 Be VERY strict: When in doubt, return aligned: false."""
@@ -329,7 +339,8 @@ async def classify_with_gemini(
 
     # Choose prompt format depending on whether sources are supplied
     if sources_text:
-        prompt = f"""You are a fact-checking assistant. Classify the following claim based on the provided fact-checking sources.
+        prompt = f"""You are a fact-checking assistant. Classify the
+following claim based on the provided fact-checking sources.
 
 Claim to verify: "{claim}"
 
@@ -346,7 +357,8 @@ Respond ONLY with a JSON object in this exact format:
 {{
     "label": "True" or "False" or "Unclear",
     "confidence": 0.0 to 1.0,
-    "explanation": "detailed explanation based on the sources provided, cite specific sources when possible"
+    "explanation": "detailed explanation based on the sources provided,
+cite specific sources when possible"
 }}
 
 Guidelines:
@@ -460,7 +472,8 @@ async def generate_explanation_from_sources(
     sources_text = "\n\n".join(sources_list)
 
     # Build the prompt with detailed instructions to generate an explanation
-    prompt = f"""You are a fact-checking assistant. Generate a clear, informative explanation based on the provided fact-checking sources.
+    prompt = f"""You are a fact-checking assistant. Generate a clear,
+informative explanation based on the provided fact-checking sources.
 
 Claim being verified: "{claim}"
 
@@ -481,7 +494,7 @@ Respond with ONLY the explanation text (no JSON, no markdown formatting, just pl
         _log_usage_metadata(usage, "explanation")
         # Get the explanation from the result
         explanation = response_text.strip()
-    
+
         return explanation
     except Exception as exc:
         # Log a warning if the explanation generation failed

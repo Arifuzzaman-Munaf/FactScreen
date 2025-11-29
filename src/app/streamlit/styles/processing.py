@@ -9,14 +9,14 @@ PROCESSING_CSS = dedent(
     align-items: center;
     justify-content: center;
     padding: 2rem 2rem;
-    background: linear-gradient(135deg, 
-        rgba(30, 41, 59, 0.9) 0%, 
-        rgba(15, 23, 42, 0.95) 50%, 
+    background: linear-gradient(135deg,
+        rgba(30, 41, 59, 0.9) 0%,
+        rgba(15, 23, 42, 0.95) 50%,
         rgba(30, 41, 59, 0.9) 100%);
     backdrop-filter: blur(20px) saturate(180%);
     border-radius: 20px;
     border: 2px solid rgba(99, 102, 241, 0.5);
-    box-shadow: 
+    box-shadow:
         0 12px 40px rgba(0, 0, 0, 0.4),
         0 4px 16px rgba(99, 102, 241, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -43,13 +43,13 @@ PROCESSING_CSS = dedent(
 
 @keyframes processingGlow {
     0%, 100% {
-        box-shadow: 
+        box-shadow:
             0 12px 40px rgba(0, 0, 0, 0.4),
             0 4px 16px rgba(99, 102, 241, 0.3),
             inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
     50% {
-        box-shadow: 
+        box-shadow:
             0 16px 50px rgba(0, 0, 0, 0.5),
             0 8px 24px rgba(99, 102, 241, 0.5),
             inset 0 1px 0 rgba(255, 255, 255, 0.15);

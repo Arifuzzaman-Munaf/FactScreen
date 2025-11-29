@@ -5,7 +5,14 @@ COMPONENTS_CSS = dedent(
 .hero-title {
     font-size: clamp(2.5rem, 5vw, 4rem);
     font-weight: 900;
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 25%, #ec4899 50%, #f59e0b 75%, #6366f1 100%);
+    background: linear-gradient(
+        135deg,
+        #6366f1 0%,
+        #8b5cf6 25%,
+        #ec4899 50%,
+        #f59e0b 75%,
+        #6366f1 100%
+    );
     background-size: 300% 300%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -41,9 +48,9 @@ COMPONENTS_CSS = dedent(
 }
 
 .content-card {
-    background: linear-gradient(135deg, 
-        rgba(30, 41, 59, 0.85) 0%, 
-        rgba(15, 23, 42, 0.9) 50%, 
+    background: linear-gradient(135deg,
+        rgba(30, 41, 59, 0.85) 0%,
+        rgba(15, 23, 42, 0.9) 50%,
         rgba(30, 41, 59, 0.85) 100%);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -51,7 +58,7 @@ COMPONENTS_CSS = dedent(
     padding: 2.5rem;
     margin: 2rem 0;
     border: 2px solid rgba(99, 102, 241, 0.4);
-    box-shadow: 
+    box-shadow:
         0 12px 48px rgba(0, 0, 0, 0.4),
         0 4px 16px rgba(99, 102, 241, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -77,7 +84,7 @@ COMPONENTS_CSS = dedent(
 
 .content-card:hover {
     transform: translateY(-4px);
-    box-shadow: 
+    box-shadow:
         0 16px 56px rgba(0, 0, 0, 0.5),
         0 6px 20px rgba(99, 102, 241, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.15);

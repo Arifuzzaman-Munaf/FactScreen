@@ -17,10 +17,13 @@ _project_root = _current_file.parent.parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-import requests
-import streamlit as st
+import requests  # noqa: E402
+import streamlit as st  # noqa: E402
 
-from src.app.streamlit.config import VALIDATION_ENDPOINT, PDF_REPORT_ENDPOINT
+from src.app.streamlit.config import (  # noqa: E402
+    VALIDATION_ENDPOINT,
+    PDF_REPORT_ENDPOINT,
+)
 
 
 def format_confidence(confidence: Optional[float]) -> str:
@@ -112,7 +115,6 @@ def render_provider_results(providers: List[Dict[str, Any]]) -> str:
     seen_entries = {}  # key: (rating, summary_normalized) -> row_data
 
     for pr in providers:
-        verdict = pr.get("verdict", "unknown").title()
         rating = pr.get("rating", "N/A")
         title = pr.get("title") or pr.get("summary") or "No title available"
         source_url = pr.get("source_url") or ""
@@ -251,7 +253,8 @@ def render_sources_from_explanation(explanation: str) -> str:
         if url:
             items.append(
                 f'<li><span class="source-title">{idx}. {label_escaped}</span>'
-                f' — <a href="{html.escape(url)}" target="_blank" rel="noopener">Visit Link</a></li>'
+                f' — <a href="{html.escape(url)}" target="_blank" '
+                f'rel="noopener">Visit Link</a></li>'
             )
         else:
             items.append(f"<li>{idx}. {html.escape(raw_line)}</li>")
@@ -294,7 +297,8 @@ def download_pdf_report(result_data: Dict[str, Any]) -> bytes:
         )
     except requests.RequestException as exc:
         raise RuntimeError(
-            "Unable to reach FactScreen backend for PDF generation. Please ensure the API server is running."
+            "Unable to reach FactScreen backend for PDF generation. "
+            "Please ensure the API server is running."
         ) from exc
 
     if response.status_code >= 400:
@@ -327,7 +331,8 @@ def scroll_to_element(element_id: str, delay: int = 100) -> None:
                         const elementTop = elementRect.top + window.pageYOffset;
                         const elementHeight = elementRect.height;
                         const windowHeight = window.innerHeight;
-                        const scrollPosition = elementTop - (windowHeight / 2) + (elementHeight / 2);
+                        const scrollPosition = elementTop - (windowHeight / 2)
+                            + (elementHeight / 2);
                         window.scrollTo({{
                             top: scrollPosition,
                             behavior: 'smooth'
@@ -336,7 +341,7 @@ def scroll_to_element(element_id: str, delay: int = 100) -> None:
                     }}
                     return false;
                 }}
-                
+
                 // Try immediately
                 if (!scrollToElement()) {{
                     // If element not found, try after a short delay

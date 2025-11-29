@@ -125,9 +125,7 @@ async def validate_claim(request: AnalyzeRequest):
     """
     # if the request does not include any of the required fields, raise an error
     if not (request.text or request.url):
-        raise HTTPException(
-            status_code=400, detail="Provide at least one of text or url"
-        )
+        raise HTTPException(status_code=400, detail="Provide at least one of text or url")
 
     try:
         # if the request includes text, validate the text
@@ -160,9 +158,7 @@ async def generate_validation_pdf(request: AnalyzeRequest):
     """
     # if the request does not include any of the required fields, raise an error
     if not (request.text or request.url):
-        raise HTTPException(
-            status_code=400, detail="Provide at least one of text or url"
-        )
+        raise HTTPException(status_code=400, detail="Provide at least one of text or url")
 
     try:
         # if the request includes text, validate the text
@@ -180,7 +176,9 @@ async def generate_validation_pdf(request: AnalyzeRequest):
             content=pdf_buffer.getvalue(),
             media_type="application/pdf",
             headers={
-                "Content-Disposition": f'attachment; filename="factcheck-report-{result.verdict.value}.pdf"'
+                "Content-Disposition": (
+                    f'attachment; filename="factcheck-report-{result.verdict.value}.pdf"'
+                )
             },
         )
     # Exception handling for HTTPException
@@ -214,7 +212,9 @@ async def generate_pdf_from_result(result: AggregatedResult):
             content=pdf_buffer.getvalue(),
             media_type="application/pdf",
             headers={
-                "Content-Disposition": f'attachment; filename="factcheck-report-{result.verdict.value}.pdf"'
+                "Content-Disposition": (
+                    f'attachment; filename="factcheck-report-{result.verdict.value}.pdf"'
+                )
             },
         )
     except Exception as exc:  # pragma: no cover - defensive

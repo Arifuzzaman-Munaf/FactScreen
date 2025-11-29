@@ -4,18 +4,18 @@ NAVBAR_CSS = dedent(
     """
 /* Top Navigation Bar - Stunning Glassmorphic Design */
 .top-navbar {
-    background: linear-gradient(135deg, 
-        rgba(15, 23, 42, 0.95) 0%, 
+    background: linear-gradient(135deg,
+        rgba(15, 23, 42, 0.95) 0%,
         rgba(30, 41, 59, 0.95) 50%,
         rgba(15, 23, 42, 0.95) 100%);
     backdrop-filter: blur(30px) saturate(180%);
     -webkit-backdrop-filter: blur(30px) saturate(180%);
     border-bottom: 2px solid transparent;
-    background-image: 
+    background-image:
         linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95)),
-        linear-gradient(90deg, 
-            rgba(99, 102, 241, 0.6), 
-            rgba(139, 92, 246, 0.6), 
+        linear-gradient(90deg,
+            rgba(99, 102, 241, 0.6),
+            rgba(139, 92, 246, 0.6),
             rgba(236, 72, 153, 0.6),
             rgba(99, 102, 241, 0.6));
     background-origin: border-box;
@@ -25,7 +25,7 @@ NAVBAR_CSS = dedent(
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 
+    box-shadow:
         0 10px 40px rgba(0, 0, 0, 0.6),
         0 0 0 1px rgba(99, 102, 241, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.15),
@@ -79,14 +79,14 @@ NAVBAR_CSS = dedent(
 }
 
 @keyframes navbarGlow {
-    0%, 100% { 
-        box-shadow: 
+    0%, 100% {
+        box-shadow:
             0 8px 32px rgba(0, 0, 0, 0.5),
             0 0 0 1px rgba(99, 102, 241, 0.2),
             inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
-    50% { 
-        box-shadow: 
+    50% {
+        box-shadow:
             0 8px 32px rgba(0, 0, 0, 0.5),
             0 0 20px rgba(99, 102, 241, 0.4),
             0 0 0 1px rgba(99, 102, 241, 0.3),
@@ -374,13 +374,13 @@ NAVBAR_CSS = dedent(
 
 @keyframes buttonPulse {
     0%, 100% {
-        box-shadow: 
+        box-shadow:
             0 8px 30px rgba(99, 102, 241, 0.6),
             0 0 20px rgba(139, 92, 246, 0.5),
             inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
     50% {
-        box-shadow: 
+        box-shadow:
             0 8px 35px rgba(99, 102, 241, 0.8),
             0 0 30px rgba(139, 92, 246, 0.7),
             inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -394,7 +394,14 @@ html {
 
 /* Force dark mode - override any light mode */
 .stApp {
-    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 25%, #2d1b3d 50%, #1a1f3a 75%, #0a0e27 100%) !important;
+    background: linear-gradient(
+        135deg,
+        #0a0e27 0%,
+        #1a1f3a 25%,
+        #2d1b3d 50%,
+        #1a1f3a 75%,
+        #0a0e27 100%
+    ) !important;
     background-size: 400% 400% !important;
     animation: gradientShift 15s ease infinite !important;
     color: var(--text-light) !important;

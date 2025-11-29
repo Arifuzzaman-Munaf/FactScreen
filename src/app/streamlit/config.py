@@ -18,7 +18,7 @@ def _load_frontend_yaml() -> Dict[str, Any]:
     config_path = Path("config") / "local.yaml"
     if not config_path.exists():
         return {}
-    
+
     try:
         with config_path.open("r", encoding="utf-8") as f:
             data = yaml.safe_load(f) or {}

@@ -98,7 +98,8 @@ def sentiment_to_label(results: List[Tuple[str, float]]) -> Tuple[str, float]:
     total = max(1e-6, pos + neg)
     # Calculate the threshold for unclear sentiment
     unclear_threshold = settings.sentiment_unclear_threshold
-    # If the difference between positive and negative scores is less than the threshold, return unclear
+    # If the difference between positive and negative scores is less than
+    # the threshold, return unclear
     if abs(pos - neg) < unclear_threshold * total:
         return "Unclear", settings.sentiment_unclear_confidence
     # Calculate the minimum and maximum confidence

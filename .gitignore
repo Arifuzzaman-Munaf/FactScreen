@@ -63,6 +63,8 @@ logs/
 .coverage
 .pytest_cache/
 htmlcov/
+allure-results/
+allure-report/
 
 # Temporary files
 *.tmp

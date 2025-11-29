@@ -19,7 +19,7 @@ def _map_label_from_sentence(text: str) -> Verdict:
     Returns:
         A Verdict
     """
-   
+
     t = _normalize_text(text)
     # Get the true and false keywords from the settings
     true_keywords = settings.classification_true_keywords or []
@@ -41,7 +41,7 @@ def classify_google(payload: Dict[str, Any]) -> Optional[ProviderResult]:
     Args:
         payload: The payload to classify
     Returns:
-        A ProviderResult object 
+        A ProviderResult object
     """
     # If the payload is not provided, return None
     if not payload:
@@ -60,7 +60,8 @@ def classify_google(payload: Dict[str, Any]) -> Optional[ProviderResult]:
         review = None
         # Iterate over the reviews
         for r in reviews:
-            # If the review contains a non-empty rating-like field, set the review to the current review
+            # If the review contains a non-empty rating-like field,
+            # set the review to the current review
             if r.get("Rating") or r.get("textualRating") or r.get("rating"):
                 review = r
                 break

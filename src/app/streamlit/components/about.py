@@ -1,8 +1,9 @@
 """
 About Page Component for the Streamlit Frontend
 
-This module defines the rendering logic for the About page in the FactScreen Streamlit application.
-It presents a formal overview of the FactScreen system, including its purpose, objectives, and core technology stack.
+This module defines the rendering logic for the About page in the FactScreen Streamlit
+application. It presents a formal overview of the FactScreen system, including its
+purpose, objectives, and core technology stack.
 
 Component Responsibilities:
     - Display product mission and value proposition.
@@ -60,9 +61,9 @@ def render_about_page() -> None:
             <h2>Purpose and System Overview</h2>
             <p>
                 <strong>FactScreen</strong> integrates authoritative third-party fact-checker feeds
-                and state-of-the-art AI classification models to empower users to verify claims efficiently.
+                evidence retrieval, verdict computation, and explanatory
                 Users may submit a statement or URL, after which the platform coordinates automated
-                evidence retrieval, verdict computation, and explanatory narrative generation—eliminating
+                manual fact-checking workflows.
                 the need for manual research.
             </p>
         </div>
@@ -80,9 +81,9 @@ def render_about_page() -> None:
             <div class="content-card">
                 <h2>Real-Time Fact-Checking</h2>
                 <ul>
-                    <li>Multi-source fact-checking pipelines augmented with semantic relevance filtering.</li>
-                    <li>Immediate verdict presentation, including dynamic confidence visualization.</li>
-                    <li>Persistent session memory enables users or teams to compare and analyze multiple claims in quick succession.</li>
+                    <li>Multi-source fact-checking pipelines augmented
+                    with semantic relevance filtering.</li>
+                    <li>Immediate verdict presentation, including
                 </ul>
             </div>
             """,
@@ -96,9 +97,9 @@ def render_about_page() -> None:
             <div class="content-card">
                 <h2>Transparent and Explainable AI</h2>
                 <ul>
-                    <li>Employs Gemini 2.5 Flash to concisely articulate the reasoning behind each verdict.</li>
-                    <li>Displays comprehensive source tables, referencing third-party evidence underpinning verdicts.</li>
-                    <li>Consistent and intuitive design language reinforces verdict interpretation and user trust.</li>
+                    <li>Employs Gemini 2.5 Flash to concisely
+                    articulate the reasoning behind each verdict.</li>
+                    <li>Displays comprehensive source tables,
                 </ul>
             </div>
             """,
@@ -118,15 +119,15 @@ def render_about_page() -> None:
                 </li>
                 <li>
                     <strong>Trust Enhancement:</strong>
-                    Facilitate evidence-backed, narrative explanations instead of opaque predictions.
+                    Facilitate evidence-backed, narrative explanations
                 </li>
                 <li>
                     <strong>Accessibility:</strong>
-                    Deliver a seamless, intuitive single-page interface for both desktop and tablet devices.
+                    Deliver a seamless, intuitive single-page
                 </li>
                 <li>
                     <strong>Accuracy:</strong>
-                    Leverage multi-source data validation and semantic filtering to maximize relevance and correctness.
+                    Leverage multi-source data validation and
                 </li>
             </ul>
         </div>
@@ -140,28 +141,28 @@ def render_about_page() -> None:
         <div class="content-card">
             <h2>Core Technology Stack</h2>
             <p>
-                FactScreen operates atop a modular, asynchronous architecture implemented in FastAPI and leverages
+                FactScreen operates atop a modular, asynchronous
                 cutting-edge machine learning and LLMs. The key components are:
             </p>
             <ul>
                 <li>
                     <strong>Data Sourcing & Integration:</strong>
-                    Aggregates and standardizes fact-check records collected from multiple authoritative external APIs,
-                    including the <strong>Google Fact Check Tool</strong> and the <strong>RapidAPI Fact-Checker</strong>.
+                    Aggregates and standardizes fact-check records
+                    collected from multiple authoritative external APIs,
                 </li>
                 <li>
                     <strong>Semantic Filtering:</strong>
-                    Utilizes the <strong><code>all-MiniLM-L6-v2</code></strong> Transformer model to compute semantic similarity
+                    Utilizes the <strong><code>all-MiniLM-L6-v2</code>
                     scores, filtering records for high relevance to the user's query.
                 </li>
                 <li>
                     <strong>AI Classification:</strong>
-                    Applies the <strong><code>facebook/bart-large-mnli</code></strong> Transformer model to infer and assign
+                    Applies the <strong><code>facebook/bart-large-mnli
                     final verdict labels for each claim.
                 </li>
                 <li>
                     <strong>Explainability Service:</strong>
-                    Implements <strong>Gemini 2.5 Flash</strong> LLM exclusively for generating transparent, human-readable
+                    Implements <strong>Gemini 2.5 Flash</strong> LLM
                     explanations and evidence-based summaries supporting each verdict.
                 </li>
             </ul>

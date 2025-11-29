@@ -5,7 +5,6 @@ This module initializes the Streamlit application, sets up navigation,
 and routes to the appropriate page components based on user selection.
 """
 
-import os
 import sys
 from pathlib import Path
 
@@ -17,10 +16,10 @@ _project_root = _current_file.parent.parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-import streamlit as st
+import streamlit as st  # noqa: E402
 
-from src.app.streamlit.components import about, help, home
-from src.app.streamlit.styles import THEME_CSS
+from src.app.streamlit.components import about, help, home  # noqa: E402
+from src.app.streamlit.styles import THEME_CSS  # noqa: E402
 
 # Initialize page state
 if "page" not in st.session_state:
@@ -29,7 +28,7 @@ if "page" not in st.session_state:
 # Configure page settings
 st.set_page_config(
     page_title="FactScreen",
-    page_icon="✅",
+    page_icon="✔",
     layout="wide",
     initial_sidebar_state="collapsed",
     menu_items={"Get Help": None, "Report a bug": None, "About": None},
@@ -99,18 +98,35 @@ st.markdown(
     + st.session_state.page
     + """';
             const icons = {
-                'HOME': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 4l9 6.5" /><path d="M5.5 9.5V20h13V9.5" /><path d="M9.5 20v-5.25h5V20" /></svg>',
-                'ABOUT': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>',
-                'HELP': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M9.75 9a2.25 2.25 0 1 1 3.5 1.85c-.75.5-1.25 1.1-1.25 2.15v.25" /><path d="M12 17h.01" /></svg>'
+                'HOME': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+                    'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'
+                    '<path d="M3 10.5L12 4l9 6.5" />'
+                    '<path d="M5.5 9.5V20h13V9.5" />'
+                    '<path d="M9.5 20v-5.25h5V20" /></svg>',
+                'ABOUT': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+                    'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'
+                    '<circle cx="12" cy="12" r="9" />'
+                    '<path d="M12 16v-4" /><path d="M12 8h.01" /></svg>',
+                'HELP': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+                    'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'
+                    '<circle cx="12" cy="12" r="9" />'
+                    '<path d="M9.75 9a2.25 2.25 0 1 1 3.5 1.85c-.75.5-1.25 1.1-1.25 '
+                    '2.15v.25" /><path d="M12 17h.01" /></svg>'
             };
 
             if (window.factScreenNavbarReady) {
-                window.factScreenSetActive && window.factScreenSetActive(currentPage);
+                if (window.factScreenSetActive) {
+                    window.factScreenSetActive(currentPage);
+                }
                 return;
             }
 
             function addIconsToButtons() {
-                const buttons = Array.from(document.querySelectorAll('.top-navbar .stButton > button'));
+                const buttons = Array.from(
+                    document.querySelectorAll(
+                        '.top-navbar .stButton > button'
+                    )
+                );
                 buttons.forEach(button => {
                     if (button.dataset.iconApplied === 'true') return;
                     const originalText = button.textContent.trim();
@@ -134,7 +150,9 @@ st.markdown(
             }
 
             function wrapNavbar() {
-                const allColContainers = Array.from(document.querySelectorAll('[data-testid="column-container"]'));
+                const allColContainers = Array.from(
+                    document.querySelectorAll('[data-testid="column-container"]')
+                );
                 if (allColContainers.length < 2) return false;
 
                 if (document.querySelector('.top-navbar')) return true;
@@ -154,7 +172,11 @@ st.markdown(
             }
 
             function setActiveButton(page) {
-                const allButtons = Array.from(document.querySelectorAll('.top-navbar .stButton > button, button[key*="nav_"]'));
+                const allButtons = Array.from(
+                    document.querySelectorAll(
+                        '.top-navbar .stButton > button, button[key*="nav_"]'
+                    )
+                );
                 allButtons.forEach(button => {
                     const buttonText = button.textContent.trim().toUpperCase();
                     button.classList.toggle('nav-active',

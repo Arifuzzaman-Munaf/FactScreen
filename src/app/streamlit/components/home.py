@@ -20,11 +20,10 @@ _project_root = _current_file.parent.parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from textwrap import dedent
-import streamlit as st
+from textwrap import dedent  # noqa: E402
+import streamlit as st  # noqa: E402
 
-from src.app.streamlit.config import VERDICT_COLORS
-from src.app.streamlit.helpers import (
+from src.app.streamlit.helpers import (  # noqa: E402
     build_payload,
     call_backend,
     download_pdf_report,
@@ -68,6 +67,7 @@ DEFAULT_EXPLANATION_HTML = dedent(
 </div>
 """
 ).strip()
+
 
 def render_home_page() -> None:
     """
@@ -200,7 +200,10 @@ def render_home_page() -> None:
                         <div class="processing-dot"></div>
                     </div>
                         <div class="processing-text">Processing Claim</div>
-                    <div class="processing-steps">Cross-referencing fact-checkers • AI classification • Generating explanation</div>
+                    <div class="processing-steps">
+                        Cross-referencing fact-checkers • AI classification
+                        • Generating explanation
+                    </div>
                     </div>
                 </div>
                 """,
@@ -286,7 +289,8 @@ def render_home_page() -> None:
                 st.session_state["evidence_table_html"] = evidence_html
                 evidence_placeholder.markdown(evidence_html, unsafe_allow_html=True)
 
-                # --- Compose and display explanation + sources, separating by 'Sources:' delimiter if present ---
+                # --- Compose and display explanation + sources,
+                # separating by 'Sources:' delimiter if present ---
                 main_text = explanation.split("Sources:")[0].strip()
                 sources_html = render_sources_from_explanation(explanation)
                 explanation_html = dedent(
@@ -310,7 +314,7 @@ def render_home_page() -> None:
                         # If PDF generation fails, do not block UI; user won't get a download button
                         st.session_state["pdf_bytes"] = None
                         st.session_state["pdf_generated"] = True
-                    
+
                     # Force rerun to ensure the download button appears once the PDF is available
                     st.rerun()
 

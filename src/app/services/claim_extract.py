@@ -69,8 +69,6 @@ class ClaimExtractionService:
             }
             # Encode the query for the request
             encoded_query = urllib.parse.quote_plus(query)
-            # Create the endpoint for the request
-            endpoint = f"/{self.fact_checker_endpoint}?query={encoded_query}&limit={limit}"
             # Send the request to the RapidAPI Fact-Checker
             conn.request(
                 "GET",

@@ -4,9 +4,9 @@ FORMS_CSS = dedent(
     """
 /* Input Card Container - Glassmorphic Design with Better Contrast */
 div[data-testid="stForm"] {
-    background: linear-gradient(135deg, 
-        rgba(30, 41, 59, 0.95) 0%, 
-        rgba(15, 23, 42, 0.9) 50%, 
+    background: linear-gradient(135deg,
+        rgba(30, 41, 59, 0.95) 0%,
+        rgba(15, 23, 42, 0.9) 50%,
         rgba(30, 41, 59, 0.95) 100%) !important;
     backdrop-filter: blur(20px) saturate(180%) !important;
     border-radius: 24px !important;
@@ -14,7 +14,7 @@ div[data-testid="stForm"] {
     margin: 2rem auto !important;
     max-width: 900px !important;
     border: 2px solid rgba(99, 102, 241, 0.5) !important;
-    box-shadow: 
+    box-shadow:
         0 12px 48px rgba(0, 0, 0, 0.5),
         0 4px 16px rgba(99, 102, 241, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.15),
@@ -32,9 +32,9 @@ div[data-testid="stForm"]::before {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(99, 102, 241, 0.1), 
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(99, 102, 241, 0.1),
         transparent);
     transition: left 0.6s ease;
 }
@@ -45,16 +45,16 @@ div[data-testid="stForm"]:hover::before {
 
 div[data-testid="stForm"]:hover {
     border-color: rgba(99, 102, 241, 0.7) !important;
-    box-shadow: 
+    box-shadow:
         0 16px 64px rgba(0, 0, 0, 0.6),
         0 8px 24px rgba(99, 102, 241, 0.5),
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
         inset 0 -1px 0 rgba(0, 0, 0, 0.3),
         0 0 60px rgba(99, 102, 241, 0.4) !important;
     transform: translateY(-3px);
-    background: linear-gradient(135deg, 
-        rgba(30, 41, 59, 1) 0%, 
-        rgba(15, 23, 42, 0.95) 50%, 
+    background: linear-gradient(135deg,
+        rgba(30, 41, 59, 1) 0%,
+        rgba(15, 23, 42, 0.95) 50%,
         rgba(30, 41, 59, 1) 100%) !important;
 }
 
@@ -86,7 +86,7 @@ section[data-testid="stSidebar"] {
     padding: 1rem 1.25rem !important;
     font-size: 1.05rem !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 2px 4px rgba(0, 0, 0, 0.3),
         0 1px 0 rgba(255, 255, 255, 0.08),
         0 0 0 1px rgba(99, 102, 241, 0.1) !important;
@@ -100,7 +100,7 @@ section[data-testid="stSidebar"] {
 .stTextInput>div>div>input:hover, .stTextArea>div>div>textarea:hover {
     border-color: rgba(99, 102, 241, 0.6) !important;
     background: rgba(30, 41, 59, 0.9) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 2px 4px rgba(0, 0, 0, 0.3),
         0 1px 0 rgba(255, 255, 255, 0.1),
         0 0 25px rgba(99, 102, 241, 0.3) !important;
@@ -108,7 +108,7 @@ section[data-testid="stSidebar"] {
 
 .stTextInput>div>div>input:focus, .stTextArea>div>div>textarea:focus {
     border-color: rgba(99, 102, 241, 1) !important;
-    box-shadow: 
+    box-shadow:
         0 0 0 4px rgba(99, 102, 241, 0.3),
         0 0 40px rgba(99, 102, 241, 0.6),
         inset 0 2px 4px rgba(0, 0, 0, 0.3),
@@ -131,7 +131,7 @@ section[data-testid="stSidebar"] {
     font-size: 1.15rem !important;
     letter-spacing: 1px !important;
     text-transform: uppercase !important;
-    box-shadow: 
+    box-shadow:
         0 10px 30px rgba(99, 102, 241, 0.6),
         0 4px 15px rgba(139, 92, 246, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.3),
@@ -165,7 +165,7 @@ section[data-testid="stSidebar"] {
 
 .stButton>button:hover {
     transform: translateY(-4px) scale(1.05) !important;
-    box-shadow: 
+    box-shadow:
         0 20px 60px rgba(99, 102, 241, 0.8),
         0 8px 25px rgba(139, 92, 246, 0.6),
         0 0 40px rgba(236, 72, 153, 0.4),
@@ -176,7 +176,7 @@ section[data-testid="stSidebar"] {
 
 .stButton>button:active {
     transform: translateY(-2px) scale(1.02) !important;
-    box-shadow: 
+    box-shadow:
         0 8px 25px rgba(99, 102, 241, 0.7),
         0 4px 15px rgba(139, 92, 246, 0.5),
         inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
@@ -192,7 +192,7 @@ button[kind="secondary"] {
     padding: 1rem 2rem !important;
     font-weight: 700 !important;
     font-size: 1.1rem !important;
-    box-shadow: 
+    box-shadow:
         0 6px 20px rgba(0, 0, 0, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -220,7 +220,7 @@ button[kind="secondary"]:hover::before {
 button[kind="secondary"]:hover {
     background: rgba(15, 23, 42, 1) !important;
     border-color: rgba(99, 102, 241, 0.7) !important;
-    box-shadow: 
+    box-shadow:
         0 10px 30px rgba(99, 102, 241, 0.4),
         0 4px 15px rgba(0, 0, 0, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;

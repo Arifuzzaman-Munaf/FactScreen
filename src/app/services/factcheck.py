@@ -19,8 +19,10 @@ async def aggregate_results(
     """Choose a final verdict and compute confidence using majority vote
 
     Rules:
-    - Final verdict is determined by majority vote among non-UNKNOWN provider verdicts.
-    - Confidence is calculated as: count_of_providers_supporting_final / count_of_all_non_unknown_verdicts.
+    - Final verdict is determined by majority vote among non-UNKNOWN
+      provider verdicts.
+    - Confidence is calculated as:
+      count_of_providers_supporting_final / count_of_all_non_unknown_verdicts.
     - Always include all provider sources in the response.
     - If no providers return a non-UNKNOWN verdict, fall back to Gemini classification.
     - Explanation is generated from available sources using Gemini.
@@ -194,12 +196,15 @@ def _normalize_label(raw: str) -> str:
         return "False"
     return "Unclear"
 
+
 # Transient exceptions
 _transient = (httpx.ConnectTimeout, httpx.ReadTimeout, httpx.RemoteProtocolError)
+
 
 def _get_timeout() -> int:
     """Get request timeout value."""
     return int(settings.request_timeout or 15)
+
 
 @retry(
     stop=stop_after_attempt(2),

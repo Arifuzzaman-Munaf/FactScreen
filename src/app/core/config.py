@@ -29,7 +29,7 @@ _YAML_CONFIG = _load_local_yaml()
 def _section(name: str) -> Dict[str, Any]:
     return _YAML_CONFIG.get(name, {}) if isinstance(_YAML_CONFIG, dict) else {}
 
-    
+
 _APP_CFG = _section("app")
 _GOOGLE_CFG = _section("google_factcheck")
 _RAPID_CFG = _section("rapidapi_fact_checker")
@@ -138,11 +138,15 @@ class Settings(BaseSettings):
     )
 
     # Sentiment analysis settings
-    sentiment_model_id: str = _SENTIMENT_CFG.get("model_id", "distilbert-base-uncased-finetuned-sst-2-english")
+    sentiment_model_id: str = _SENTIMENT_CFG.get(
+        "model_id", "distilbert-base-uncased-finetuned-sst-2-english"
+    )
     sentiment_model_dir: str = _SENTIMENT_CFG.get("model_dir", "src/app/models/distilbert-sst2")
     sentiment_max_length: int = _SENTIMENT_CFG.get("max_length", 256)
     sentiment_unclear_threshold: float = _SENTIMENT_CFG.get("unclear_threshold", 0.1)
-    sentiment_default_unclear_confidence: float = _SENTIMENT_CFG.get("default_unclear_confidence", 0.5)
+    sentiment_default_unclear_confidence: float = _SENTIMENT_CFG.get(
+        "default_unclear_confidence", 0.5
+    )
     sentiment_unclear_confidence: float = _SENTIMENT_CFG.get("unclear_confidence", 0.55)
     sentiment_min_confidence: float = _SENTIMENT_CFG.get("min_confidence", 0.6)
     sentiment_max_confidence: float = _SENTIMENT_CFG.get("max_confidence", 0.95)

@@ -288,7 +288,6 @@ async def analyze_detailed(req: AnalyzeRequest) -> AnalyzeResponseDetailed:
         "Unclear": "Unclear",
     }.get(label, "Unclear")
 
-
     explanation_text = (
         f"Sentiment aggregation on {len(texts)} texts: POS={pos_sum:.2f}, NEG={neg_sum:.2f}. "
         f"Per-provider first ratings: {provider_summary}. "

@@ -152,7 +152,10 @@ VERDICT_CSS = dedent(
     width: 150px;
     height: 150px;
     border-radius: 50%;
-    background: conic-gradient(#fef3c7 calc(var(--confidence-value) * 1%), rgba(255, 255, 255, 0.15) 0);
+    background: conic-gradient(
+        #fef3c7 calc(var(--confidence-value) * 1%),
+        rgba(255, 255, 255, 0.15) 0
+    );
     display: flex;
     align-items: center;
     justify-content: center;
@@ -162,11 +165,17 @@ VERDICT_CSS = dedent(
 }
 
 .verdict-card.verdict-true .confidence-gauge {
-    background: conic-gradient(#dcfce7 calc(var(--confidence-value) * 1%), rgba(255, 255, 255, 0.15) 0);
+    background: conic-gradient(
+        #dcfce7 calc(var(--confidence-value) * 1%),
+        rgba(255, 255, 255, 0.15) 0
+    );
 }
 
 .verdict-card.verdict-unknown .confidence-gauge {
-    background: conic-gradient(#fef9c3 calc(var(--confidence-value) * 1%), rgba(255, 255, 255, 0.15) 0);
+    background: conic-gradient(
+        #fef9c3 calc(var(--confidence-value) * 1%),
+        rgba(255, 255, 255, 0.15) 0
+    );
 }
 
 .confidence-gauge[data-empty="true"] {
@@ -201,9 +210,9 @@ VERDICT_CSS = dedent(
 
 
 .stExpander {
-    background: linear-gradient(135deg, 
-        rgba(30, 41, 59, 0.9) 0%, 
-        rgba(15, 23, 42, 0.95) 50%, 
+    background: linear-gradient(135deg,
+        rgba(30, 41, 59, 0.9) 0%,
+        rgba(15, 23, 42, 0.95) 50%,
         rgba(30, 41, 59, 0.9) 100%) !important;
     backdrop-filter: blur(22px) saturate(180%) !important;
     border-radius: 24px !important;
@@ -211,7 +220,7 @@ VERDICT_CSS = dedent(
     padding: 1rem !important;
     margin: 1.75rem auto !important;
     max-width: 1080px !important;
-    box-shadow: 
+    box-shadow:
         0 18px 50px rgba(0, 0, 0, 0.45),
         0 10px 30px rgba(76, 81, 191, 0.25),
         inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
@@ -220,7 +229,7 @@ VERDICT_CSS = dedent(
 
 .stExpander:hover {
     border-color: rgba(99, 102, 241, 0.6) !important;
-    box-shadow: 
+    box-shadow:
         0 12px 40px rgba(0, 0, 0, 0.4),
         0 4px 12px rgba(99, 102, 241, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
@@ -411,7 +420,7 @@ VERDICT_CSS = dedent(
     text-align: center;
     background: linear-gradient(135deg, rgba(30, 41, 59, 0.92), rgba(17, 24, 39, 0.9));
     border: 1px solid rgba(99, 102, 241, 0.35);
-    box-shadow: 
+    box-shadow:
         0 20px 55px rgba(12, 17, 40, 0.65),
         inset 0 1px 0 rgba(255, 255, 255, 0.08);
     color: rgba(248, 250, 252, 0.85);
