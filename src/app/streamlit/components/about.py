@@ -11,7 +11,7 @@ import streamlit as st
 def render_about_page() -> None:
     """
     Render the About page with system overview and technology information.
-    
+
     This function displays product information, purpose, objectives,
     and technical architecture details.
     """
@@ -23,7 +23,7 @@ def render_about_page() -> None:
         """,
         unsafe_allow_html=True,
     )
-    
+
     st.markdown(
         """
         <div class="hero-subtitle" style="max-width:900px;margin:0 auto 2rem auto;">
@@ -71,9 +71,9 @@ def render_about_page() -> None:
                 </ul>
         </div>
         """,
-        unsafe_allow_html=True,
-    )
-    
+            unsafe_allow_html=True,
+        )
+
     st.markdown(
         """
         <div class="content-card">
@@ -89,7 +89,7 @@ def render_about_page() -> None:
         """,
         unsafe_allow_html=True,
     )
-    
+
     st.markdown(
         """
         <div class="content-card">
@@ -105,6 +105,5 @@ def render_about_page() -> None:
         """,
         unsafe_allow_html=True,
     )
-    
-    # Project details card intentionally removed per latest design request.
 
+    # Project details card intentionally removed per latest design request.

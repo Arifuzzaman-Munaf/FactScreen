@@ -1,0 +1,40 @@
+app:
+  name: FactScreen API
+  version: "0.1.0"
+  cors_origins:
+    - "http://localhost:5173"
+    - "http://localhost:3000"
+  request_timeout: 15
+
+google_factcheck:
+  url: "https://factchecktools.googleapis.com"
+  endpoint: "v1alpha1/claims:search"
+
+rapidapi_fact_checker:
+  url: "fact-checker.p.rapidapi.com"
+  endpoint: "search"
+  host: "fact-checker.p.rapidapi.com"
+
+ml:
+  similarity_threshold: 0.15
+  sentence_transformer_model: "all-MiniLM-L6-v2"
+  classification_model: "facebook/bart-large-mnli"
+
+gemini:
+  model: "gemini-2.5-flash"
+
+frontend:
+  default_api_url: "http://localhost:8000"
+  verdict_colors:
+    true: "#22c55e"        # Green
+    misleading: "#ef4444"  # Red
+    unknown: "#eab308"     # Yellow
+    false: "#ef4444"       # Red (alias for misleading)
+
+secrets:
+  # Names of environment variables containing API keys. Do not store actual secrets here.
+  google_api_key_env: GOOGLE_API_KEY
+  fact_checker_api_key_env: FACT_CHECKER_API_KEY
+  gemini_api_key_env: GEMINI_API_KEY
+
+

@@ -11,7 +11,7 @@ import streamlit as st
 def render_help_page() -> None:
     """
     Render the Help page with getting started and troubleshooting information.
-    
+
     This function displays usage instructions, verdict explanations,
     and error recovery guidance.
     """
@@ -23,7 +23,7 @@ def render_help_page() -> None:
         """,
         unsafe_allow_html=True,
     )
-    
+
     st.markdown(
         """
         <div class="hero-subtitle" style="max-width:900px;margin:0 auto 2rem auto;">
@@ -77,7 +77,7 @@ def render_help_page() -> None:
             """,
             unsafe_allow_html=True,
         )
-    
+
     st.markdown(
         """
         <div class="content-card">
@@ -118,7 +118,7 @@ def render_help_page() -> None:
         """,
         unsafe_allow_html=True,
     )
-    
+
     st.markdown(
         """
         <div class="content-card">
@@ -135,4 +135,3 @@ def render_help_page() -> None:
         """,
         unsafe_allow_html=True,
     )
-

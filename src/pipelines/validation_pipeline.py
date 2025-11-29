@@ -27,10 +27,10 @@ from src.app.services.claim_extract import ClaimExtractionService
 from src.pipelines.feature_eng_pipeline import SimilarityFilterService
 from src.pipelines.inference_pipeline import ClaimClassificationService
 from src.app.core.config import settings
+
 _claim_extraction_service = ClaimExtractionService()
 _similarity_filter_service = SimilarityFilterService()
 _classification_service = ClaimClassificationService()
-
 
 
 async def validate_text(text: str) -> AggregatedResult:
@@ -222,9 +222,9 @@ async def analyze_detailed(req: AnalyzeRequest) -> AnalyzeResponseDetailed:
         seen.add(provider_name)
         providers.append(
             ProviderRating(
-            provider=provider_name,
-            rating=h.get("rating"),
-            label=h.get("verdict"),
+                provider=provider_name,
+                rating=h.get("rating"),
+                label=h.get("verdict"),
             )
         )
 

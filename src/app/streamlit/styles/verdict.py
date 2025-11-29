@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 VERDICT_CSS = dedent(
-"""
+    """
 .claim-verdict-row {
     display: flex;
     gap: 2.5rem;

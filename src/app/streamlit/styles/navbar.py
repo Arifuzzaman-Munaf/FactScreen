@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 NAVBAR_CSS = dedent(
-"""
+    """
 /* Top Navigation Bar - Stunning Glassmorphic Design */
 .top-navbar {
     background: linear-gradient(135deg, 

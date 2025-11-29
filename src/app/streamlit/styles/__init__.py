@@ -43,4 +43,3 @@ def build_theme_css() -> str:
 THEME_CSS = build_theme_css()
 
 __all__ = ["THEME_CSS", "build_theme_css"]
-

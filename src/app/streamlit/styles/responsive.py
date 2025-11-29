@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 RESPONSIVE_CSS = dedent(
-"""
+    """
 /* Responsive Design - Stunning on All Screens */
 @media (max-width: 1200px) {
     .main .block-container {

@@ -32,11 +32,7 @@ st.set_page_config(
     page_icon="✅",
     layout="wide",
     initial_sidebar_state="collapsed",
-    menu_items={
-        'Get Help': None,
-        'Report a bug': None,
-        'About': None
-    }
+    menu_items={"Get Help": None, "Report a bug": None, "About": None},
 )
 
 # Apply custom styles
@@ -78,17 +74,17 @@ with nav_col_brand:
 with nav_col_buttons:
     # Navigation buttons in parallel columns
     btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 1], gap="small")
-    
+
     with btn_col1:
         if st.button("HOME", key="nav_home", use_container_width=True):
             st.session_state.page = "home"
             st.rerun()
-    
+
     with btn_col2:
         if st.button("ABOUT", key="nav_about", use_container_width=True):
             st.session_state.page = "about"
             st.rerun()
-    
+
     with btn_col3:
         if st.button("HELP", key="nav_help", use_container_width=True):
             st.session_state.page = "help"
@@ -99,7 +95,9 @@ st.markdown(
     """
     <script>
         (function() {
-            const currentPage = '""" + st.session_state.page + """';
+            const currentPage = '"""
+    + st.session_state.page
+    + """';
             const icons = {
                 'HOME': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 4l9 6.5" /><path d="M5.5 9.5V20h13V9.5" /><path d="M9.5 20v-5.25h5V20" /></svg>',
                 'ABOUT': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>',
@@ -211,4 +209,3 @@ elif st.session_state.page == "help":
     help.render_help_page()
 else:
     home.render_home_page()
-

@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 COMPONENTS_CSS = dedent(
-"""
+    """
 .hero-title {
     font-size: clamp(2.5rem, 5vw, 4rem);
     font-weight: 900;

@@ -12,7 +12,8 @@ run-frontend:
 	fi
 	@echo "Starting Streamlit frontend..."
 	@echo "Backend URL: $(FACTSCREEN_API_URL)"
-	@PYTHONPATH=. FACTSCREEN_API_URL=$(FACTSCREEN_API_URL) ./venv/bin/streamlit run src/app/streamlit/main.py
+	@PYTHONPATH=. FACTSCREEN_API_URL=$(FACTSCREEN_API_URL) ./venv/bin/streamlit run src/app/streamlit/main.py; \
+	$(MAKE) _clean
 
 run-app:
 	@if [ ! -d "venv" ]; then \
@@ -45,6 +46,8 @@ run-app:
 		PYTHONPATH=. FACTSCREEN_API_URL=$(FACTSCREEN_API_URL) ./venv/bin/streamlit run src/app/streamlit/main.py || EXIT_CODE=$$?; \
 		echo "Shutting down backend..."; \
 		kill $$BACKEND_PID >/dev/null 2>&1 || true; \
+		echo "Cleaning cache files..."; \
+		$(MAKE) _clean; \
 		exit $${EXIT_CODE:-0}
 # Default target
 help:

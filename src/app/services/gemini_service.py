@@ -167,7 +167,7 @@ async def check_claim_verdict_alignment(
         # The title often contains the actual claim being fact-checked
         # Use title first, then snippet as fallback
         claim_being_checked = title.strip() if title else (snippet[:200] if snippet else "")
-        
+
         if snippet or verdict or title:
             verdict_context.append(
                 f"Source: {source}\n"

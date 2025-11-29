@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 PROCESSING_CSS = dedent(
-"""
+    """
 /* Custom Processing Animation - Smaller size */
 .processing-container {
     display: flex;

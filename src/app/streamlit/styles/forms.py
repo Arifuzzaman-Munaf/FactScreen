@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 FORMS_CSS = dedent(
-"""
+    """
 /* Input Card Container - Glassmorphic Design with Better Contrast */
 div[data-testid="stForm"] {
     background: linear-gradient(135deg, 

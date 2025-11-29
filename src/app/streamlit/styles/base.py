@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 BASE_CSS = dedent(
-"""
+    """
 :root {
     --bg-dark: #0f172a;
     --bg-card: #111827;
