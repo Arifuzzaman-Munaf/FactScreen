@@ -34,20 +34,132 @@ run-app:
 		echo "✔ Dependencies installed!"; \
 	fi
 	@echo "Starting FactScreen application (backend + frontend)..."
-	@STREAMLIT_SERVER_FILE_WATCHER_TYPE=none $(PYTHON) -m streamlit run src/app/streamlit/main.py --server.port 8501 &
-	@sleep 2
-	@echo "Backend will start automatically when frontend makes first request"
-	@echo "Frontend available at: http://localhost:8501"
-	@wait || $(MAKE) _clean
+	@BACKEND_PORT=8000; \
+	FRONTEND_PORT=8501; \
+	echo "Step 1: Checking and freeing ports..."; \
+	for port in $$BACKEND_PORT $$FRONTEND_PORT; do \
+		if lsof -ti:$$port > /dev/null 2>&1; then \
+			echo "⚠️  Port $$port is in use. Stopping existing process..."; \
+			lsof -ti:$$port | xargs kill -9 2>/dev/null || true; \
+			sleep 1; \
+			if lsof -ti:$$port > /dev/null 2>&1; then \
+				if [ $$port -eq 8000 ]; then \
+					for alt_port in 8001 8002 8003 8004 8005; do \
+						if ! lsof -ti:$$alt_port > /dev/null 2>&1; then \
+							BACKEND_PORT=$$alt_port; \
+							echo "✔ Using alternative backend port $$BACKEND_PORT"; \
+							break; \
+						fi; \
+					done; \
+				elif [ $$port -eq 8501 ]; then \
+					for alt_port in 8502 8503 8504 8505 8506; do \
+						if ! lsof -ti:$$alt_port > /dev/null 2>&1; then \
+							FRONTEND_PORT=$$alt_port; \
+							echo "✔ Using alternative frontend port $$FRONTEND_PORT"; \
+							break; \
+						fi; \
+					done; \
+				fi; \
+			fi; \
+		fi; \
+	done; \
+	echo ""; \
+	echo "Step 2: Starting backend server on http://localhost:$$BACKEND_PORT..."; \
+	$(PYTHON) entrypoint/server.py > /tmp/factscreen-backend.log 2>&1 & \
+	BACKEND_PID=$$!; \
+	echo "Backend starting (PID: $$BACKEND_PID)..."; \
+	echo "Waiting for backend to be ready..."; \
+	MAX_WAIT=30; \
+	WAIT_COUNT=0; \
+	HEALTH_CHECK_CMD=""; \
+	if command -v curl > /dev/null 2>&1; then \
+		HEALTH_CHECK_CMD="curl -s -f http://localhost:$$BACKEND_PORT/v1/health > /dev/null 2>&1"; \
+	elif command -v wget > /dev/null 2>&1; then \
+		HEALTH_CHECK_CMD="wget -q --spider http://localhost:$$BACKEND_PORT/v1/health > /dev/null 2>&1"; \
+	else \
+		HEALTH_CHECK_CMD="$(PYTHON) -c \"import urllib.request; urllib.request.urlopen('http://localhost:$$BACKEND_PORT/v1/health').read()\" > /dev/null 2>&1"; \
+	fi; \
+	while [ $$WAIT_COUNT -lt $$MAX_WAIT ]; do \
+		if eval $$HEALTH_CHECK_CMD; then \
+			echo ""; \
+			echo "✔ Backend server is ready on http://localhost:$$BACKEND_PORT"; \
+			echo "  API docs: http://localhost:$$BACKEND_PORT/docs"; \
+			break; \
+		fi; \
+		sleep 1; \
+		WAIT_COUNT=$$((WAIT_COUNT + 1)); \
+		if [ $$((WAIT_COUNT % 5)) -eq 0 ]; then \
+			echo  " ($$WAIT_COUNT/$$MAX_WAIT)"; \
+		else \
+			echo  "."; \
+		fi; \
+	done; \
+	if [ $$WAIT_COUNT -eq $$MAX_WAIT ]; then \
+		echo ""; \
+		echo "⚠️  Backend did not start within $$MAX_WAIT seconds. Check /tmp/factscreen-backend.log"; \
+		kill $$BACKEND_PID 2>/dev/null || true; \
+		$(MAKE) _clean; \
+		exit 1; \
+	fi; \
+	echo ""; \
+	echo "Step 3: Starting frontend on http://localhost:$$FRONTEND_PORT..."; \
+	STREAMLIT_SERVER_FILE_WATCHER_TYPE=none $(PYTHON) -m streamlit run src/app/streamlit/main.py --server.port $$FRONTEND_PORT --server.headless true & \
+	FRONTEND_PID=$$!; \
+	sleep 3; \
+	if ps -p $$FRONTEND_PID > /dev/null 2>&1; then \
+		echo "✔ Frontend is ready on http://localhost:$$FRONTEND_PORT"; \
+	else \
+		echo "❌ Frontend failed to start. Check logs above."; \
+		kill $$BACKEND_PID 2>/dev/null || true; \
+		$(MAKE) _clean; \
+		exit 1; \
+	fi; \
+	echo ""; \
+	echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"; \
+	echo "  FactScreen is running!"; \
+	echo "  Backend:  http://localhost:$$BACKEND_PORT"; \
+	echo "  Frontend: http://localhost:$$FRONTEND_PORT"; \
+	echo "  API Docs: http://localhost:$$BACKEND_PORT/docs"; \
+	echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"; \
+	echo "Press Ctrl+C to stop both servers"; \
+	echo ""; \
+	wait $$FRONTEND_PID; \
+	EXIT_CODE=$$?; \
+	echo ""; \
+	echo "Stopping servers..."; \
+	kill $$BACKEND_PID 2>/dev/null || true; \
+	pkill -f "uvicorn.*src.app.main:app" 2>/dev/null || true; \
+	pkill -f "streamlit.*main.py" 2>/dev/null || true; \
+	$(MAKE) _clean; \
+	exit $$EXIT_CODE
 
 # Setup commands
 install:
 	@echo "Creating virtual environment..."
-	@python3 -m venv venv || python -m venv venv
+	@if [ ! -d "venv" ]; then \
+		python3 -m venv venv 2>/dev/null || python -m venv venv 2>/dev/null || (echo "Error: Could not create virtual environment. Please install Python 3.8+ first."; exit 1); \
+		echo "✔ Virtual environment created"; \
+	else \
+		echo "Virtual environment already exists"; \
+	fi
 	@echo "Upgrading pip, setuptools, and wheel..."
-	@$(PIP) install --upgrade pip setuptools wheel
+	@if [ -f "venv/bin/pip" ]; then \
+		venv/bin/pip install --upgrade pip setuptools wheel; \
+	elif [ -f "venv/Scripts/pip.exe" ]; then \
+		venv/Scripts/pip.exe install --upgrade pip setuptools wheel; \
+	else \
+		echo "Error: Could not find pip in virtual environment"; \
+		exit 1; \
+	fi
 	@echo "Installing all dependencies (including test dependencies)..."
-	@$(PIP) install -r requirements-dev.txt
+	@if [ -f "venv/bin/pip" ]; then \
+		venv/bin/pip install -r requirements-dev.txt; \
+	elif [ -f "venv/Scripts/pip.exe" ]; then \
+		venv/Scripts/pip.exe install -r requirements-dev.txt; \
+	else \
+		echo "Error: Could not find pip in virtual environment"; \
+		exit 1; \
+	fi
 	@echo "✔ Virtual environment created and all dependencies installed!"
 	@$(MAKE) _clean
 

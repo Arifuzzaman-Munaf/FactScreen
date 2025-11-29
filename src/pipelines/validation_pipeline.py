@@ -44,13 +44,28 @@ async def validate_text(text: str) -> AggregatedResult:
 
 
 async def validate_url(url: str) -> AggregatedResult:
+    # Ensure URL is properly preserved
+    if not url or not url.strip():
+        raise ValueError("URL cannot be empty")
+    
+    url = url.strip()
+    
     # Use the URL for Google's pageUrl param to improve hit rate
     claim_source = await _extract_text_from_url(url)
-    claim_for_display = extract_key_claim(claim_source or url)
-    raw_query = url.strip() or claim_for_display
+    
+    # For URL validation, prefer using the full URL as claim_for_display
+    # Only use extracted text if it's meaningful (not empty and longer than just the URL)
+    if claim_source and len(claim_source.strip()) > len(url) + 50:
+        # Use extracted text if it's substantially longer than the URL
+        claim_for_display = extract_key_claim(claim_source)
+    else:
+        # Use the full URL as the claim
+        claim_for_display = url
+    
+    raw_query = url or claim_for_display
     results = await _get_provider_results(raw_query, page_url=url)
 
-    # Get sources for Gemini explanation
+    # Get sources for Gemini explanation - use full URL for better search results
     sources = await search_all(claim_for_display)
     return await aggregate_results(claim_for_display, results, sources)
 
@@ -63,7 +78,9 @@ async def analyze(req) -> ValidateResponse:
     if getattr(req, "text", None):
         result = await validate_text(req.text)
     elif getattr(req, "url", None):
-        result = await validate_url(str(req.url))
+        # Get the full URL string - Pydantic v2 AnyHttpUrl uses unicode_string()
+        url_str = req.url.unicode_string() if hasattr(req.url, 'unicode_string') else str(req.url)
+        result = await validate_url(url_str)
     else:
         # Should be validated at route level, but keep a safe default
         result = await validate_text("")
@@ -221,7 +238,9 @@ async def analyze_detailed(req: AnalyzeRequest) -> AnalyzeResponseDetailed:
     raw_text = req.text or ""
     # If no raw text and there is a URL, fetch the text from the URL
     if not raw_text and req.url:
-        raw_text = await fetch_page_text(str(req.url))
+        # Get the full URL string - Pydantic v2 AnyHttpUrl uses unicode_string()
+        url_str = req.url.unicode_string() if hasattr(req.url, 'unicode_string') else str(req.url)
+        raw_text = await fetch_page_text(url_str)
     if not raw_text:
         raw_text = "No text provided."
 

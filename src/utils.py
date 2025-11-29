@@ -1,6 +1,7 @@
 """
 Utility functions for FactScreen
 """
+from urllib.parse import urlparse
 
 
 def extract_key_claim(text: str) -> str:
@@ -13,7 +14,20 @@ def extract_key_claim(text: str) -> str:
     """
     if not text:
         return ""
-    # Split the text into sentences
+    
+    # Check if the text is a URL - if so, return it as-is (up to reasonable length)
+    text_stripped = text.strip()
+    try:
+        parsed = urlparse(text_stripped)
+        # If it has a scheme and netloc, it's a valid URL
+        if parsed.scheme and parsed.netloc:
+            # Return the full URL, but limit to 500 chars to avoid extremely long URLs
+            return text_stripped[:500]
+    except Exception:
+        # Not a URL, continue with normal processing
+        pass
+    
+    # For non-URL text, split into sentences and take the first one
     sentences = text.split(".")
     if sentences:
         return sentences[0].strip()[:200]

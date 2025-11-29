@@ -133,7 +133,9 @@ async def validate_claim(request: AnalyzeRequest):
             result = await validate_text(request.text)
         # if the request includes url, validate the url
         elif request.url:
-            result = await validate_url(str(request.url))
+            # Get the full URL string - Pydantic v2 AnyHttpUrl uses unicode_string()
+            url_str = request.url.unicode_string() if hasattr(request.url, 'unicode_string') else str(request.url)
+            result = await validate_url(url_str)
 
         return ValidateResponse(result=result)
     # Exception handling for HTTPException
@@ -166,7 +168,9 @@ async def generate_validation_pdf(request: AnalyzeRequest):
             result = await validate_text(request.text)
         # if the request includes url, validate the url
         elif request.url:
-            result = await validate_url(str(request.url))
+            # Get the full URL string - Pydantic v2 AnyHttpUrl uses unicode_string()
+            url_str = request.url.unicode_string() if hasattr(request.url, 'unicode_string') else str(request.url)
+            result = await validate_url(url_str)
 
         # Generate PDF report
         pdf_buffer = generate_pdf_report(result)
