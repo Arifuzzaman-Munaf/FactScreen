@@ -29,6 +29,17 @@ ml:
   sentence_transformer_model: "all-MiniLM-L6-v2"      # Sentence transformer model identifier.
   classification_model: "facebook/bart-large-mnli"    # Classification model identifier.
 
+sentiment:
+  # Sentiment analysis model configuration.
+  model_id: "distilbert-base-uncased-finetuned-sst-2-english"  # HuggingFace model identifier.
+  model_dir: "src/app/models/distilbert-sst2"                  # Local directory path for storing the model (relative to project root).
+  max_length: 256                                     # Maximum sequence length for tokenization.
+  unclear_threshold: 0.1                             # Threshold for determining unclear sentiment (relative difference).
+  default_unclear_confidence: 0.5                    # Default confidence when sentiment is unclear.
+  unclear_confidence: 0.55                           # Confidence score when sentiment is unclear.
+  min_confidence: 0.6                                # Minimum confidence score for True/False verdicts.
+  max_confidence: 0.95                               # Maximum confidence score cap.
+
 
 gemini:
   # Gemini LLM model configuration.

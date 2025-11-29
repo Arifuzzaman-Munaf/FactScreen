@@ -39,6 +39,7 @@ _CLASSIFY_CFG = _section("classification")
 _SERVER_CFG = _section("server")
 _LOGGING_CFG = _section("logging")
 _SECRETS_CFG = _section("secrets")
+_SENTIMENT_CFG = _section("sentiment")
 
 _GOOGLE_API_ENV = _SECRETS_CFG.get("google_api_key_env", "GOOGLE_API_KEY")
 _FACTCHECK_API_ENV = _SECRETS_CFG.get("fact_checker_api_key_env", "FACT_CHECKER_API_KEY")
@@ -135,6 +136,16 @@ class Settings(BaseSettings):
         default=_GEMINI_CFG.get("model"),
         alias="GEMINI_MODEL",
     )
+
+    # Sentiment analysis settings
+    sentiment_model_id: str = _SENTIMENT_CFG.get("model_id", "distilbert-base-uncased-finetuned-sst-2-english")
+    sentiment_model_dir: str = _SENTIMENT_CFG.get("model_dir", "src/app/models/distilbert-sst2")
+    sentiment_max_length: int = _SENTIMENT_CFG.get("max_length", 256)
+    sentiment_unclear_threshold: float = _SENTIMENT_CFG.get("unclear_threshold", 0.1)
+    sentiment_default_unclear_confidence: float = _SENTIMENT_CFG.get("default_unclear_confidence", 0.5)
+    sentiment_unclear_confidence: float = _SENTIMENT_CFG.get("unclear_confidence", 0.55)
+    sentiment_min_confidence: float = _SENTIMENT_CFG.get("min_confidence", 0.6)
+    sentiment_max_confidence: float = _SENTIMENT_CFG.get("max_confidence", 0.95)
 
 
 # Instantiate the settings object to be used throughout the application
