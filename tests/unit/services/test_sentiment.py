@@ -59,7 +59,6 @@ def mock_aggregated_result():
     )
 
 
-
 class TestSentimentService:
     """
     Test suite for the sentiment analysis service.
@@ -147,5 +146,3 @@ class TestSentimentService:
         label, confidence = sentiment_to_label([])
         assert label == "Unclear"
         assert confidence == 0.5
-
-

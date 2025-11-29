@@ -59,7 +59,6 @@ def mock_aggregated_result():
     )
 
 
-
 class TestClaimExtractionService:
     """
     Test suite for the claim extraction service.
@@ -210,5 +209,3 @@ class TestClaimExtractionService:
         assert len(result) == 2
         assert any("Google" in claim.get("source_api", "") for claim in result)
         assert any("RapidAPI" in claim.get("source_api", "") for claim in result)
-
-

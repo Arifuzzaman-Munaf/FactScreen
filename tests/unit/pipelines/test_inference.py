@@ -24,7 +24,6 @@ from src.app.models.schemas import (
 )
 
 
-
 class TestInferencePipeline:
     """
     Test suite for the claim classification inference pipeline.
@@ -135,5 +134,3 @@ class TestInferencePipeline:
         assert isinstance(labels, list)
         assert len(labels) > 0
         assert "True" in labels
-
-

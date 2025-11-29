@@ -24,7 +24,6 @@ from src.app.models.schemas import (
 )
 
 
-
 class TestValidationPipeline:
     """
     Test suite for the claim validation pipeline.
@@ -194,5 +193,3 @@ class TestValidationPipeline:
         assert result.label in ["True", "False", "Unclear"]
         assert result.confidence >= 0.0
         assert result.confidence <= 1.0
-
-

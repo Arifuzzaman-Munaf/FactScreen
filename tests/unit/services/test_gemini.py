@@ -32,6 +32,13 @@ from src.app.services.claim_extract import ClaimExtractionService
 from src.app.services.classify import classify_google, classify_rapid
 
 
+class TestGeminiService:
+    """
+    Test suite for the Gemini AI service integration.
+
+    Tests Google Gemini AI integration for claim classification, explanation generation,
+    and related functionality with proper mocking of external dependencies.
+    """
 
     @pytest.mark.asyncio
     async def test_classify_with_gemini_no_api_key(self):
@@ -48,5 +55,3 @@ from src.app.services.classify import classify_google, classify_rapid
             assert label == "Unclear"
             assert confidence == 0.5
             assert "not configured" in explanation.lower()
-
-

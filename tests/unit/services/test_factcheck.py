@@ -59,7 +59,6 @@ def mock_aggregated_result():
     )
 
 
-
 class TestFactcheckService:
     """
     Test suite for the fact-checking aggregation service.
@@ -155,5 +154,3 @@ class TestFactcheckService:
 
         result = await search_all("Test claim")
         assert len(result) > 0
-
-

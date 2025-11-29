@@ -183,6 +183,8 @@ def _invoke_gemini(prompt: str, context: str) -> Tuple[str, Optional[Dict[str, o
             "total_token_count": getattr(usage, "total_token_count", "n/a"),
         }
     return text, usage_metadata
+
+
 async def classify_with_gemini(
     claim: str, sources: Optional[List[Dict[str, Optional[str]]]] = None
 ) -> Tuple[str, float, str]:

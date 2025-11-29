@@ -508,7 +508,6 @@ class TestFilteredClaimsEndpoint:
         assert "similarity_threshold" in data
         assert "classification_labels" in data
 
-
     @patch("src.app.api.routes.claim_extraction_service")
     @allure.severity(allure.severity_level.NORMAL)
     def test_filtered_claims_error(self, mock_service, client):

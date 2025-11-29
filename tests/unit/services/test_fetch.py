@@ -59,7 +59,6 @@ def mock_aggregated_result():
     )
 
 
-
 class TestFetchService:
     """
     Test suite for the data fetching service.
@@ -206,5 +205,3 @@ class TestFetchService:
 
         result = await _http_get("https://example.com")
         assert result == {}
-
-

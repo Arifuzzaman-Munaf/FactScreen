@@ -59,7 +59,6 @@ def mock_aggregated_result():
     )
 
 
-
 class TestClassifyService:
     """
     Test suite for the provider result classification service.

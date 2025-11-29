@@ -24,7 +24,6 @@ from src.app.models.schemas import (
 )
 
 
-
 class TestFeatureEngPipeline:
     """
     Test suite for the feature engineering and similarity filtering pipeline.

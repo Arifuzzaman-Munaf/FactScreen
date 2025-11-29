@@ -59,7 +59,6 @@ def mock_aggregated_result():
     )
 
 
-
 class TestReportService:
     """
     Test suite for the PDF report generation service.
@@ -129,5 +128,3 @@ class TestReportService:
             pdf_buffer = generate_pdf_report(result)
             assert isinstance(pdf_buffer, BytesIO)
             assert len(pdf_buffer.getvalue()) > 0
-
-
