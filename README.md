@@ -2,7 +2,7 @@
 
 A comprehensive fact-checking API that combines multiple sources and uses AI for claim analysis and classification.
 
-## 🚀 Features
+## Features
 
 - **Multi-source claim extraction**: Integrates Google Fact Check API and RapidAPI Fact-Checker
 - **Similarity filtering**: Uses sentence transformers to filter claims by relevance
@@ -10,7 +10,7 @@ A comprehensive fact-checking API that combines multiple sources and uses AI for
 - **Standardized response format**: Consistent data structure across all sources
 - **Production-ready**: Comprehensive testing, documentation, and deployment tools
 
-## ⚡ Quick Start
+## Quick Start
 
 ### Option 1: Using Make (Recommended)
 ```bash
@@ -41,7 +41,7 @@ make test
 - **ReDoc**: http://localhost:8000/redoc
 - **OpenAPI schema**: http://localhost:8000/openapi.json
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Search Claims
 ```bash
@@ -57,12 +57,24 @@ curl -X POST "http://localhost:8000/v1/claims/filtered" \
   -d '{"query": "Climate change is a hoax", "similarity_threshold": 0.75}'
 ```
 
-### Validate Claims (text / url / image)
+### Validate Claims (text / url)
 ```bash
 curl -X POST "http://localhost:8000/v1/validate" \
   -H "Content-Type: application/json" \
   -d '{
         "text": "The Eiffel Tower will be demolished next year"
+      }'
+```
+
+### Generate PDF Report
+```bash
+curl -X POST "http://localhost:8000/v1/report/pdf" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "claim_text": "The Eiffel Tower will be demolished next year",
+        "verdict": "misleading",
+        "confidence": 0.91,
+        "explanation": "..."
       }'
 ```
 
@@ -83,31 +95,50 @@ The validation endpoint automatically combines third-party fact-checking provide
 - `confidence` — confidence score
 - `explanation` — natural-language reasoning citing sources or Gemini fallback
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 FactScreen/
+├── config/                     # Configuration files
+│   ├── local.yaml             # Static configuration (URLs, models, thresholds)
 ├── entrypoint/                 # Application entrypoints
 │   └── server.py              # Server startup script
 ├── src/                        # Main source code
 │   ├── app/                    # Application code
 │   │   ├── api/               # API routes
-│   │   ├── core/              # Configuration
-│   │   ├── models/            # Data models
-│   │   ├── services/          # Business logic
-│   │   └── utils/             # Utility functions
+│   │   ├── core/              # Configuration and logging
+│   │   ├── models/            # Data models and schemas
+│   │   ├── services/          # Business logic services
+│   │   │   ├── factcheck.py  # Result aggregation
+│   │   │   ├── fetch.py      # Data fetching
+│   │   │   ├── gemini_service.py  # Gemini AI integration
+│   │   │   ├── classify.py   # Provider result classification
+│   │   │   ├── sentiment.py  # Sentiment analysis
+│   │   │   ├── report.py     # PDF report generation
+│   │   │   └── claim_extract.py  # Claim extraction
+│   │   └── streamlit/         # Streamlit frontend
+│   │       ├── main.py        # Frontend entry point
+│   │       ├── components/    # Page components
+│   │       ├── helpers.py     # Helper functions
+│   │       └── styles/        # CSS styling modules
 │   ├── pipelines/             # ML pipelines
-│   │   ├── feature_eng_pipeline.py    # Feature engineering
-│   │   ├── inference_pipeline.py      # Inference/classification
+│   │   ├── feature_eng_pipeline.py    # Similarity filtering
+│   │   ├── inference_pipeline.py      # Classification service
 │   │   └── validation_pipeline.py     # Validation pipeline
 │   └── utils.py               # Utility functions
 ├── tests/                      # Test suite
+│   ├── unit/                  # Unit tests
+│   │   ├── services/         # Service unit tests
+│   │   └── pipelines/        # Pipeline unit tests
+│   ├── integration/          # Integration tests
+│   ├── conftest.py           # Shared fixtures
+│   └── README_TEST.md        # Test documentation
 ├── Makefile                    # Development commands
 ├── requirements-dev.txt        # Development dependencies
 └── README.md                   # This file
 ```
 
-## 🛠️ Development Commands
+## Development Commands
 
 ```bash
 # Setup
@@ -121,8 +152,12 @@ make clean            # Clean cache files
 
 # Testing
 make test             # Run all tests
-make test-unit        # Run unit tests only
-make test-integration # Run integration tests only
+make test-api         # Run API route tests
+make test-services    # Run core services tests
+make test-pipelines   # Run data pipeline tests
+make test-integration # Run integration workflow tests
+make test-coverage    # Run tests with coverage report
+make test-report      # Generate Allure test report
 make test-all         # Run all tests with verbose output
 
 # Code Quality
@@ -130,56 +165,73 @@ make lint             # Run linting checks
 make format           # Format code with black
 ```
 
-## 📚 Documentation
+## Documentation
 
 - [API Documentation](API_DOCUMENTATION.md) - Complete API reference
 - [Project Structure](PROJECT_STRUCTURE.md) - Detailed project overview
 - [Testing Guide](TESTING_GUIDE.md) - Testing documentation and examples
 
-## 🔧 Configuration
+## Configuration
 
-Configuration is managed through environment variables loaded from a `.env` file (via `pydantic-settings`). Create a `.env` file in the project root with:
+Configuration is managed through two sources:
+
+### 1. Static Configuration (`config/local.yaml`)
+All static settings (URLs, endpoints, model names, thresholds, etc.) are stored in `config/local.yaml`. This includes:
+- API endpoints and URLs
+- ML model identifiers
+- Similarity thresholds
+- Classification keywords
+- Logging configuration
+- Server host/port settings
+
+### 2. Environment Variables (`.env`)
+API keys and secrets are stored in `.env` file. Create a `.env` file in the project root:
 
 ```
 GOOGLE_API_KEY=your-google-factcheck-key
 FACT_CHECKER_API_KEY=your-rapidapi-key
 GEMINI_API_KEY=your-gemini-key
-GEMINI_MODEL=gemini-2.5-flash
 ```
 
-These values override any defaults declared in code.
+**Note**: Only API keys are stored in `.env`. All other configuration is in `config/local.yaml`.
 
-Key configuration options:
-- `GOOGLE_API_KEY`: Google Fact Check API key
-- `FACT_CHECKER_API_KEY`: RapidAPI Fact-Checker key
-- `GEMINI_API_KEY`: Gemini 2.5 Flash API key used for explanations/classification
-- `SIMILARITY_THRESHOLD`: Default similarity threshold (0.75)
-- `SENTENCE_TRANSFORMER_MODEL`: Model for similarity (all-MiniLM-L6-v2)
-- `CLASSIFICATION_MODEL`: Model for classification (facebook/bart-large-mnli)
+### Key Configuration Files
+- `config/local.yaml`: Static application settings
+- `config/prompt.yaml`: LLM prompt templates
+- `.env`: API keys and secrets (not committed to git)
 
 Gemini usage and quota warnings are written to `logs/gemini.log`, including token counts and quota/invalid-key errors.
 
-## 🧪 Testing
+## Testing
 
-The project includes comprehensive testing:
+The project includes comprehensive testing organized into unit and integration tests:
 
-- **Unit Tests**: Test individual services in isolation
-- **Integration Tests**: Test API endpoints end-to-end
-- **Legacy Tests**: Backward compatibility tests
+- **Unit Tests** (`tests/unit/`): Test individual services and pipelines in isolation
+  - Service tests: factcheck, fetch, gemini, classify, sentiment, report, claim_extract
+  - Pipeline tests: validation, inference, feature_eng
+- **Integration Tests** (`tests/integration/`): Test API endpoints and end-to-end workflows
 
 ```bash
 # Run all tests
 make test
 
-# Run specific test types
-make test-unit
-make test-integration
+# Run specific test categories
+make test-api         # API route tests
+make test-services    # Service unit tests
+make test-pipelines   # Pipeline unit tests
+make test-integration # Integration workflow tests
+
+# Generate test reports
+make test-coverage    # Coverage report (HTML)
+make test-report      # Allure test report
 
 # Run with verbose output
 make test-all
 ```
 
-## 🖥️ Streamlit Frontend
+See [tests/README_TEST.md](tests/README_TEST.md) for detailed testing documentation.
+
+## Streamlit Frontend
 
 A lightweight Streamlit presentation layer lives in `src/app/streamlit/`.
 
@@ -200,7 +252,7 @@ FACTSCREEN_API_URL=http://localhost:8000 streamlit run src/app/streamlit/main.py
 Environment variables (loaded from `.env`) must include the API keys noted above.  
 `FACTSCREEN_API_URL` defaults to `http://localhost:8000` but can be overridden when the backend runs elsewhere.
 
-## 🚀 Running the Application
+## Running the Application
 
 ### Development
 ```bash
@@ -208,7 +260,7 @@ make dev
 make run-server
 ```
 
-## 📦 Installation
+## Installation
 
 ### From Source
 ```bash
@@ -222,7 +274,7 @@ make dev
 pip install factscreen-api
 ```
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -230,12 +282,6 @@ pip install factscreen-api
 4. Run tests: `make test`
 5. Submit a pull request
 
-## 📄 License
+## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-- **Documentation**: Check the [API Documentation](API_DOCUMENTATION.md)
-- **Issues**: Report bugs on [GitHub Issues](https://github.com/factscreen/factscreen-api/issues)
-- **Discussions**: Join [GitHub Discussions](https://github.com/factscreen/factscreen-api/discussions)

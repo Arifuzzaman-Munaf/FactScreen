@@ -11,7 +11,7 @@ The test suite is organized into a hierarchical directory structure:
 ```
 tests/
 ├── conftest.py              # Shared pytest fixtures and configuration
-├── README.md                # This file
+├── README_TEST.md           # This file
 ├── unit/                    # Unit tests (isolated component testing)
 │   ├── services/           # Service layer unit tests
 │   │   ├── test_factcheck.py
@@ -39,7 +39,7 @@ tests/
 - **`test_fetch.py`**: Data fetching service tests (Google FactCheck, RapidAPI, page text extraction)
 - **`test_sentiment.py`**: Sentiment analysis service tests (label conversion, edge cases)
 - **`test_report.py`**: PDF report generation service tests (all verdict types)
-- **`test_gemini.py`**: Gemini AI service integration tests (classification, explanation, alignment)
+- **`test_gemini.py`**: Gemini AI service integration tests (classification, explanation generation)
 - **`test_claim_extract.py`**: Claim extraction service tests (extraction and mapping from multiple sources)
 - **`test_classify.py`**: Provider result classification service tests (normalization)
 
@@ -189,7 +189,7 @@ pytest tests/integration/test_api_routes.py::TestValidateEndpoint::test_validate
 - `fetch.py` - Google/RapidAPI fetching, page text
 - `sentiment.py` - Sentiment analysis, label conversion
 - `report.py` - PDF generation
-- `gemini_service.py` - Classification, explanation, alignment
+- `gemini_service.py` - Classification, explanation generation
 - `claim_extract.py` - Claim extraction and mapping
 - `classify.py` - Provider result classification
 
