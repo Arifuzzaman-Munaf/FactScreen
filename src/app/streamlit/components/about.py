@@ -141,28 +141,28 @@ def render_about_page() -> None:
         <div class="content-card">
             <h2>Core Technology Stack</h2>
             <p>
-                FactScreen operates atop a modular, asynchronous
+                FactScreen operates a top modular, asynchronous architecture leveraging
                 cutting-edge machine learning and LLMs. The key components are:
             </p>
             <ul>
                 <li>
                     <strong>Data Sourcing & Integration:</strong>
                     Aggregates and standardizes fact-check records
-                    collected from multiple authoritative external APIs,
+                    collected from multiple authoritative external APIs.
                 </li>
                 <li>
                     <strong>Semantic Filtering:</strong>
-                    Utilizes the <strong><code>all-MiniLM-L6-v2</code>
-                    scores, filtering records for high relevance to the user's query.
+                    Utilizes the <code style="background-color: #e8d5ff !important; color: #2d1b4e !important; padding: 3px 8px !important; border-radius: 4px !important; font-weight: 600 !important; font-family: 'Courier New', monospace !important; display: inline-block !important; margin: 0 2px !important; border: none !important;">all-MiniLM-L6-v2</code>
+                    model to compute similarity scores, filtering records for high relevance to the user's query.
                 </li>
                 <li>
                     <strong>AI Classification:</strong>
-                    Applies the <strong><code>facebook/bart-large-mnli
-                    final verdict labels for each claim.
+                    Applies the <code style="background-color: #e8d5ff !important; color: #2d1b4e !important; padding: 3px 8px !important; border-radius: 4px !important; font-weight: 600 !important; font-family: 'Courier New', monospace !important; display: inline-block !important; margin: 0 2px !important; border: none !important;">facebook/bart-large-mnli</code>
+                    model to assign final verdict labels for each claim.
                 </li>
                 <li>
                     <strong>Explainability Service:</strong>
-                    Implements <strong>Gemini 2.5 Flash</strong> LLM
+                    Implements <strong>Gemini 2.5 Flash</strong> LLM to provide
                     explanations and evidence-based summaries supporting each verdict.
                 </li>
             </ul>
