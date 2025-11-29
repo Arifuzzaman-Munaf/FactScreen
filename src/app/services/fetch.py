@@ -33,7 +33,6 @@ async def _http_get(
 async def fetch_google_factcheck(query: str, page_url: Optional[str] = None) -> Dict[str, Any]:
     """Call Google Fact Check Tools API claims:search.
 
-    If endpoint is not configured, default to v1alpha1 claims search.
     Args:
         query: The query to search for
         page_url: The URL of the page to search for
@@ -43,19 +42,17 @@ async def fetch_google_factcheck(query: str, page_url: Optional[str] = None) -> 
     # If the API key is not set, return an empty dictionary
     if not settings.google_api_key:
         return {}
-    # Get the base URL and endpoint
-    base = (
-        str(settings.google_factcheck_url).rstrip("/")
-        if settings.google_factcheck_url
-        else "https://factchecktools.googleapis.com"
-    )
-    endpoint = settings.google_factcheck_endpoint or "v1alpha1/claims:search"
+    # Get the base URL and endpoint from configuration
+    base = str(settings.google_factcheck_url).rstrip("/")
+    endpoint = settings.google_factcheck_endpoint
     url = f"{base}/{endpoint}"
+    # Build the parameters for the request
     params = {
         "key": settings.google_api_key,
-        "languageCode": "en",
-        "pageSize": 1,
+        "languageCode": settings.google_factcheck_language_code,
+        "pageSize": settings.google_factcheck_page_size,
     }
+    # Add the page URL if provided
     if page_url:
         params["pageUrl"] = page_url
     else:
@@ -64,31 +61,53 @@ async def fetch_google_factcheck(query: str, page_url: Optional[str] = None) -> 
 
 
 async def fetch_rapid_factchecker(query: str) -> Dict[str, Any]:
-    """Call RapidAPI example: fact-checker.p.rapidapi.com/search.
+    """Call RapidAPI fact-checker.p.rapidapi.com/search.
 
-    Requires FACT_CHECKER_URL with scheme and FACT_CHECKER_HOST header.
+    Args:
+        query: The query to search for
+    Returns:
+        The response from the request
     """
+    # If the API key is not set, return an empty dictionary
     if (
         not settings.fact_checker_api_key
         or not settings.fact_checker_url
         or not settings.fact_checker_host
     ):
         return {}
+    # Get the base URL and endpoint from configuration
     base = settings.fact_checker_url.rstrip("/")
-    endpoint = settings.fact_checker_endpoint or "search"
+    endpoint = settings.fact_checker_endpoint
     url = f"{base}/{endpoint}"
+    # Build the headers for the request
     headers = {
         "X-RapidAPI-Key": settings.fact_checker_api_key,
         "X-RapidAPI-Host": settings.fact_checker_host,
     }
-    params = {"query": query, "limit": 20, "offset": 0, "language": "en"}
+    # Build the parameters for the request
+    params = {
+        "query": query,
+        "limit": settings.fact_checker_limit,
+        "offset": settings.fact_checker_offset,
+        "language": settings.fact_checker_language,
+    }
+    # Make the request and return the response
     return await _http_get(url, params=params, headers=headers)
 
 
 async def fetch_page_text(url: str) -> str:
+    """Fetch the text from a given URL.
+
+    Args:
+        url: The URL to fetch the text from
+    Returns:
+        The text from the URL
+    """
+    # Make the request and return the response
     async with httpx.AsyncClient(timeout=settings.request_timeout) as client:
         r = await client.get(url, follow_redirects=True)
         r.raise_for_status()
+    # Parse the text and return the response as a string
     soup = BeautifulSoup(r.text, "lxml")
     for t in soup(["script", "style", "noscript"]):
         t.decompose()

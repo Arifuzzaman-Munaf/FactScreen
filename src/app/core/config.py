@@ -88,6 +88,8 @@ class Settings(BaseSettings):
         default=_GOOGLE_CFG.get("endpoint"),
         alias="GOOGLE_FACTCHECK_ENDPOINT",
     )
+    google_factcheck_language_code: str = _GOOGLE_CFG.get("language_code", "en")
+    google_factcheck_page_size: int = _GOOGLE_CFG.get("page_size", 1)
 
     # RapidAPI Fact Checker settings
     fact_checker_api_key: str = Field(default="", alias=_FACTCHECK_API_ENV)
@@ -103,6 +105,9 @@ class Settings(BaseSettings):
         default=_RAPID_CFG.get("host"),
         alias="FACT_CHECKER_HOST",
     )
+    fact_checker_limit: int = _RAPID_CFG.get("limit", 20)
+    fact_checker_offset: int = _RAPID_CFG.get("offset", 0)
+    fact_checker_language: str = _RAPID_CFG.get("language", "en")
 
     # ML Model settings
     similarity_threshold: float = Field(

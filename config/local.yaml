@@ -11,12 +11,17 @@ google_factcheck:
   # Google Fact Check Tools API configuration (static only).
   url: "https://factchecktools.googleapis.com"    # Base URL for Google Fact Check API.
   endpoint: "v1alpha1/claims:search"              # Endpoint for claim search.
+  language_code: "en"                              # Language code for API requests.
+  page_size: 1                                     # Number of results per page.
 
 rapidapi_fact_checker:
   # RapidAPI Fact Checker configuration (static only).
-  url: "fact-checker.p.rapidapi.com"    # Base host for RapidAPI Fact Checker.
-  endpoint: "search"                    # Endpoint for fact check requests.
-  host: "fact-checker.p.rapidapi.com"   # Host header for API requests.
+  url: "https://fact-checker.p.rapidapi.com"    # Base URL for RapidAPI Fact Checker (with scheme).
+  endpoint: "search"                            # Endpoint for fact check requests.
+  host: "fact-checker.p.rapidapi.com"          # Host header for API requests.
+  limit: 20                                     # Maximum number of results to return.
+  offset: 0                                     # Offset for pagination.
+  language: "en"                                # Language code for API requests.
 
 ml:
   # Machine learning settings for text processing and classification.
