@@ -37,12 +37,11 @@ async def health():
 async def search_claims(request: ClaimRequest):
     """
     Search for claims from multiple fact-checking sources
-
-    args:
-    - request: ClaimRequest - Request model for claim search
-    returns:
-    - ClaimsListResponse - Response model for list of claims
-    - HTTPException - Exception if error occurs
+    Args:
+        request: ClaimRequest - Request model for claim search
+    Returns:
+        ClaimsListResponse - Response model for list of claims
+        HTTPException - Exception if error occurs
     """
     try:
         # Get combined claims from all sources
@@ -70,11 +69,11 @@ async def get_filtered_claims(request: FilteredClaimsRequest):
     """
     Search for claims and filter them by similarity and assign classification labels.
 
-    args:
-    - request: FilteredClaimsRequest - Request model for filtered claim search
-    returns:
-    - FilteredClaimsResponse - Response model for filtered claims
-    - HTTPException - Exception if error occurs
+    Args:
+        request: FilteredClaimsRequest - Request model for filtered claim search
+    Returns:
+        FilteredClaimsResponse - Response model for filtered claims
+        HTTPException - Exception if error occurs
     """
     try:
         # Get combined claims from all sources
@@ -115,24 +114,31 @@ async def validate_claim(request: AnalyzeRequest):
     """
     Validate a claim using third-party fact-checkers and Gemini explanations.
 
-    The request can include either `text`, `url`, or `image_base64`.
+    The request can include either `text`, or `url`.
+    Args:
+        request: AnalyzeRequest - Request model for claim validation
+    Returns:
+        ValidateResponse - Response model for claim validation
+        HTTPException - Exception if error occurs
     """
-
-    if not (request.text or request.url or request.image_base64):
+    # if the request does not include any of the required fields, raise an error
+    if not (request.text or request.url):
         raise HTTPException(
-            status_code=400, detail="Provide at least one of text, url, or image_base64"
+            status_code=400, detail="Provide at least one of text or url"
         )
 
     try:
+        # if the request includes text, validate the text
         if request.text:
             result = await validate_text(request.text)
+        # if the request includes url, validate the url
         elif request.url:
             result = await validate_url(str(request.url))
-        else:
-            result = await validate_image(request.image_base64)  # type: ignore[arg-type]
 
         return ValidateResponse(result=result)
+    # Exception handling for HTTPException
     except HTTPException:
         raise
+    # Exception handling for other exceptions
     except Exception as exc:  # pragma: no cover - defensive
         raise HTTPException(status_code=500, detail=f"Error validating claim: {exc}")

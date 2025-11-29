@@ -1,40 +1,56 @@
 app:
-  name: FactScreen API
-  version: "0.1.0"
-  cors_origins:
+  # General application metadata and settings.
+  name: FactScreen API               # Application name.
+  version: "0.1.0"                   # Application version.
+  cors_origins:                      # List of trusted frontend origins (CORS).
     - "http://localhost:5173"
     - "http://localhost:3000"
-  request_timeout: 15
+  request_timeout: 15                # Default request timeout in seconds.
 
 google_factcheck:
-  url: "https://factchecktools.googleapis.com"
-  endpoint: "v1alpha1/claims:search"
+  # Google Fact Check Tools API configuration (static only).
+  url: "https://factchecktools.googleapis.com"    # Base URL for Google Fact Check API.
+  endpoint: "v1alpha1/claims:search"              # Endpoint for claim search.
 
 rapidapi_fact_checker:
-  url: "fact-checker.p.rapidapi.com"
-  endpoint: "search"
-  host: "fact-checker.p.rapidapi.com"
+  # RapidAPI Fact Checker configuration (static only).
+  url: "fact-checker.p.rapidapi.com"    # Base host for RapidAPI Fact Checker.
+  endpoint: "search"                    # Endpoint for fact check requests.
+  host: "fact-checker.p.rapidapi.com"   # Host header for API requests.
 
 ml:
-  similarity_threshold: 0.15
-  sentence_transformer_model: "all-MiniLM-L6-v2"
-  classification_model: "facebook/bart-large-mnli"
+  # Machine learning settings for text processing and classification.
+  similarity_threshold: 0.15                          # Minimum similarity score for match acceptance.
+  sentence_transformer_model: "all-MiniLM-L6-v2"      # Sentence transformer model identifier.
+  classification_model: "facebook/bart-large-mnli"    # Classification model identifier.
 
 gemini:
-  model: "gemini-2.5-flash"
+  # Gemini LLM model configuration.
+  model: "gemini-2.5-flash"                          # Gemini model to use for LLM-related tasks.
 
 frontend:
-  default_api_url: "http://localhost:8000"
-  verdict_colors:
-    true: "#22c55e"        # Green
-    misleading: "#ef4444"  # Red
-    unknown: "#eab308"     # Yellow
-    false: "#ef4444"       # Red (alias for misleading)
+  # Frontend integration and theming options.
+  default_api_url: "http://localhost:8000"           # Default backend API URL for local frontend usage.
+  verdict_colors:                                    # Color palette for verdicts (hex codes).
+    true: "#22c55e"        # Used for "True" verdict (green).
+    misleading: "#ef4444"  # Used for "Misleading" verdict (red).
+    unknown: "#eab308"     # Used for "Unknown" verdict (yellow).
+    false: "#ef4444"       # Used for "False" verdict (same as misleading/red).
+
+server:
+  # Development server bind configuration for uvicorn.
+  host: "127.0.0.1"        # Host interface to bind the API server.
+  port: 8000               # Default port for the API server.
+
+logging:
+  # Application logging configuration.
+  level: "INFO"            # Default log level (DEBUG, INFO, WARNING, ERROR).
+  dir: "logs"              # Directory where log files are stored.
+  file: "app.log"          # File name for general application logs.
 
 secrets:
-  # Names of environment variables containing API keys. Do not store actual secrets here.
+  # Specify the names of environment variables that hold API keys and secrets.
+  # Do NOT store any actual secret values here.
   google_api_key_env: GOOGLE_API_KEY
   fact_checker_api_key_env: FACT_CHECKER_API_KEY
   gemini_api_key_env: GEMINI_API_KEY
-
-

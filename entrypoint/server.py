@@ -2,18 +2,24 @@
 """
 Startup script for FactScreen API server
 """
-
 import subprocess
 import sys
 import os
-
 import socket
 import platform
 import signal
 import time
 
+from src.app.core.config import settings
+
 def is_port_in_use(port, host="127.0.0.1"):
-    """Check if a port is in use on the given host."""
+    """Check if a port is in use on the given host.
+    Args:
+        port: The port to check.
+        host: The host to check.
+    Returns:
+        True if the port is in use, False otherwise.
+    """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.settimeout(1.0)
@@ -23,9 +29,13 @@ def is_port_in_use(port, host="127.0.0.1"):
             return False
 
 def kill_process_on_port(port):
-    """Find and kill process using the given port."""
+    """Find and kill process using the given port.
+    Args:
+        port: The port to kill the process on.
+    """
     current_platform = platform.system()
     try:
+        # if the current platform is Windows, use the netstat command to find and kill the process
         if current_platform == "Windows":
             # Find PID(s) listening on the port
             result = subprocess.check_output(["netstat", "-ano"], encoding="utf-8")
@@ -37,12 +47,14 @@ def kill_process_on_port(port):
                     if pid != "0":
                         print(f"Stopping process with PID {pid} using port {port}...")
                         subprocess.call(["taskkill", "/PID", pid, "/F"])
+        # if the current platform is not Windows, use the lsof command to find and kill the process
         else:
-            # Use lsof (Unix/Linux/macOS) - more aggressive approach
+            # Use lsof (Unix/Linux/macOS)
             try:
                 # First try to get PIDs using lsof
                 result = subprocess.check_output(["lsof", "-ti", f":{port}"], encoding='utf-8')
                 pids = result.strip().split('\n')
+
                 for pid in pids:
                     if pid.strip():
                         print(f"Stopping process with PID {pid} using port {port}...")
@@ -66,19 +78,24 @@ def kill_process_on_port(port):
 def main():
     """Start the FactScreen API server"""
 
+    # get the project root directory
     project_root = os.path.dirname(os.path.dirname(__file__))
 
+    # if the project root directory does not exist, print an error and exit
     if not os.path.exists(project_root):
         print("Error: Project root directory not found!")
         sys.exit(1)
 
+    # change the current working directory to the project root directory
     os.chdir(project_root)
-    # Add project root to Python path for imports
+
+    # add the project root to the Python path for imports
     if project_root not in sys.path:
         sys.path.insert(0, project_root)
 
-    port = 8000
-    host = "127.0.0.1"
+    # get the server port and host from the settings
+    port = settings.server_port
+    host = settings.server_host
 
     # Check if port is already in use and stop the process if necessary
     if is_port_in_use(port, host):
@@ -102,12 +119,13 @@ def main():
             print(f"Port {port} is now free.")
 
     print("Starting FactScreen API server...")
-    print(f"Server will be available at: http://localhost:{port}")
-    print(f"API documentation: http://localhost:{port}/docs")
+    print(f"Server will be available at: http://{host}:{port}")
+    print(f"API documentation: http://{host}:{port}/docs")
     print("Press Ctrl+C to stop the server")
     print("-" * 50)
 
     try:
+        # run the server using uvicorn
         subprocess.run(
             [
                 sys.executable,
@@ -139,4 +157,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
