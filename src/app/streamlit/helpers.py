@@ -221,34 +221,51 @@ def render_sources_from_explanation(explanation: str) -> str:
     if "Sources:" not in explanation:
         return ""
 
+    # Extract the sources block after the "Sources:" marker
     _, sources_block = explanation.split("Sources:", maxsplit=1)
     lines = [line.strip("- ").strip() for line in sources_block.splitlines() if line.strip()]
     if not lines:
         return ""
 
-    items = []
-    for line in lines:
-        if "|" in line:
-            parts = [part.strip() for part in line.split("|")]
+    items: List[str] = []
+    seen: set[tuple[str, str]] = set()
+
+    for idx, line in enumerate(lines, start=1):
+        raw_line = line
+        url = ""
+        label = raw_line
+
+        if "|" in raw_line:
+            parts = [part.strip() for part in raw_line.split("|")]
             possible_url = parts[-1]
-            label = " | ".join(parts[:-1]) if possible_url.startswith("http") else line
-            label = html.escape(label)
             if possible_url.startswith("http"):
-                items.append(
-                    f'<li>{label} — <a href="{html.escape(possible_url)}" target="_blank" rel="noopener">Visit Link</a></li>'
-                )
-            else:
-                items.append(f"<li>{html.escape(line)}</li>")
+                url = possible_url
+                label = " | ".join(parts[:-1]).strip() or raw_line
+
+        label_escaped = html.escape(label)
+        key = (label_escaped.lower(), url.lower())
+        if key in seen:
+            continue
+        seen.add(key)
+
+        if url:
+            items.append(
+                f'<li><span class="source-title">{idx}. {label_escaped}</span>'
+                f' — <a href="{html.escape(url)}" target="_blank" rel="noopener">Visit Link</a></li>'
+            )
         else:
-            items.append(f"<li>{html.escape(line)}</li>")
+            items.append(f"<li>{idx}. {html.escape(raw_line)}</li>")
+
+    if not items:
+        return ""
 
     sources_html = dedent(
         f"""
         <div class="sources-list">
             <h4>Sources</h4>
-            <ul>
+            <ol>
                 {''.join(items)}
-            </ul>
+            </ol>
         </div>
         """
     ).strip()

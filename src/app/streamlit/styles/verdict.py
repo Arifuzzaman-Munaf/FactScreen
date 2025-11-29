@@ -264,24 +264,26 @@ VERDICT_CSS = dedent(
     margin: 0 auto 2rem auto;
     padding: 1.5px;
     border-radius: 24px;
-    border: 1px solid rgba(99, 102, 241, 0.35);
-    background: linear-gradient(135deg, rgba(12, 19, 42, 0.95), rgba(5, 9, 28, 0.85));
-    box-shadow: 0 24px 55px rgba(5, 8, 25, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.6);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.94));
+    box-shadow:
+        0 20px 45px rgba(15, 23, 42, 0.7),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .source-table {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 0 14px;
+    border-spacing: 0 10px;
 }
 
 .source-table thead th {
-    padding: 1rem 1.4rem;
+    padding: 0.9rem 1.4rem;
     text-transform: uppercase;
-    letter-spacing: 0.22em;
-    font-size: 0.78rem;
-    background: rgba(255, 255, 255, 0.04);
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    letter-spacing: 0.18em;
+    font-size: 0.8rem;
+    background: rgba(15, 23, 42, 0.85);
+    border-right: 1px solid rgba(30, 64, 175, 0.6);
 }
 
 .source-table thead th:first-child {
@@ -296,20 +298,23 @@ VERDICT_CSS = dedent(
 }
 
 .source-table tbody tr {
-    background: linear-gradient(120deg, rgba(18, 25, 58, 0.8), rgba(7, 10, 30, 0.95));
-    border-radius: 24px;
-    box-shadow: 0 15px 40px rgba(4, 6, 20, 0.55);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    background: linear-gradient(120deg, rgba(30, 64, 175, 0.14), rgba(15, 23, 42, 0.98));
+    border-radius: 18px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(30, 64, 175, 0.65);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
 .source-table tbody tr:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 22px 44px rgba(4, 6, 20, 0.65);
+    transform: translateY(-2px);
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.8);
+    border-color: rgba(96, 165, 250, 0.9);
 }
 
 .source-table tbody td {
-    padding: 1.25rem 1.4rem;
+    padding: 0.95rem 1.4rem;
     border: none;
+    font-size: 0.95rem;
 }
 
 .source-table tbody tr td:first-child {
@@ -362,14 +367,14 @@ VERDICT_CSS = dedent(
 }
 
 .summary-cell {
-    color: rgba(248, 250, 252, 0.92);
-    line-height: 1.75;
-    font-size: 1rem;
+    color: rgba(248, 250, 252, 0.96);
+    line-height: 1.6;
+    font-size: 0.98rem;
 }
 
 .source-cell {
     text-align: right;
-    width: 160px;
+    width: 170px;
 }
 
 .source-link {
@@ -427,26 +432,50 @@ VERDICT_CSS = dedent(
     margin-bottom: 1rem;
 }
 
-.sources-list h4 {
-    margin-bottom: 0.5rem;
-    font-size: 1rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
+.sources-list {
+    max-width: 1080px;
+    margin: 0 auto 2rem auto;
+    padding: 1.75rem 2rem;
+    border-radius: 24px;
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    background: radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.25), transparent 55%),
+                radial-gradient(circle at 100% 100%, rgba(56, 189, 248, 0.25), transparent 55%),
+                linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.92));
+    box-shadow:
+        0 22px 55px rgba(15, 23, 42, 0.75),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-.sources-list ul {
+.sources-list h4 {
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(226, 232, 240, 0.9);
+}
+
+.sources-list ol {
     list-style: none;
     padding-left: 0;
     margin: 0;
 }
 
 .sources-list li {
-    padding: 0.4rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.55rem 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
 }
 
 .sources-list li:last-child {
     border-bottom: none;
+}
+
+.sources-list .source-title {
+    font-weight: 600;
+    color: rgba(248, 250, 252, 0.94);
 }
 
 h1, h2, h3 {
