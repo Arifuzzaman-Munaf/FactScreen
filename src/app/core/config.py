@@ -35,6 +35,7 @@ _GOOGLE_CFG = _section("google_factcheck")
 _RAPID_CFG = _section("rapidapi_fact_checker")
 _ML_CFG = _section("ml")
 _GEMINI_CFG = _section("gemini")
+_CLASSIFY_CFG = _section("classification")
 _SERVER_CFG = _section("server")
 _LOGGING_CFG = _section("logging")
 _SECRETS_CFG = _section("secrets")
@@ -116,6 +117,12 @@ class Settings(BaseSettings):
         default=_ML_CFG.get("classification_model"),
         alias="CLASSIFICATION_MODEL",
     )
+
+    # Claim classification vocab/labels (static config)
+    classification_candidate_labels: List[str] = _CLASSIFY_CFG.get("candidate_labels")
+    classification_true_keywords: List[str] = _CLASSIFY_CFG.get("true_keywords")
+    classification_false_keywords: List[str] = _CLASSIFY_CFG.get("false_keywords")
+    classification_no_info_keywords: List[str] = _CLASSIFY_CFG.get("no_info_keywords")
 
     # Gemini API settings
     gemini_api_key: str = Field(default="", alias=_GEMINI_API_ENV)

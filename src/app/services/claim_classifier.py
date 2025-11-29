@@ -1,70 +1,39 @@
+from typing import Any, Dict, List
+
 from transformers import pipeline
-from typing import List, Dict, Any
+
 from src.app.core.config import settings
 
 
 class ClaimClassificationService:
-    """Service for classifying claims using transformers pipeline"""
+    """Service for classifying claims using transformers pipeline."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.model_name = settings.classification_model
         self.classifier = None
-        self.candidate_labels = ["True", "False or Misleading", "Not enough information found"]
+        # Candidate labels and keyword vocabularies are configured via config/local.yaml
+        self.candidate_labels = settings.classification_candidate_labels
         self._load_model()
         self._setup_keywords()
 
-    def _load_model(self):
-        """Load the classification model"""
+    def _load_model(self) -> None:
+        """Load the classification model."""
         try:
+            # Load the classification model using the pipeline from transformers
             self.classifier = pipeline("zero-shot-classification", model=self.model_name)
         except Exception as e:
             print(f"Error loading classification model: {e}")
             raise
 
-    def _setup_keywords(self):
-        """Setup keyword lists for fast classification"""
-        self.true_keywords = [
-            "true",
-            "correct",
-            "accurate",
-            "valid",
-            "factual",
-            "verified",
-            "confirmed",
-            "legitimate",
-            "proven",
-        ]
-        self.false_misleading_keywords = [
-            "false",
-            "misleading",
-            "lie",
-            "incorrect",
-            "debunked",
-            "refuted",
-            "inaccurate",
-            "fabricated",
-            "untrue",
-            "wrong",
-            "fake",
-            "hoax",
-            "myth",
-            "busted",
-            "disproven",
-        ]
-        self.no_info_keywords = [
-            "not enough",
-            "no evidence",
-            "unproven",
-            "no proof",
-            "inconclusive",
-            "unclear",
-            "insufficient",
-            "unknown",
-            "partly true",
-            "partially true",
-            "mixed",
-            "unverified",
-        ]
+    def _setup_keywords(self) -> None:
+        """Setup keyword lists for fast classification from static configuration."""
+
+        # True keywords
+        self.true_keywords = settings.classification_true_keywords
+        # False/misleading keywords
+        self.false_misleading_keywords = settings.classification_false_keywords
+        # No info keywords
+        self.no_info_keywords = settings.classification_no_info_keywords
 
     def fast_keyword_classification(self, text: str) -> str:
         """Fast classification based on keywords"""
@@ -186,19 +155,23 @@ class ClaimClassificationService:
             claim_text = claim.get("claim", "")
             if not isinstance(claim_text, str):
                 claim_text = str(claim_text) if claim_text is not None else ""
-
+            # Get original rating from the claim
             original_rating = claim.get("rating", "")
+            # If original rating is not a string, convert it to a string
             if not isinstance(original_rating, str):
                 original_rating = str(original_rating) if original_rating is not None else ""
 
             # Classify the claim using both text and original rating
             normalized_rating = self.classify_claim(claim_text, original_rating)
+            # Add the normalized rating to the classified claim
             classified_claim["normalized_rating"] = normalized_rating
 
+            # Add the classified claim to the list of classified claims
             classified_claims.append(classified_claim)
 
         return classified_claims
 
     def get_classification_labels(self) -> List[str]:
         """Get available classification labels"""
+        # Return a copy of the candidate labels
         return self.candidate_labels.copy()

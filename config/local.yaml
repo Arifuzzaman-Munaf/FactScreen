@@ -24,6 +24,52 @@ ml:
   sentence_transformer_model: "all-MiniLM-L6-v2"      # Sentence transformer model identifier.
   classification_model: "facebook/bart-large-mnli"    # Classification model identifier.
 
+classification:
+  # Claim classification labels and keyword vocabularies.
+  candidate_labels:
+    - "True"
+    - "False or Misleading"
+    - "Not enough information found"
+  true_keywords:
+    - "true"
+    - "correct"
+    - "accurate"
+    - "valid"
+    - "factual"
+    - "verified"
+    - "confirmed"
+    - "legitimate"
+    - "proven"
+  false_keywords:
+    - "false"
+    - "misleading"
+    - "lie"
+    - "incorrect"
+    - "debunked"
+    - "refuted"
+    - "inaccurate"
+    - "fabricated"
+    - "untrue"
+    - "wrong"
+    - "fake"
+    - "hoax"
+    - "myth"
+    - "busted"
+    - "disproven"
+  no_info_keywords:
+    - "not enough"
+    - "no evidence"
+    - "unproven"
+    - "no proof"
+    - "inconclusive"
+    - "unclear"
+    - "insufficient"
+    - "unknown"
+    - "partly true"
+    - "partially true"
+    - "mixed"
+    - "unverified"
+
 gemini:
   # Gemini LLM model configuration.
   model: "gemini-2.5-flash"                          # Gemini model to use for LLM-related tasks.
