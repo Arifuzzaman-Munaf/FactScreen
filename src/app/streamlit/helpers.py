@@ -20,7 +20,7 @@ if str(_project_root) not in sys.path:
 import requests
 import streamlit as st
 
-from src.app.streamlit.config import VALIDATION_ENDPOINT
+from src.app.streamlit.config import VALIDATION_ENDPOINT, PDF_REPORT_ENDPOINT
 
 
 def format_confidence(confidence: Optional[float]) -> str:
@@ -271,6 +271,40 @@ def render_sources_from_explanation(explanation: str) -> str:
     ).strip()
 
     return sources_html
+
+
+def download_pdf_report(result_data: Dict[str, Any]) -> bytes:
+    """
+    Download PDF report from the backend API.
+
+    Args:
+        result_data: The AggregatedResult data dictionary
+
+    Returns:
+        PDF file bytes
+
+    Raises:
+        RuntimeError: If the API request fails or returns an error status
+    """
+    try:
+        response = requests.post(
+            PDF_REPORT_ENDPOINT,
+            json=result_data,
+            timeout=120,
+        )
+    except requests.RequestException as exc:
+        raise RuntimeError(
+            "Unable to reach FactScreen backend for PDF generation. Please ensure the API server is running."
+        ) from exc
+
+    if response.status_code >= 400:
+        try:
+            detail = response.json().get("detail")
+        except Exception:  # pragma: no cover - defensive
+            detail = response.text
+        raise RuntimeError(detail or "Backend returned an error while generating PDF.")
+
+    return response.content
 
 
 def scroll_to_element(element_id: str, delay: int = 100) -> None:

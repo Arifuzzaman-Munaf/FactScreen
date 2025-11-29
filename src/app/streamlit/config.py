@@ -36,6 +36,7 @@ _DEFAULT_API_URL = _FRONTEND_CFG.get("default_api_url", "http://localhost:8000")
 DEFAULT_API_URL = _DEFAULT_API_URL
 API_BASE_URL = os.getenv("FACTSCREEN_API_URL", DEFAULT_API_URL).rstrip("/")
 VALIDATION_ENDPOINT = f"{API_BASE_URL}/v1/validate"
+PDF_REPORT_ENDPOINT = f"{API_BASE_URL}/v1/report/pdf"
 
 # Verdict Color Mapping
 _DEFAULT_VERDICT_COLORS: Dict[str, str] = {

@@ -9,11 +9,21 @@ from src.app.core.config import settings
 async def _http_get(
     url: str, params: Optional[Dict[str, Any]] = None, headers: Optional[Dict[str, str]] = None
 ) -> Dict[str, Any]:
+    """Make an HTTP GET request.
+    Args:
+        url: The URL to make the request to
+        params: The parameters to pass to the request
+        headers: The headers to pass to the request
+    Returns:
+        The response from the request
+    """
     timeout = settings.request_timeout
     try:
+        # Make the request
         async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
             response = await client.get(url, params=params, headers=headers)
             response.raise_for_status()
+            # Return the response
             return response.json()
     except Exception:
         # Swallow network/API errors and return empty payload so pipeline can continue
@@ -24,9 +34,16 @@ async def fetch_google_factcheck(query: str, page_url: Optional[str] = None) -> 
     """Call Google Fact Check Tools API claims:search.
 
     If endpoint is not configured, default to v1alpha1 claims search.
+    Args:
+        query: The query to search for
+        page_url: The URL of the page to search for
+    Returns:
+        The response from the request
     """
+    # If the API key is not set, return an empty dictionary
     if not settings.google_api_key:
         return {}
+    # Get the base URL and endpoint
     base = (
         str(settings.google_factcheck_url).rstrip("/")
         if settings.google_factcheck_url

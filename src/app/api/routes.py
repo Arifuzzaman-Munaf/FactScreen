@@ -1,5 +1,6 @@
 # Import FastAPI modules for routing and error handling
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import Response
 
 # Import Pydantic models for claim-related API requests and responses
 from src.app.models.claim_models import (
@@ -10,10 +11,11 @@ from src.app.models.claim_models import (
     FilteredClaimsResponse,  # Response model for filtered claims
     FilteredClaimResponse,  # Response model for a single filtered claim
 )
-from src.app.models.schemas import AnalyzeRequest, ValidateResponse
+from src.app.models.schemas import AnalyzeRequest, AggregatedResult, ValidateResponse
 
 # Import services for claim extraction, similarity filtering, and classification
 from src.app.services.claim_extract import ClaimExtractionService
+from src.app.services.report import generate_pdf_report
 from src.pipelines.feature_eng_pipeline import SimilarityFilterService
 from src.pipelines.inference_pipeline import ClaimClassificationService
 from src.pipelines.validation_pipeline import validate_text, validate_url, validate_image
@@ -142,3 +144,78 @@ async def validate_claim(request: AnalyzeRequest):
     # Exception handling for other exceptions
     except Exception as exc:  # pragma: no cover - defensive
         raise HTTPException(status_code=500, detail=f"Error validating claim: {exc}")
+
+
+@router.post("/validate/pdf", tags=["validation"])
+async def generate_validation_pdf(request: AnalyzeRequest):
+    """
+    Validate a claim and generate a PDF report.
+
+    The request can include either `text`, or `url`.
+    Args:
+        request: AnalyzeRequest - Request model for claim validation
+    Returns:
+        PDF file as response
+        HTTPException - Exception if error occurs
+    """
+    # if the request does not include any of the required fields, raise an error
+    if not (request.text or request.url):
+        raise HTTPException(
+            status_code=400, detail="Provide at least one of text or url"
+        )
+
+    try:
+        # if the request includes text, validate the text
+        if request.text:
+            result = await validate_text(request.text)
+        # if the request includes url, validate the url
+        elif request.url:
+            result = await validate_url(str(request.url))
+
+        # Generate PDF report
+        pdf_buffer = generate_pdf_report(result)
+
+        # Return PDF as response
+        return Response(
+            content=pdf_buffer.getvalue(),
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="factcheck-report-{result.verdict.value}.pdf"'
+            },
+        )
+    # Exception handling for HTTPException
+    except HTTPException:
+        raise
+    # Exception handling for HTTPException
+    except HTTPException:
+        raise
+    # Exception handling for other exceptions
+    except Exception as exc:  # pragma: no cover - defensive
+        raise HTTPException(status_code=500, detail=f"Error generating PDF report: {exc}")
+
+
+@router.post("/report/pdf", tags=["validation"])
+async def generate_pdf_from_result(result: AggregatedResult):
+    """
+    Generate a PDF report from an existing AggregatedResult.
+
+    Args:
+        result: AggregatedResult - The fact-checking result to generate PDF from
+    Returns:
+        PDF file as response
+        HTTPException - Exception if error occurs
+    """
+    try:
+        # Generate PDF report
+        pdf_buffer = generate_pdf_report(result)
+
+        # Return PDF as response
+        return Response(
+            content=pdf_buffer.getvalue(),
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="factcheck-report-{result.verdict.value}.pdf"'
+            },
+        )
+    except Exception as exc:  # pragma: no cover - defensive
+        raise HTTPException(status_code=500, detail=f"Error generating PDF report: {exc}")

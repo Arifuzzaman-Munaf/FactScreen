@@ -21,6 +21,7 @@ from src.app.streamlit.config import VERDICT_COLORS
 from src.app.streamlit.helpers import (
     build_payload,
     call_backend,
+    download_pdf_report,
     format_confidence,
     render_provider_results,
     render_sources_from_explanation,
@@ -78,6 +79,10 @@ def render_home_page() -> None:
         st.session_state["explanation_html"] = DEFAULT_EXPLANATION_HTML
     if "clear_inputs" not in st.session_state:
         st.session_state["clear_inputs"] = False
+    if "result_data" not in st.session_state:
+        st.session_state["result_data"] = None
+    if "pdf_generated" not in st.session_state:
+        st.session_state["pdf_generated"] = False
     st.session_state.setdefault("claim_text_input", "")
     st.session_state.setdefault("claim_url_input", "")
 
@@ -87,6 +92,9 @@ def render_home_page() -> None:
         st.session_state["verdict_card_html"] = DEFAULT_VERDICT_CARD
         st.session_state["evidence_table_html"] = DEFAULT_EVIDENCE_HTML
         st.session_state["explanation_html"] = DEFAULT_EXPLANATION_HTML
+        st.session_state["result_data"] = None
+        st.session_state["pdf_bytes"] = None
+        st.session_state["pdf_generated"] = False
         st.session_state["clear_inputs"] = False
 
     st.markdown(
@@ -264,3 +272,66 @@ def render_home_page() -> None:
                 ).strip()
                 st.session_state["explanation_html"] = explanation_html
                 explanation_placeholder.markdown(explanation_html, unsafe_allow_html=True)
+
+                # Store full result data for PDF generation
+                st.session_state["result_data"] = result
+                # Generate PDF in background (cache it for download)
+                if not st.session_state.get("pdf_generated"):
+                    try:
+                        st.session_state["pdf_bytes"] = download_pdf_report(result)
+                        st.session_state["pdf_generated"] = True
+                    except RuntimeError:
+                        # If PDF generation fails, don't block the UI
+                        st.session_state["pdf_bytes"] = None
+                        st.session_state["pdf_generated"] = True
+                    
+                    # Trigger rerun to show download button
+                    st.rerun()
+
+    # Download PDF button (only show if we have results) - positioned stunningly
+    if st.session_state.get("result_data") and st.session_state.get("pdf_bytes"):
+        st.markdown(
+            """
+            <div style="margin: 2rem 0;">
+                <div class="section-heading" style="margin-bottom: 1rem;">
+                    <h3>Export Report</h3>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        # Create a centered, prominent download button
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            verdict = st.session_state["result_data"].get("verdict", "unknown")
+            st.markdown(
+                """
+                <style>
+                .stDownloadButton > button {
+                    width: 100%;
+                    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+                    color: white;
+                    font-weight: 600;
+                    font-size: 1.1rem;
+                    padding: 1rem 2rem;
+                    border-radius: 16px;
+                    border: none;
+                    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+                    transition: all 0.3s ease;
+                }
+                .stDownloadButton > button:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 12px 32px rgba(99, 102, 241, 0.6);
+                }
+                </style>
+                """,
+                unsafe_allow_html=True,
+            )
+            st.download_button(
+                label="📥 Download PDF Report",
+                data=st.session_state["pdf_bytes"],
+                file_name=f"factcheck-report-{verdict}.pdf",
+                mime="application/pdf",
+                use_container_width=True,
+                type="primary",
+            )
