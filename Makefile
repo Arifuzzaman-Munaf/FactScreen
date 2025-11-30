@@ -294,8 +294,32 @@ test-coverage:
 		-v; \
 	EXIT_CODE=$$?; \
 	echo ""; \
-	echo "Coverage report: htmlcov/index.html"; \
-	$(MAKE) _clean; \
+	if [ -d "htmlcov" ]; then \
+		echo "✓ Coverage report generated: htmlcov/index.html"; \
+		if command -v open >/dev/null 2>&1; then \
+			echo "  Opening coverage report in browser..."; \
+			open htmlcov/index.html; \
+		elif command -v xdg-open >/dev/null 2>&1; then \
+			echo "  Opening coverage report in browser..."; \
+			xdg-open htmlcov/index.html; \
+		else \
+			echo "  Open it manually: htmlcov/index.html"; \
+		fi; \
+	else \
+		echo "⚠ Warning: Coverage report directory not found"; \
+	fi; \
+	$(PYTHON) -c "import os, shutil, glob; \
+		exclude = {'venv', '.git', 'htmlcov'}; \
+		paths = []; \
+		paths.extend([d for d in glob.glob('**/__pycache__', recursive=True) if not any(ex in d for ex in exclude)]); \
+		paths.extend([f for f in glob.glob('**/*.pyc', recursive=True) if not any(ex in f for ex in exclude)]); \
+		paths.extend([f for f in glob.glob('**/*.pyo', recursive=True) if not any(ex in f for ex in exclude)]); \
+		paths.extend([d for d in glob.glob('**/.pytest_cache', recursive=True) if not any(ex in d for ex in exclude)]); \
+		paths.extend([d for d in glob.glob('**/.mypy_cache', recursive=True) if not any(ex in d for ex in exclude)]); \
+		paths.extend([f for f in glob.glob('**/.coverage', recursive=True) if not any(ex in f for ex in exclude)]); \
+		paths.extend([d for d in glob.glob('**/allure-results', recursive=True) if not any(ex in d for ex in exclude)]); \
+		[shutil.rmtree(p, ignore_errors=True) if os.path.isdir(p) else os.remove(p) for p in paths if os.path.exists(p)]; \
+	" 2>/dev/null || true; \
 	exit $$EXIT_CODE
 
 test-all:

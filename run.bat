@@ -1,6 +1,7 @@
 @echo off
 REM FactScreen API - Windows Launcher
 setlocal enabledelayedexpansion
+setlocal ENABLEEXTENSIONS
 
 :menu
 cls
@@ -13,15 +14,21 @@ echo   1. Install/Setup (first time only)
 echo   2. Run Full Application (Backend + Frontend)
 echo   3. Run Backend Only
 echo   4. Run Frontend Only
-echo   5. Exit
+echo   5. Run Tests
+echo   6. Run Tests with Coverage
+echo   7. Exit
 echo.
-set /p choice="Select an option (1-5): "
+set /p choice="Select an option (1-7): "
 
+if "%choice%"=="" goto menu
 if "%choice%"=="1" goto install
 if "%choice%"=="2" goto run_app
 if "%choice%"=="3" goto run_server
 if "%choice%"=="4" goto run_frontend
-if "%choice%"=="5" goto end
+if "%choice%"=="5" goto run_tests
+if "%choice%"=="6" goto run_tests_coverage
+if "%choice%"=="7" goto end
+echo.
 echo Invalid choice. Please try again.
 timeout /t 2 /nobreak >nul
 goto menu
@@ -86,22 +93,52 @@ echo.
 
 REM Check if virtual environment exists
 if not exist "venv" (
-    echo Virtual environment not found. Please run option 1 (Install/Setup) first.
+    echo.
+    echo ERROR: Virtual environment not found.
+    echo Please run option 1 (Install/Setup) first.
+    echo.
+    pause
+    goto menu
+)
+
+REM Check if venv\Scripts exists
+if not exist "venv\Scripts" (
+    echo.
+    echo ERROR: Virtual environment Scripts directory not found.
+    echo The virtual environment may be corrupted. Please run option 1 (Install/Setup) again.
+    echo.
+    pause
+    goto menu
+)
+
+REM Check if Python executable exists
+if not exist "venv\Scripts\python.exe" (
+    echo.
+    echo ERROR: Python executable not found in virtual environment.
+    echo The virtual environment may be corrupted. Please run option 1 (Install/Setup) again.
+    echo.
     pause
     goto menu
 )
 
 REM Check if dependencies are installed
+echo Checking dependencies...
 venv\Scripts\python.exe -c "import uvicorn, streamlit" 2>nul
 if errorlevel 1 (
     echo Dependencies not installed. Installing now...
     call venv\Scripts\pip.exe install --upgrade pip setuptools wheel
+    if errorlevel 1 (
+        echo Failed to upgrade pip
+        pause
+        goto menu
+    )
     call venv\Scripts\pip.exe install -r requirements-dev.txt
     if errorlevel 1 (
         echo Failed to install dependencies
         pause
         goto menu
     )
+    echo Dependencies installed successfully.
 )
 
 REM Set ports
@@ -179,27 +216,53 @@ echo.
 
 REM Check if virtual environment exists
 if not exist "venv" (
-    echo Virtual environment not found. Please run option 1 (Install/Setup) first.
+    echo.
+    echo ERROR: Virtual environment not found.
+    echo Please run option 1 (Install/Setup) first.
+    echo.
+    pause
+    goto menu
+)
+
+REM Check if venv\Scripts exists
+if not exist "venv\Scripts" (
+    echo.
+    echo ERROR: Virtual environment Scripts directory not found.
+    echo The virtual environment may be corrupted. Please run option 1 (Install/Setup) again.
+    echo.
     pause
     goto menu
 )
 
 REM Check if dependencies are installed
+echo Checking dependencies...
 venv\Scripts\python.exe -c "import uvicorn" 2>nul
 if errorlevel 1 (
     echo Dependencies not installed. Installing now...
     call venv\Scripts\pip.exe install --upgrade pip setuptools wheel
+    if errorlevel 1 (
+        echo Failed to upgrade pip
+        pause
+        goto menu
+    )
     call venv\Scripts\pip.exe install -r requirements-dev.txt
     if errorlevel 1 (
         echo Failed to install dependencies
         pause
         goto menu
     )
+    echo Dependencies installed successfully.
 )
 
 echo Starting FactScreen API server...
 echo.
-venv\Scripts\python.exe entrypoint\server.py
+call venv\Scripts\python.exe entrypoint\server.py
+if errorlevel 1 (
+    echo.
+    echo Server encountered an error. Press any key to return to menu...
+    pause >nul
+    goto menu
+)
 echo.
 echo Server stopped. Press any key to return to menu...
 pause >nul
@@ -215,31 +278,191 @@ echo.
 
 REM Check if virtual environment exists
 if not exist "venv" (
-    echo Virtual environment not found. Please run option 1 (Install/Setup) first.
+    echo.
+    echo ERROR: Virtual environment not found.
+    echo Please run option 1 (Install/Setup) first.
+    echo.
+    pause
+    goto menu
+)
+
+REM Check if venv\Scripts exists
+if not exist "venv\Scripts" (
+    echo.
+    echo ERROR: Virtual environment Scripts directory not found.
+    echo The virtual environment may be corrupted. Please run option 1 (Install/Setup) again.
+    echo.
     pause
     goto menu
 )
 
 REM Check if dependencies are installed
+echo Checking dependencies...
 venv\Scripts\python.exe -c "import streamlit" 2>nul
 if errorlevel 1 (
     echo Dependencies not installed. Installing now...
     call venv\Scripts\pip.exe install --upgrade pip setuptools wheel
+    if errorlevel 1 (
+        echo Failed to upgrade pip
+        pause
+        goto menu
+    )
     call venv\Scripts\pip.exe install -r requirements-dev.txt
     if errorlevel 1 (
         echo Failed to install dependencies
         pause
         goto menu
     )
+    echo Dependencies installed successfully.
 )
 
 echo Starting Streamlit frontend...
 echo Note: Make sure the backend server is running on http://localhost:8000
 echo.
 set STREAMLIT_SERVER_FILE_WATCHER_TYPE=none
-venv\Scripts\python.exe -m streamlit run src\app\streamlit\main.py --server.port 8501
+call venv\Scripts\python.exe -m streamlit run src\app\streamlit\main.py --server.port 8501
+if errorlevel 1 (
+    echo.
+    echo Frontend encountered an error. Press any key to return to menu...
+    pause >nul
+    goto menu
+)
 echo.
 echo Frontend stopped. Press any key to return to menu...
+pause >nul
+goto menu
+
+:run_tests
+cls
+echo.
+echo ========================================
+echo   Running Tests
+echo ========================================
+echo.
+
+REM Check if virtual environment exists
+if not exist "venv" (
+    echo.
+    echo ERROR: Virtual environment not found.
+    echo Please run option 1 (Install/Setup) first.
+    echo.
+    pause
+    goto menu
+)
+
+REM Check if venv\Scripts exists
+if not exist "venv\Scripts" (
+    echo.
+    echo ERROR: Virtual environment Scripts directory not found.
+    echo The virtual environment may be corrupted. Please run option 1 (Install/Setup) again.
+    echo.
+    pause
+    goto menu
+)
+
+REM Check if dependencies are installed
+echo Checking dependencies...
+venv\Scripts\python.exe -c "import pytest" 2>nul
+if errorlevel 1 (
+    echo Dependencies not installed. Installing now...
+    call venv\Scripts\pip.exe install --upgrade pip setuptools wheel
+    if errorlevel 1 (
+        echo Failed to upgrade pip
+        pause
+        goto menu
+    )
+    call venv\Scripts\pip.exe install -r requirements-dev.txt
+    if errorlevel 1 (
+        echo Failed to install dependencies
+        pause
+        goto menu
+    )
+    echo Dependencies installed successfully.
+)
+
+echo Running all tests...
+echo.
+call venv\Scripts\python.exe -m pytest tests\ -v
+if errorlevel 1 (
+    echo.
+    echo Some tests failed. Check the output above for details.
+) else (
+    echo.
+    echo All tests passed!
+)
+echo.
+echo Press any key to return to menu...
+pause >nul
+goto menu
+
+:run_tests_coverage
+cls
+echo.
+echo ========================================
+echo   Running Tests with Coverage
+echo ========================================
+echo.
+
+REM Check if virtual environment exists
+if not exist "venv" (
+    echo.
+    echo ERROR: Virtual environment not found.
+    echo Please run option 1 (Install/Setup) first.
+    echo.
+    pause
+    goto menu
+)
+
+REM Check if venv\Scripts exists
+if not exist "venv\Scripts" (
+    echo.
+    echo ERROR: Virtual environment Scripts directory not found.
+    echo The virtual environment may be corrupted. Please run option 1 (Install/Setup) again.
+    echo.
+    pause
+    goto menu
+)
+
+REM Check if dependencies are installed
+echo Checking dependencies...
+venv\Scripts\python.exe -c "import pytest, pytest_cov" 2>nul
+if errorlevel 1 (
+    echo Dependencies not installed. Installing now...
+    call venv\Scripts\pip.exe install --upgrade pip setuptools wheel
+    if errorlevel 1 (
+        echo Failed to upgrade pip
+        pause
+        goto menu
+    )
+    call venv\Scripts\pip.exe install -r requirements-dev.txt
+    if errorlevel 1 (
+        echo Failed to install dependencies
+        pause
+        goto menu
+    )
+    echo Dependencies installed successfully.
+)
+
+echo Running tests with coverage analysis...
+echo.
+call venv\Scripts\python.exe -m pytest tests\ --cov=src --cov-report=html --cov-report=term-missing --cov-branch -v
+if errorlevel 1 (
+    echo.
+    echo Some tests failed. Check the output above for details.
+) else (
+    echo.
+    echo All tests passed!
+)
+echo.
+if exist "htmlcov\index.html" (
+    echo Coverage report generated: htmlcov\index.html
+    echo Opening coverage report in browser...
+    start htmlcov\index.html
+) else (
+    echo Warning: Coverage report not found.
+)
+echo.
+echo Press any key to return to menu...
 pause >nul
 goto menu
 
