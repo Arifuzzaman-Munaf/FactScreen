@@ -55,7 +55,7 @@ if not exist "venv" (
 
 echo.
 echo Upgrading pip, setuptools, and wheel...
-call venv\Scripts\pip.exe install --upgrade pip setuptools wheel
+call venv\Scripts\python.exe install --upgrade pip setuptools wheel
 if errorlevel 1 (
     echo Error: Could not upgrade pip
     pause
