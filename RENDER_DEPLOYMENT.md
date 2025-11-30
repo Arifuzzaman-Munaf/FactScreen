@@ -54,8 +54,9 @@ This guide will help you deploy the FactScreen API backend to Render.
      ```
    - **Start Command**: 
      ```bash
-     python entrypoint/server.py
+     python entrypoint/render_start.py
      ```
+     **Important:** Use `entrypoint/render_start.py` for Render deployment. It's optimized for Render's port binding requirements and uses uvicorn directly.
 
 4. **Set Environment Variables:**
    - Go to **Environment** section
