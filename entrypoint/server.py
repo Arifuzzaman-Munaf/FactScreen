@@ -116,24 +116,24 @@ def main():
     else:
         # Development mode: Check if port is already in use
         if is_port_in_use(port, host):
-        print(f"Port {port} is already in use. Attempting to stop server on port {port}...")
-        kill_process_on_port(port)
-        time.sleep(2)  # Give more time for processes to terminate
-        
-        # Double check before proceeding
-        if is_port_in_use(port, host):
-            print(f"Failed to free port {port}. Trying alternative port...")
-            # Try alternative ports
-            for alt_port in [8001, 8002, 8003, 8004, 8005]:
-                if not is_port_in_use(alt_port, host):
-                    port = alt_port
-                    print(f"Using alternative port {port}")
-                    break
+            print(f"Port {port} is already in use. Attempting to stop server on port {port}...")
+            kill_process_on_port(port)
+            time.sleep(2)  # Give more time for processes to terminate
+            
+            # Double check before proceeding
+            if is_port_in_use(port, host):
+                print(f"Failed to free port {port}. Trying alternative port...")
+                # Try alternative ports
+                for alt_port in [8001, 8002, 8003, 8004, 8005]:
+                    if not is_port_in_use(alt_port, host):
+                        port = alt_port
+                        print(f"Using alternative port {port}")
+                        break
+                else:
+                    print("No available ports found. Please manually stop processes using ports 8000-8005.")
+                    sys.exit(1)
             else:
-                print("No available ports found. Please manually stop processes using ports 8000-8005.")
-                sys.exit(1)
-        else:
-            print(f"Port {port} is now free.")
+                print(f"Port {port} is now free.")
         
         print("Starting FactScreen API server in development mode...")
         print(f"Server will be available at: http://{host}:{port}")
