@@ -474,6 +474,34 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 - See [tests/README_TEST.md](tests/README_TEST.md) for testing documentation
 - Gemini usage and quota warnings are written to `logs/gemini.log`
 
+## Deployment
+
+### Deploy to Render
+
+The backend API is configured for deployment on [Render](https://render.com). See [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md) for detailed instructions.
+
+**Quick Deploy:**
+1. Push your code to GitHub/GitLab/Bitbucket
+2. Go to [Render Dashboard](https://dashboard.render.com)
+3. Click **New > Blueprint** (or **New > Web Service**)
+4. Connect your repository
+5. Render will automatically detect `render.yaml` and configure the service
+6. Add your API keys as environment variables in Render Dashboard:
+   - `GOOGLE_API_KEY`
+   - `FACT_CHECKER_API_KEY`
+   - `GEMINI_API_KEY`
+7. Deploy!
+
+**Key Configuration:**
+- Server automatically binds to `0.0.0.0` (required by Render)
+- Uses `PORT` environment variable (Render sets this automatically, default: 10000)
+- Health check endpoint: `/v1/health`
+- Production mode automatically enabled on Render
+
+**Important:** For ML workloads, use **Starter plan** ($7/month) or higher. Free tier has 512MB limit which may cause memory issues.
+
+For detailed deployment instructions, see [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md).
+
 ## Installation
 
 ### From Source

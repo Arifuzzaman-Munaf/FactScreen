@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: factscreen-api
+    env: python
+    region: oregon  # Change to your preferred region
+    branch: main    # Change to your default branch if different
+    # Optimized build command to reduce memory usage
+    buildCommand: pip install --upgrade pip setuptools wheel && pip install --no-cache-dir -r requirements-dev.txt
+    # Use server.py which automatically detects Render environment
+    startCommand: python entrypoint/server.py
+    plan: starter   # Use 'starter' or 'standard' for production (free tier has 512MB limit)
+    healthCheckPath: /v1/health

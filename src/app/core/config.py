@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict, List
 
+import os
 import yaml
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -69,8 +70,18 @@ class Settings(BaseSettings):
     request_timeout: int = _APP_CFG.get("request_timeout")
 
     # Server settings (used by entrypoint/server.py for uvicorn)
-    server_host: str = _SERVER_CFG.get("host")
-    server_port: int = _SERVER_CFG.get("port")
+    # For Render: PORT env var takes precedence (default 10000)
+    # For local development: uses config/local.yaml or defaults
+    server_host: str = Field(
+        default=_SERVER_CFG.get("host", "0.0.0.0"),
+        alias="HOST"
+    )
+    # PORT env var is read directly by pydantic from environment
+    # If not set, falls back to config/local.yaml or default 8000
+    server_port: int = Field(
+        default=_SERVER_CFG.get("port", 8000),
+        alias="PORT"
+    )
 
     # Logging settings
     log_level: str = _LOGGING_CFG.get("level")

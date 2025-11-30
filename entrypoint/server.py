@@ -99,11 +99,23 @@ def main():
         sys.path.insert(0, project_root)
 
     # get the server port and host from the settings
-    port = settings.server_port
+    # For Render: PORT env var is used (default 10000), host must be 0.0.0.0
+    # Explicitly check PORT env var first (Render requirement)
+    port = int(os.getenv("PORT", settings.server_port))
     host = settings.server_host
-
-    # Check if port is already in use and stop the process if necessary
-    if is_port_in_use(port, host):
+    
+    # Check if running in production (Render sets PORT env var)
+    is_production = os.getenv("PORT") is not None
+    
+    # In production, always use 0.0.0.0 and skip port checking
+    if is_production:
+        host = "0.0.0.0"
+        print(f"Starting FactScreen API server in production mode...")
+        print(f"PORT environment variable: {os.getenv('PORT')}")
+        print(f"Binding to {host}:{port}")
+    else:
+        # Development mode: Check if port is already in use
+        if is_port_in_use(port, host):
         print(f"Port {port} is already in use. Attempting to stop server on port {port}...")
         kill_process_on_port(port)
         time.sleep(2)  # Give more time for processes to terminate
@@ -122,21 +134,29 @@ def main():
                 sys.exit(1)
         else:
             print(f"Port {port} is now free.")
-
-    print("Starting FactScreen API server...")
-    print(f"Server will be available at: http://{host}:{port}")
-    print(f"API documentation: http://{host}:{port}/docs")
-    print("Press Ctrl+C to stop the server")
-    print("-" * 50)
+        
+        print("Starting FactScreen API server in development mode...")
+        print(f"Server will be available at: http://{host}:{port}")
+        print(f"API documentation: http://{host}:{port}/docs")
+        print("Press Ctrl+C to stop the server")
+        print("-" * 50)
 
     try:
-        # run the server using uvicorn
-        subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "uvicorn",
-                "src.app.main:app",
+        # Build uvicorn command
+        uvicorn_cmd = [
+            sys.executable,
+            "-m",
+            "uvicorn",
+            "src.app.main:app",
+            "--host",
+            host,
+            "--port",
+            str(port),
+        ]
+        
+        # Add reload options only in development
+        if not is_production:
+            uvicorn_cmd.extend([
                 "--reload",
                 "--reload-dir",
                 "src",
@@ -148,12 +168,10 @@ def main():
                 "venv/*",
                 "--reload-exclude",
                 ".venv/*",
-                "--host",
-                "0.0.0.0",
-                "--port",
-                str(port),
-            ]
-        )
+            ])
+        
+        # run the server using uvicorn
+        subprocess.run(uvicorn_cmd)
     except KeyboardInterrupt:
         print("\nServer stopped.")
     except Exception as e:
