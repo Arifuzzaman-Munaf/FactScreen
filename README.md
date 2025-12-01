@@ -484,31 +484,35 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ## Deployment
 
-### Deploy to Render
+### Deploy to Fly.io
 
-The backend API is configured for deployment on [Render](https://render.com). See [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md) for detailed instructions.
+The backend API is configured for deployment on [Fly.io](https://fly.io). See [FLYIO_DEPLOYMENT.md](FLYIO_DEPLOYMENT.md) for detailed instructions.
 
 **Quick Deploy:**
-1. Push your code to GitHub/GitLab/Bitbucket
-2. Go to [Render Dashboard](https://dashboard.render.com)
-3. Click **New > Blueprint** (or **New > Web Service**)
-4. Connect your repository
-5. Render will automatically detect `render.yaml` and configure the service
-6. Add your API keys as environment variables in Render Dashboard:
-   - `GOOGLE_API_KEY`
-   - `FACT_CHECKER_API_KEY`
-   - `GEMINI_API_KEY`
-7. Deploy!
+1. Install Fly CLI: `curl -L https://fly.io/install.sh | sh`
+2. Login: `fly auth login`
+3. Initialize: `fly launch` (in your project directory)
+4. Set environment variables:
+   ```bash
+   fly secrets set GOOGLE_API_KEY=your-key
+   fly secrets set FACT_CHECKER_API_KEY=your-key
+   fly secrets set GEMINI_API_KEY=your-key
+   ```
+5. Deploy: `fly deploy`
 
-**Key Configuration:**
-- Server automatically binds to `0.0.0.0` (required by Render)
-- Uses `PORT` environment variable (Render sets this automatically, default: 10000)
+**Configuration:**
+- Server automatically binds to `0.0.0.0` (required by Fly.io)
+- Uses `PORT` environment variable (Fly.io sets this automatically)
 - Health check endpoint: `/v1/health`
-- Production mode automatically enabled on Render
+- Docker-based deployment
 
-**Important:** For ML workloads, use **Starter plan** ($7/month) or higher. Free tier has 512MB limit which may cause memory issues.
+**Free Tier:**
+- 3 shared-cpu-1x VMs (256MB RAM each)
+- 3GB persistent volume storage
+- 160GB outbound data transfer
+- Auto-stop/auto-start enabled
 
-For detailed deployment instructions, see [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md).
+For detailed deployment instructions, see [FLYIO_DEPLOYMENT.md](FLYIO_DEPLOYMENT.md).
 
 ## Installation
 

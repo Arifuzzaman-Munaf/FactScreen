@@ -70,7 +70,7 @@ class Settings(BaseSettings):
     request_timeout: int = _APP_CFG.get("request_timeout")
 
     # Server settings (used by entrypoint/server.py for uvicorn)
-    # For Render: PORT env var takes precedence (default 10000)
+    # PORT env var can be set for production deployments
     # For local development: uses config/local.yaml or defaults
     server_host: str = Field(
         default=_SERVER_CFG.get("host", "0.0.0.0"),

@@ -99,12 +99,11 @@ def main():
         sys.path.insert(0, project_root)
 
     # get the server port and host from the settings
-    # For Render: PORT env var is used (default 10000), host must be 0.0.0.0
-    # Explicitly check PORT env var first (Render requirement)
+    # PORT env var can be set for production deployments
     port = int(os.getenv("PORT", settings.server_port))
     host = settings.server_host
     
-    # Check if running in production (Render sets PORT env var)
+    # Check if running in production (PORT env var is set)
     is_production = os.getenv("PORT") is not None
     
     # In production, always use 0.0.0.0 and skip port checking

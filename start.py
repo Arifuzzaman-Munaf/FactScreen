@@ -53,7 +53,14 @@ def main():
         
         choice = input("\nSelect (1-9): ").strip()
         
-        venv_python = "venv\\Scripts\\python.exe" if os.name == 'nt' else "venv/bin/python"
+        # Get absolute path to venv Python to avoid path issues
+        project_root = os.path.dirname(os.path.abspath(__file__))
+        if os.name == 'nt':
+            venv_python = os.path.join(project_root, "venv", "Scripts", "python.exe")
+        else:
+            venv_python = os.path.join(project_root, "venv", "bin", "python")
+        # Normalize the path
+        venv_python = os.path.normpath(venv_python)
         
         if choice == "1":
             print("\n" + "="*50)
@@ -110,18 +117,33 @@ def main():
             frontend_port = 8501
             
             print(f"\nStep 1: Starting backend on http://localhost:{backend_port}...")
-            # Use os.path.join for proper cross-platform path handling
-            server_script = os.path.join("entrypoint", "server.py")
-            server_script_abs = os.path.abspath(server_script)
+            # Get project root and normalize paths
+            project_root = os.path.dirname(os.path.abspath(__file__))
+            venv_python = os.path.normpath(venv_python)
+            
+            # Run uvicorn directly instead of the script file to avoid path issues
+            uvicorn_cmd = [
+                venv_python,
+                "-m",
+                "uvicorn",
+                "src.app.main:app",
+                "--host", "0.0.0.0",
+                "--port", str(backend_port),
+                "--reload",
+                "--reload-dir", "src",
+                "--reload-dir", "entrypoint",
+            ]
             
             # Start backend in background
             if os.name == 'nt':
-                subprocess.Popen([venv_python, server_script_abs],
-                                creationflags=subprocess.CREATE_NEW_CONSOLE)
+                subprocess.Popen(uvicorn_cmd,
+                                creationflags=subprocess.CREATE_NEW_CONSOLE,
+                                cwd=project_root)
             else:
-                subprocess.Popen([venv_python, server_script_abs],
+                subprocess.Popen(uvicorn_cmd,
                                 stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+                                stderr=subprocess.DEVNULL,
+                                cwd=project_root)
             
             # Wait for backend to be ready
             print("Waiting for backend to be ready...", end="", flush=True)
@@ -148,22 +170,26 @@ def main():
             print(f"\nStep 2: Starting frontend on http://localhost:{frontend_port}...")
             env = os.environ.copy()
             env['STREAMLIT_SERVER_FILE_WATCHER_TYPE'] = 'none'
-            # Use os.path.join for proper cross-platform path handling
+            # Get project root and normalize paths
+            project_root = os.path.dirname(os.path.abspath(__file__))
             streamlit_script = os.path.join("src", "app", "streamlit", "main.py")
-            streamlit_script_abs = os.path.abspath(streamlit_script)
+            streamlit_script_path = os.path.join(project_root, streamlit_script)
+            streamlit_script_path = os.path.normpath(streamlit_script_path)
+            venv_python = os.path.normpath(venv_python)
             
             # Start frontend in background
             if os.name == 'nt':
                 subprocess.Popen([venv_python, "-m", "streamlit", "run",
-                                 streamlit_script_abs, "--server.port", str(frontend_port),
+                                 streamlit_script_path, "--server.port", str(frontend_port),
                                  "--server.headless", "true"],
-                                creationflags=subprocess.CREATE_NEW_CONSOLE, env=env)
+                                creationflags=subprocess.CREATE_NEW_CONSOLE,
+                                env=env, cwd=project_root)
             else:
                 subprocess.Popen([venv_python, "-m", "streamlit", "run",
-                                 streamlit_script_abs, "--server.port", str(frontend_port),
+                                 streamlit_script_path, "--server.port", str(frontend_port),
                                  "--server.headless", "true"],
                                 stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL, env=env)
+                                stderr=subprocess.DEVNULL, env=env, cwd=project_root)
             
             time.sleep(3)
             
@@ -187,13 +213,42 @@ def main():
             print("API docs will be available at http://localhost:8000/docs")
             print("Press Ctrl+C to stop the server\n")
             try:
-                # Use os.path.join for proper cross-platform path handling
-                server_script = os.path.join("entrypoint", "server.py")
-                # Use absolute path to avoid any path interpretation issues
-                server_script_abs = os.path.abspath(server_script)
-                subprocess.run([venv_python, server_script_abs])
+                # Get project root
+                project_root = os.path.dirname(os.path.abspath(__file__))
+                
+                # Normalize venv_python path
+                venv_python = os.path.normpath(venv_python)
+                
+                # Verify paths exist
+                if not os.path.exists(venv_python):
+                    print(f"Error: Python executable not found at: {venv_python}")
+                    input("Press Enter to continue...")
+                    continue
+                
+                # Instead of running the script file, run uvicorn directly
+                # This avoids Windows path issues with script files
+                # The server.py script just runs uvicorn anyway, so we can do it directly
+                backend_port = 8000
+                uvicorn_cmd = [
+                    venv_python,
+                    "-m",
+                    "uvicorn",
+                    "src.app.main:app",
+                    "--host", "0.0.0.0",
+                    "--port", str(backend_port),
+                    "--reload",
+                    "--reload-dir", "src",
+                    "--reload-dir", "entrypoint",
+                ]
+                
+                # Run uvicorn directly - this avoids all path issues
+                subprocess.run(uvicorn_cmd, cwd=project_root)
             except KeyboardInterrupt:
                 print("\nServer stopped.")
+            except Exception as e:
+                print(f"\nError starting server: {e}")
+                import traceback
+                traceback.print_exc()
             input("\nPress Enter to continue...")
             
         elif choice == "4":
@@ -207,11 +262,15 @@ def main():
             print("Press Enter if Streamlit asks for Email or server not started\n")
             env = os.environ.copy()
             env['STREAMLIT_SERVER_FILE_WATCHER_TYPE'] = 'none'
-            # Use os.path.join for proper cross-platform path handling
+            # Get project root and normalize paths
+            project_root = os.path.dirname(os.path.abspath(__file__))
             streamlit_script = os.path.join("src", "app", "streamlit", "main.py")
-            streamlit_script_abs = os.path.abspath(streamlit_script)
+            streamlit_script_path = os.path.join(project_root, streamlit_script)
+            streamlit_script_path = os.path.normpath(streamlit_script_path)
+            venv_python = os.path.normpath(venv_python)
             try:
-                subprocess.run([venv_python, "-m", "streamlit", "run", streamlit_script_abs, "--server.port", "8501"], env=env)
+                subprocess.run([venv_python, "-m", "streamlit", "run", streamlit_script_path, "--server.port", "8501"],
+                              env=env, cwd=project_root)
             except KeyboardInterrupt:
                 print("\nFrontend stopped.")
             input("\nPress Enter to continue...")
