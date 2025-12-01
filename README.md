@@ -20,6 +20,7 @@ A comprehensive fact-checking API that combines multiple sources and uses AI for
 - Python installed with "Add Python to PATH" option checked
 - Command Prompt or PowerShell
 - (Optional) Git for Windows - [Download Git](https://git-scm.com/download/win)
+- Make utility use make commands - [Download Make](https://gnuwin32.sourceforge.net/packages/make.htm)
 
 ### For macOS/Linux
 - Python 3.10+ and pip
@@ -28,13 +29,15 @@ A comprehensive fact-checking API that combines multiple sources and uses AI for
 
 ## Quick Start
 
-### 🪟 Windows Users
+### Windows Users
 
 **Simple Method - Using Python Launcher:**
 
 1. **Run the launcher:**
    ```cmd
    python start.py
+   or 
+   python3 start.py
    ```
 
 2. **Select option 1** to install dependencies (first time only)
@@ -80,7 +83,7 @@ set STREAMLIT_SERVER_FILE_WATCHER_TYPE=none
 streamlit run src\app\streamlit\main.py --server.port 8501
 ```
 
-### 🐧 macOS/Linux Users
+### macOS/Linux Users
 
 **Recommended - Using Make:**
 
