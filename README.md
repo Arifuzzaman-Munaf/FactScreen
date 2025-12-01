@@ -30,11 +30,11 @@ A comprehensive fact-checking API that combines multiple sources and uses AI for
 
 ### 🪟 Windows Users
 
-**Easiest Method - Using the Launcher:**
+**Simple Method - Using Python Launcher:**
 
-1. **Double-click `run.bat`** or open Command Prompt in the project folder and run:
+1. **Run the launcher:**
    ```cmd
-   run.bat
+   python start.py
    ```
 
 2. **Select option 1** to install dependencies (first time only)
@@ -53,7 +53,12 @@ A comprehensive fact-checking API that combines multiple sources and uses AI for
 - **Option 2**: Run Full Application (Backend + Frontend) - **Recommended**
 - **Option 3**: Run Backend Only
 - **Option 4**: Run Frontend Only (requires backend running)
-- **Option 5**: Exit
+- **Option 5**: Run Tests
+- **Option 6**: Run Tests with Coverage
+- **Option 7**: Exit
+- **Option 5**: Run Tests
+- **Option 6**: Run Tests with Coverage
+- **Option 7**: Exit
 
 **Manual Setup (Alternative):**
 ```cmd
@@ -246,9 +251,13 @@ make format           # Format code with black
 
 ### Windows
 
-Use `run.bat` menu or run commands manually in activated virtual environment:
+Use `start.py` launcher or run commands manually in activated virtual environment:
 
 ```cmd
+# Option 1: Use launcher
+python start.py
+
+# Option 2: Run commands manually
 # Activate virtual environment first
 venv\Scripts\activate
 
@@ -358,7 +367,7 @@ FactScreen/
 │   ├── integration/          # Integration tests
 │   ├── conftest.py           # Shared fixtures
 │   └── README_TEST.md        # Test documentation
-├── run.bat                     # Windows launcher (Windows only)
+├── start.py                    # Windows launcher (Python-based, cross-platform)
 ├── Makefile                    # Development commands (macOS/Linux)
 ├── requirements-dev.txt        # Development dependencies
 └── README.md                   # This file
@@ -517,7 +526,7 @@ make dev
 ```cmd
 git clone https://github.com/factscreen/factscreen-api.git
 cd factscreen-api
-run.bat
+python start.py
 # Select option 1 to install
 ```
 
