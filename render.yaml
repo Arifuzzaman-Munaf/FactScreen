@@ -6,8 +6,9 @@ services:
     branch: main    # Change to your default branch if different
     # Optimized build command to reduce memory usage (important for free tier)
     buildCommand: pip install --upgrade pip setuptools wheel && pip install --no-cache-dir -r requirements-dev.txt
-    # Use render_start.py which is optimized for Render deployment
-    # This ensures proper port binding and process stays in foreground
-    startCommand: python render_start.py
+    # Direct uvicorn command with explicit PORT reading (per Render docs)
+    # Render sets PORT env var automatically (default: 10000)
+    # Using Python to explicitly read PORT ensures it works reliably
+    startCommand: python -c "import os; import uvicorn; port = int(os.environ.get('PORT', 10000)); uvicorn.run('src.app.main:app', host='0.0.0.0', port=port)"
     plan: free      # Free tier (512MB RAM, spins down after 15min inactivity)
     healthCheckPath: /v1/health

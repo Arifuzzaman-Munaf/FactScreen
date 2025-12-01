@@ -197,6 +197,7 @@ def main():
             print("\nStarting frontend on http://localhost:8501...")
             print("Note: Make sure backend is running on http://localhost:8000")
             print("Press Ctrl+C to stop the frontend\n")
+            print("Press Enter if Streamlit asks for Email or server not started\n")
             env = os.environ.copy()
             env['STREAMLIT_SERVER_FILE_WATCHER_TYPE'] = 'none'
             streamlit_script = "src\\app\\streamlit\\main.py" if os.name == 'nt' else "src/app/streamlit/main.py"

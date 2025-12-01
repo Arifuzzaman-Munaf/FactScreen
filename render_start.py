@@ -5,9 +5,8 @@ This script is optimized for Render's deployment environment
 """
 import os
 import sys
-import uvicorn
 
-# Add project root to path
+# Add project root to path FIRST, before any imports
 project_root = os.path.dirname(os.path.abspath(__file__))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
@@ -21,13 +20,43 @@ print(f"Starting FactScreen API on Render...")
 print(f"Host: {host}")
 print(f"Port: {port}")
 print(f"PORT env var: {os.environ.get('PORT', 'NOT SET')}")
+print(f"Python path: {sys.path[:3]}")  # Show first 3 paths for debugging
+
+# Test import before starting server
+try:
+    print("Testing imports...")
+    import uvicorn
+    print("✓ uvicorn imported successfully")
+    
+    # Try importing the app to catch any import errors early
+    print("Testing app import...")
+    from src.app.main import app
+    print("✓ App imported successfully")
+    print(f"✓ App name: {app.title}")
+    
+except Exception as e:
+    print(f"✗ ERROR during import: {e}")
+    print(f"Error type: {type(e).__name__}")
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
 
 # Start uvicorn server
 # This must stay in foreground for Render to detect the port
-uvicorn.run(
-    "src.app.main:app",
-    host=host,
-    port=port,
-    log_level="info"
-)
+print(f"\nStarting uvicorn server on {host}:{port}...")
+print("=" * 50)
+
+try:
+    # Use string format for app (standard uvicorn approach)
+    uvicorn.run(
+        "src.app.main:app",
+        host=host,
+        port=port,
+        log_level="info"
+    )
+except Exception as e:
+    print(f"✗ ERROR starting server: {e}")
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
 
