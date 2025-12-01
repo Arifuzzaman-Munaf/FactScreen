@@ -4,9 +4,9 @@ services:
     env: python
     region: oregon  # Change to your preferred region
     branch: main    # Change to your default branch if different
-    # Optimized build command to reduce memory usage
+    # Optimized build command to reduce memory usage (important for free tier)
     buildCommand: pip install --upgrade pip setuptools wheel && pip install --no-cache-dir -r requirements-dev.txt
-    # Use uvicorn directly - Render sets PORT env var automatically
-    startCommand: python -c "import os, uvicorn; uvicorn.run('src.app.main:app', host='0.0.0.0', port=int(os.environ.get('PORT', 10000)))"
-    plan: starter   # Use 'starter' or 'standard' for production (free tier has 512MB limit)
+    # Use entrypoint/server.py which handles Render environment automatically
+    startCommand: python entrypoint/server.py
+    plan: free      # Free tier (512MB RAM, spins down after 15min inactivity)
     healthCheckPath: /v1/health
