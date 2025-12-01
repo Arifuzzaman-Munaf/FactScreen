@@ -482,38 +482,6 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 - See [tests/README_TEST.md](tests/README_TEST.md) for testing documentation
 - Gemini usage and quota warnings are written to `logs/gemini.log`
 
-## Deployment
-
-### Deploy to Fly.io
-
-The backend API is configured for deployment on [Fly.io](https://fly.io). See [FLYIO_DEPLOYMENT.md](FLYIO_DEPLOYMENT.md) for detailed instructions.
-
-**Quick Deploy:**
-1. Install Fly CLI: `curl -L https://fly.io/install.sh | sh`
-2. Login: `fly auth login`
-3. Initialize: `fly launch` (in your project directory)
-4. Set environment variables:
-   ```bash
-   fly secrets set GOOGLE_API_KEY=your-key
-   fly secrets set FACT_CHECKER_API_KEY=your-key
-   fly secrets set GEMINI_API_KEY=your-key
-   ```
-5. Deploy: `fly deploy`
-
-**Configuration:**
-- Server automatically binds to `0.0.0.0` (required by Fly.io)
-- Uses `PORT` environment variable (Fly.io sets this automatically)
-- Health check endpoint: `/v1/health`
-- Docker-based deployment
-
-**Free Tier:**
-- 3 shared-cpu-1x VMs (256MB RAM each)
-- 3GB persistent volume storage
-- 160GB outbound data transfer
-- Auto-stop/auto-start enabled
-
-For detailed deployment instructions, see [FLYIO_DEPLOYMENT.md](FLYIO_DEPLOYMENT.md).
-
 ## Installation
 
 ### From Source
