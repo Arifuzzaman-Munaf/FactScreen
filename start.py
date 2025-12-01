@@ -7,11 +7,39 @@ import os
 import sys
 import subprocess
 import time
+import urllib.request
+import http.server
+import socketserver
+import webbrowser
+from threading import Timer
+
+
+def serve_static_report(report_dir="allure-report", port=8080):
+    """Serve static Allure report using Python HTTP server."""
+    original_dir = os.getcwd()
+    try:
+        os.chdir(report_dir)
+        handler = http.server.SimpleHTTPRequestHandler
+        
+        def open_browser():
+            webbrowser.open(f'http://localhost:{port}')
+        
+        with socketserver.TCPServer(("", port), handler) as httpd:
+            print(f"Server started at http://localhost:{port}")
+            Timer(1, open_browser).start()
+            httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("\nServer stopped.")
+    except Exception as e:
+        print(f"\nError starting server: {e}")
+    finally:
+        os.chdir(original_dir)
+
 
 def main():
     while True:
         print("\n" + "="*50)
-        print("  FactScreen API - Launcher")
+        print("  FactScreen APP - Launcher")
         print("="*50)
         print("\n1. Install/Setup (first time only)")
         print("2. Run Full Application (Backend + Frontend) - Recommended")
@@ -86,16 +114,15 @@ def main():
             
             # Start backend in background
             if os.name == 'nt':
-                backend_process = subprocess.Popen([venv_python, server_script],
-                                                  creationflags=subprocess.CREATE_NEW_CONSOLE)
+                subprocess.Popen([venv_python, server_script],
+                                creationflags=subprocess.CREATE_NEW_CONSOLE)
             else:
-                backend_process = subprocess.Popen([venv_python, server_script],
-                                                  stdout=subprocess.DEVNULL,
-                                                  stderr=subprocess.DEVNULL)
+                subprocess.Popen([venv_python, server_script],
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL)
             
             # Wait for backend to be ready
             print("Waiting for backend to be ready...", end="", flush=True)
-            import urllib.request
             max_wait = 30
             backend_ready = False
             for i in range(max_wait):
@@ -110,7 +137,6 @@ def main():
             if not backend_ready:
                 print(f"\n\nBackend did not start within {max_wait} seconds.")
                 print("Please check the backend window for errors.")
-                backend_process.terminate()
                 input("\nPress Enter to continue...")
                 continue
             
@@ -124,16 +150,16 @@ def main():
             
             # Start frontend in background
             if os.name == 'nt':
-                frontend_process = subprocess.Popen([venv_python, "-m", "streamlit", "run",
-                                                   streamlit_script, "--server.port", str(frontend_port),
-                                                   "--server.headless", "true"],
-                                                  creationflags=subprocess.CREATE_NEW_CONSOLE, env=env)
+                subprocess.Popen([venv_python, "-m", "streamlit", "run",
+                                 streamlit_script, "--server.port", str(frontend_port),
+                                 "--server.headless", "true"],
+                                creationflags=subprocess.CREATE_NEW_CONSOLE, env=env)
             else:
-                frontend_process = subprocess.Popen([venv_python, "-m", "streamlit", "run",
-                                                   streamlit_script, "--server.port", str(frontend_port),
-                                                   "--server.headless", "true"],
-                                                  stdout=subprocess.DEVNULL,
-                                                  stderr=subprocess.DEVNULL, env=env)
+                subprocess.Popen([venv_python, "-m", "streamlit", "run",
+                                 streamlit_script, "--server.port", str(frontend_port),
+                                 "--server.headless", "true"],
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL, env=env)
             
             time.sleep(3)
             
@@ -335,27 +361,11 @@ def main():
                         if os.path.exists("allure-results"):
                             subprocess.run(["allure", "serve", "allure-results"])
                         else:
-                            # For static reports, we need to use a simple HTTP server
+                            # For static reports, use Python HTTP server
                             print("\nServing static report...")
-                            import http.server
-                            import socketserver
-                            import webbrowser
-                            from threading import Timer
-                            
-                            os.chdir("allure-report")
-                            port = 8080
-                            handler = http.server.SimpleHTTPRequestHandler
-                            
-                            def open_browser():
-                                webbrowser.open(f'http://localhost:{port}')
-                            
-                            with socketserver.TCPServer(("", port), handler) as httpd:
-                                print(f"Server started at http://localhost:{port}")
-                                Timer(1, open_browser).start()
-                                httpd.serve_forever()
+                            serve_static_report()
                     except KeyboardInterrupt:
                         print("\nServer stopped.")
-                        os.chdir("..")
                 else:
                     print("\nNo Allure results or report found. Run option 7 first.")
             else:
@@ -364,32 +374,7 @@ def main():
                     print("\n⚠ Allure CLI not found. Using Python HTTP server to view report...")
                     print("Report will be available at http://localhost:8080")
                     print("Press Ctrl+C to stop the server")
-                    try:
-                        import http.server
-                        import socketserver
-                        import webbrowser
-                        from threading import Timer
-                        
-                        # Save current directory
-                        original_dir = os.getcwd()
-                        os.chdir("allure-report")
-                        
-                        port = 8080
-                        handler = http.server.SimpleHTTPRequestHandler
-                        
-                        def open_browser():
-                            webbrowser.open(f'http://localhost:{port}')
-                        
-                        with socketserver.TCPServer(("", port), handler) as httpd:
-                            print(f"\nServer started at http://localhost:{port}")
-                            Timer(1, open_browser).start()
-                            httpd.serve_forever()
-                    except KeyboardInterrupt:
-                        print("\nServer stopped.")
-                        os.chdir(original_dir)
-                    except Exception as e:
-                        print(f"\nError starting server: {e}")
-                        os.chdir(original_dir)
+                    serve_static_report()
                 else:
                     print("\n⚠ Allure CLI not found and no report available.")
                     print("\nTo view reports properly, install Allure CLI:")
