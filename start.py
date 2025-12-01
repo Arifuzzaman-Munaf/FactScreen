@@ -110,14 +110,16 @@ def main():
             frontend_port = 8501
             
             print(f"\nStep 1: Starting backend on http://localhost:{backend_port}...")
-            server_script = "entrypoint\\server.py" if os.name == 'nt' else "entrypoint/server.py"
+            # Use os.path.join for proper cross-platform path handling
+            server_script = os.path.join("entrypoint", "server.py")
+            server_script_abs = os.path.abspath(server_script)
             
             # Start backend in background
             if os.name == 'nt':
-                subprocess.Popen([venv_python, server_script],
+                subprocess.Popen([venv_python, server_script_abs],
                                 creationflags=subprocess.CREATE_NEW_CONSOLE)
             else:
-                subprocess.Popen([venv_python, server_script],
+                subprocess.Popen([venv_python, server_script_abs],
                                 stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL)
             
@@ -146,17 +148,19 @@ def main():
             print(f"\nStep 2: Starting frontend on http://localhost:{frontend_port}...")
             env = os.environ.copy()
             env['STREAMLIT_SERVER_FILE_WATCHER_TYPE'] = 'none'
-            streamlit_script = "src\\app\\streamlit\\main.py" if os.name == 'nt' else "src/app/streamlit/main.py"
+            # Use os.path.join for proper cross-platform path handling
+            streamlit_script = os.path.join("src", "app", "streamlit", "main.py")
+            streamlit_script_abs = os.path.abspath(streamlit_script)
             
             # Start frontend in background
             if os.name == 'nt':
                 subprocess.Popen([venv_python, "-m", "streamlit", "run",
-                                 streamlit_script, "--server.port", str(frontend_port),
+                                 streamlit_script_abs, "--server.port", str(frontend_port),
                                  "--server.headless", "true"],
                                 creationflags=subprocess.CREATE_NEW_CONSOLE, env=env)
             else:
                 subprocess.Popen([venv_python, "-m", "streamlit", "run",
-                                 streamlit_script, "--server.port", str(frontend_port),
+                                 streamlit_script_abs, "--server.port", str(frontend_port),
                                  "--server.headless", "true"],
                                 stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL, env=env)
@@ -183,8 +187,11 @@ def main():
             print("API docs will be available at http://localhost:8000/docs")
             print("Press Ctrl+C to stop the server\n")
             try:
-                server_script = "entrypoint\\server.py" if os.name == 'nt' else "entrypoint/server.py"
-                subprocess.run([venv_python, server_script])
+                # Use os.path.join for proper cross-platform path handling
+                server_script = os.path.join("entrypoint", "server.py")
+                # Use absolute path to avoid any path interpretation issues
+                server_script_abs = os.path.abspath(server_script)
+                subprocess.run([venv_python, server_script_abs])
             except KeyboardInterrupt:
                 print("\nServer stopped.")
             input("\nPress Enter to continue...")
@@ -200,9 +207,11 @@ def main():
             print("Press Enter if Streamlit asks for Email or server not started\n")
             env = os.environ.copy()
             env['STREAMLIT_SERVER_FILE_WATCHER_TYPE'] = 'none'
-            streamlit_script = "src\\app\\streamlit\\main.py" if os.name == 'nt' else "src/app/streamlit/main.py"
+            # Use os.path.join for proper cross-platform path handling
+            streamlit_script = os.path.join("src", "app", "streamlit", "main.py")
+            streamlit_script_abs = os.path.abspath(streamlit_script)
             try:
-                subprocess.run([venv_python, "-m", "streamlit", "run", streamlit_script, "--server.port", "8501"], env=env)
+                subprocess.run([venv_python, "-m", "streamlit", "run", streamlit_script_abs, "--server.port", "8501"], env=env)
             except KeyboardInterrupt:
                 print("\nFrontend stopped.")
             input("\nPress Enter to continue...")
