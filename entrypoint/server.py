@@ -98,10 +98,9 @@ def main():
     if project_root not in sys.path:
         sys.path.insert(0, project_root)
 
-    # get the server port and host from the settings
-    # PORT env var can be set for production deployments
+    # Determine server port; always bind host to 0.0.0.0 for consistency
     port = int(os.getenv("PORT", settings.server_port))
-    host = settings.server_host
+    host = "0.0.0.0"
     
     # Check if running in production (PORT env var is set)
     is_production = os.getenv("PORT") is not None
