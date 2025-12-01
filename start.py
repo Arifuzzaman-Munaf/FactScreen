@@ -19,9 +19,11 @@ def main():
         print("4. Run Frontend Only")
         print("5. Run Tests")
         print("6. Run Tests with Coverage")
-        print("7. Exit")
+        print("7. Run Tests with Allure Report")
+        print("8. View Allure Report")
+        print("9. Exit")
         
-        choice = input("\nSelect (1-7): ").strip()
+        choice = input("\nSelect (1-9): ").strip()
         
         venv_python = "venv\\Scripts\\python.exe" if os.name == 'nt' else "venv/bin/python"
         
@@ -218,10 +220,197 @@ def main():
             input("\nPress Enter to continue...")
             
         elif choice == "7":
+            if not os.path.exists(venv_python):
+                print("\nError: Virtual environment not found. Run option 1 first!")
+                input("Press Enter to continue...")
+                continue
+            
+            # Check if allure-pytest is installed
+            print("\nChecking dependencies...")
+            result = subprocess.run([venv_python, "-c", "import pytest, allure"],
+                                  capture_output=True, text=True)
+            if result.returncode != 0:
+                print("Installing allure-pytest...")
+                subprocess.run([venv_python, "-m", "pip", "install", "allure-pytest"])
+            
+            print("\n" + "="*50)
+            print("  Running Tests with Allure Report")
+            print("="*50)
+            print("\nRunning tests...\n")
+            
+            # Create allure-results directory
+            os.makedirs("allure-results", exist_ok=True)
+            
+            tests_dir = "tests\\" if os.name == 'nt' else "tests/"
+            result = subprocess.run([venv_python, "-m", "pytest", tests_dir,
+                                   "--alluredir=allure-results", "-v", "--tb=short"])
+            
+            if result.returncode == 0:
+                print("\nAll tests passed!")
+            else:
+                print("\nSome tests failed. Check the output above.")
+            
+            print("\nGenerating Allure report...")
+            
+            # Check if Allure CLI is available
+            allure_available = False
+            try:
+                subprocess.run(["allure", "--version"], capture_output=True, check=True)
+                allure_available = True
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                allure_available = False
+            
+            if allure_available:
+                # Generate HTML report
+                print("Generating HTML report...")
+                subprocess.run(["allure", "generate", "allure-results", "-o", "allure-report", "--clean"])
+                
+                if os.path.exists("allure-report/index.html"):
+                    print("\n✓ Allure report generated: allure-report/index.html")
+                    print("\nStarting Allure report server...")
+                    print("Report will open in your browser at http://localhost:8080")
+                    print("Press Ctrl+C in the server window to stop the server")
+                    print("\nNote: Keep this window open while viewing the report.")
+                    try:
+                        # Use allure serve which starts a web server (recommended)
+                        subprocess.run(["allure", "serve", "allure-results"])
+                    except KeyboardInterrupt:
+                        print("\nReport server stopped.")
+                else:
+                    print("\nWarning: Report file not found after generation.")
+            else:
+                print("\n⚠ Allure CLI not found. Test results saved to: allure-results/")
+                print("\nTo generate HTML report, install Allure CLI:")
+                if os.name == 'nt':
+                    print("  Option 1: Download from https://github.com/allure-framework/allure2/releases")
+                    print("  Option 2: Install via npm: npm install -g allure-commandline")
+                    print("  Option 3: Install via Chocolatey: choco install allure")
+                elif sys.platform == 'darwin':
+                    print("  brew install allure")
+                else:
+                    print("  See: https://docs.qameta.io/allure/")
+                print("\nOr use: npm install -g allure-commandline")
+            
+            input("\nPress Enter to continue...")
+            
+        elif choice == "8":
+            print("\n" + "="*50)
+            print("  View Allure Report")
+            print("="*50)
+            print()
+            
+            # Check if allure-results exists
+            if not os.path.exists("allure-results") and not os.path.exists("allure-report"):
+                print("No Allure results found.")
+                print("Please run option 7 (Run Tests with Allure Report) first.")
+                input("\nPress Enter to continue...")
+                continue
+            
+            # Check if Allure CLI is available
+            allure_available = False
+            try:
+                subprocess.run(["allure", "--version"], capture_output=True, check=True)
+                allure_available = True
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                allure_available = False
+            
+            if allure_available:
+                # Use allure serve which is the recommended way (starts web server)
+                if os.path.exists("allure-results"):
+                    print("\nStarting Allure report server...")
+                    print("Report will open in your browser at http://localhost:8080")
+                    print("Press Ctrl+C to stop the server")
+                    print("\nNote: Keep this window open while viewing the report.")
+                    try:
+                        subprocess.run(["allure", "serve", "allure-results"])
+                    except KeyboardInterrupt:
+                        print("\nReport server stopped.")
+                elif os.path.exists("allure-report/index.html"):
+                    # If only static report exists, try to serve it
+                    print("\nFound static report. Starting server...")
+                    print("Report will be available at http://localhost:8080")
+                    print("Press Ctrl+C to stop the server")
+                    try:
+                        # Generate fresh from results if available, otherwise serve static
+                        if os.path.exists("allure-results"):
+                            subprocess.run(["allure", "serve", "allure-results"])
+                        else:
+                            # For static reports, we need to use a simple HTTP server
+                            print("\nServing static report...")
+                            import http.server
+                            import socketserver
+                            import webbrowser
+                            from threading import Timer
+                            
+                            os.chdir("allure-report")
+                            port = 8080
+                            handler = http.server.SimpleHTTPRequestHandler
+                            
+                            def open_browser():
+                                webbrowser.open(f'http://localhost:{port}')
+                            
+                            with socketserver.TCPServer(("", port), handler) as httpd:
+                                print(f"Server started at http://localhost:{port}")
+                                Timer(1, open_browser).start()
+                                httpd.serve_forever()
+                    except KeyboardInterrupt:
+                        print("\nServer stopped.")
+                        os.chdir("..")
+                else:
+                    print("\nNo Allure results or report found. Run option 7 first.")
+            else:
+                # Allure CLI not available - try to serve static report with Python HTTP server
+                if os.path.exists("allure-report/index.html"):
+                    print("\n⚠ Allure CLI not found. Using Python HTTP server to view report...")
+                    print("Report will be available at http://localhost:8080")
+                    print("Press Ctrl+C to stop the server")
+                    try:
+                        import http.server
+                        import socketserver
+                        import webbrowser
+                        from threading import Timer
+                        
+                        # Save current directory
+                        original_dir = os.getcwd()
+                        os.chdir("allure-report")
+                        
+                        port = 8080
+                        handler = http.server.SimpleHTTPRequestHandler
+                        
+                        def open_browser():
+                            webbrowser.open(f'http://localhost:{port}')
+                        
+                        with socketserver.TCPServer(("", port), handler) as httpd:
+                            print(f"\nServer started at http://localhost:{port}")
+                            Timer(1, open_browser).start()
+                            httpd.serve_forever()
+                    except KeyboardInterrupt:
+                        print("\nServer stopped.")
+                        os.chdir(original_dir)
+                    except Exception as e:
+                        print(f"\nError starting server: {e}")
+                        os.chdir(original_dir)
+                else:
+                    print("\n⚠ Allure CLI not found and no report available.")
+                    print("\nTo view reports properly, install Allure CLI:")
+                    if os.name == 'nt':
+                        print("  Option 1: Download from https://github.com/allure-framework/allure2/releases")
+                        print("  Option 2: npm install -g allure-commandline")
+                        print("  Option 3: choco install allure")
+                    elif sys.platform == 'darwin':
+                        print("  brew install allure")
+                    else:
+                        print("  See: https://docs.qameta.io/allure/")
+                    print("\nOr use: npm install -g allure-commandline")
+                    print("\nTest results are saved in: allure-results/")
+            
+            input("\nPress Enter to continue...")
+            
+        elif choice == "9":
             print("\nGoodbye!\n")
             sys.exit(0)
         else:
-            print("\nInvalid choice! Please select 1-7.")
+            print("\nInvalid choice! Please select 1-9.")
             time.sleep(1)
 
 if __name__ == "__main__":
@@ -230,4 +419,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n\nGoodbye!")
         sys.exit(0)
-

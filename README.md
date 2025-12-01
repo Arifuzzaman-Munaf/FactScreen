@@ -55,10 +55,9 @@ A comprehensive fact-checking API that combines multiple sources and uses AI for
 - **Option 4**: Run Frontend Only (requires backend running)
 - **Option 5**: Run Tests
 - **Option 6**: Run Tests with Coverage
-- **Option 7**: Exit
-- **Option 5**: Run Tests
-- **Option 6**: Run Tests with Coverage
-- **Option 7**: Exit
+- **Option 7**: Run Tests with Allure Report
+- **Option 8**: View Allure Report
+- **Option 9**: Exit
 
 **Manual Setup (Alternative):**
 ```cmd
